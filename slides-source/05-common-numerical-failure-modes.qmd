@@ -1,0 +1,38 @@
+# Module 5: Common Numerical Failure Modes
+
+## Module Arc
+
+- Cancellation loses significant information
+- Reductions accumulate rounding
+- Intermediate range matters
+- Stable reformulations preserve useful information
+
+::: notes
+This module should be experiment-heavy. Use several small failures rather than
+one long implementation.
+:::
+
+## Diagnose The Pattern
+
+- Subtracting nearly equal quantities
+- Mixing very large and very small magnitudes
+- Overflow before a representable final result
+- Underflow in products or probabilities
+- Strong dependence on evaluation order
+
+::: notes
+Ask participants to name the dangerous operation before showing an improved
+formulation.
+:::
+
+## Summation Is An Algorithm
+
+- Naive sequential order
+- Magnitude-aware order
+- Pairwise reduction
+- Compensated summation
+- Accuracy, cost, and parallelism trade-offs
+
+::: notes
+Use the same input for every method and compare against a stronger reference.
+:::

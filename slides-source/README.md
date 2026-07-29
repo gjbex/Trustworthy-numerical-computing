@@ -1,10 +1,26 @@
 # Slide sources
 
-Optional source files for generated slide decks.
+The Quarto RevealJS slide deck is modular and follows the numbered learning
+modules.
 
-If the training uses a PowerPoint deck as the source of truth, keep the deck at
-the repository root and remove this directory if it is not needed.
+* `trustworthy-numerical-computing.qmd` owns the presentation metadata and
+  includes the section files.
+* `00-course-overview.qmd` introduces the learning path.
+* `01-...qmd` through `10-...qmd` correspond one-to-one with the numbered
+  reading modules.
+* `11-wrap-up.qmd` closes the course.
 
-If the training uses Quarto revealjs slides, keep the source `.qmd` files here
-and render generated HTML into `docs/slides/` so GitHub Pages can publish them
-with the rest of the classic Jekyll site.
+Build the published deck from the repository root with:
+
+```bash
+scripts/build_training_site.sh
+```
+
+Preview it while editing with:
+
+```bash
+slides-source/preview.sh
+```
+
+Slides are teaching aids. Detailed explanation belongs in `learning-modules/`;
+trainer-only delivery guidance belongs in `::: notes` blocks.

@@ -1,36 +1,50 @@
-# {{TRAINING_TITLE}}
+# Trustworthy Numerical Computing
 
-Training material for the "{{TRAINING_TITLE}}" session.
+Training material for recognizing, investigating, preventing, and communicating
+numerical reliability problems in scientific computing.
+
+The course is language-agnostic at the conceptual level. Short computational
+experiments will be used to expose failure modes and compare validation
+strategies without tying the material to one programming language.
 
 
 ## What is it?
 
-1. `{{SLIDE_DECK_FILE}}`: main slide deck for the training.
-1. `source-code`: examples and demonstrations used in the training.
-1. `hands-on`: participant-facing exercises and starter files.
-1. `environment.yml`: portable conda environment description file, if used.
-1. `SETUP.md`: software setup and verification instructions.
-1. `docs`: classic GitHub Pages website for the training.
-1. `CONTRIBUTING.md`: how to contribute to this repository.
-1. `LICENSE`: license information for the material in this repository.
-1. `CODE_OF_CONDUCT.md`: participation rules for the training.
+1. `docs/README.md`: source for the course landing page.
+1. `learning-modules/`: long-form reading material, published with MkDocs.
+1. `slides-source/`: modular Quarto RevealJS slides aligned with the learning
+   modules.
+1. `source-code/`: demonstrations and small numerical experiments.
+1. `hands-on/`: participant-facing exercises and starter files.
+1. `mkdocs.yml`: navigation and configuration for the learning-module site.
+1. `scripts/build_training_site.sh`: assembles the deployable website under
+   `_site/`.
+1. `.github/workflows/pages.yml`: validates the site on pull requests and
+   deploys it to GitHub Pages from `main`.
+1. `environment.yml`: environment for building the material and, later, running
+   the core exercises.
+1. `SETUP.md`: setup and publication instructions.
 
 
-## Website
+## Training materials
 
-The training website is rendered from `docs/` using GitHub Pages with Jekyll and
-the `jekyll-theme-slate` theme.
+- [Course landing page](docs/README.md)
+- [Learning modules](learning-modules/index.md)
+- [Slide sources](slides-source/trustworthy-numerical-computing.qmd)
 
-After creating the GitHub repository, configure Pages as follows:
+After running `scripts/build_training_site.sh`, preview the assembled landing
+page at `_site/index.html`, the learning modules under
+`_site/learning-modules/`, and the slide deck under `_site/slides/`.
 
-* Source: deploy from a branch.
-* Branch: `main` or `master`.
-* Folder: `/docs`.
+Generated HTML is not committed. GitHub Actions builds the same `_site/`
+artifact for pull-request validation and deploys it after changes reach `main`.
 
 
-## Setup
+## Current status
 
-See [SETUP.md](SETUP.md) for installation and verification instructions.
+The overall learning path and publication layout are in place. The module and
+slide files provide the structure for developing the detailed reading,
+experiments, and exercises.
 
 
 ## Contributing

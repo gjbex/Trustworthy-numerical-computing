@@ -1,0 +1,27 @@
+# Wrap Up
+
+## The Reliability Workflow
+
+1. Define the claim and required accuracy
+2. Measure the discrepancy
+3. Separate conditioning, algorithm, and implementation
+4. Gather independent validation evidence
+5. Test relevant environment changes
+6. Report assumptions and limitations
+
+::: notes
+Return to the opening example and ask what evidence participants would request
+now.
+:::
+
+## Habits To Keep
+
+- Predict before computing
+- Compare against more than one kind of evidence
+- Treat tolerances as scientific requirements
+- Record termination reasons and environments
+- Report fewer digits and stronger evidence
+
+::: notes
+End with habits participants can apply immediately in their own projects.
+:::

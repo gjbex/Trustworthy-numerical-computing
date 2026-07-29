@@ -1,0 +1,37 @@
+# Module 2: Understanding Floating-Point Arithmetic
+
+## Module Arc
+
+- A finite set represents a wide numeric range
+- Each operation rounds
+- Exceptional values carry information
+- Evaluation order can change the result
+
+::: notes
+Use diagrams and live experiments when developing this section; avoid turning
+the deck into an IEEE 754 encoding reference.
+:::
+
+## Predict Before Running
+
+- When does `x + small == x`?
+- Can a finite calculation produce infinity?
+- Is `NaN == NaN`?
+- Does `(a + b) + c` equal `a + (b + c)`?
+
+::: notes
+Collect predictions before showing results. Choose values that expose the
+behaviour clearly in the eventual exercise language.
+:::
+
+## What To Observe
+
+- Spacing grows with magnitude
+- Rounding is unavoidable but structured
+- Overflow and underflow affect intermediate values
+- Real-number algebra is not always a safe rewrite rule
+
+::: notes
+End by asking how a difference should be measured. That question leads directly
+to Module 3.
+:::

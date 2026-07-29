@@ -1,0 +1,38 @@
+---
+title: "Trustworthy Numerical Computing"
+author: "Geert Jan Bex"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    code-line-numbers: false
+execute:
+  echo: true
+  eval: false
+---
+
+{{< include 00-course-overview.qmd >}}
+
+{{< include 01-when-correct-code-produces-wrong-answers.qmd >}}
+
+{{< include 02-understanding-floating-point-arithmetic.qmd >}}
+
+{{< include 03-measuring-and-comparing-numerical-error.qmd >}}
+
+{{< include 04-conditioning-and-numerical-stability.qmd >}}
+
+{{< include 05-common-numerical-failure-modes.qmd >}}
+
+{{< include 06-iterative-algorithms-and-convergence.qmd >}}
+
+{{< include 07-validating-scientific-computations.qmd >}}
+
+{{< include 08-reproducibility-across-computing-environments.qmd >}}
+
+{{< include 09-communicating-numerical-reliability.qmd >}}
+
+{{< include 10-capstone-investigating-a-suspicious-result.qmd >}}
+
+{{< include 11-wrap-up.qmd >}}

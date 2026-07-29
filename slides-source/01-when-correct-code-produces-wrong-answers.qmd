@@ -1,0 +1,38 @@
+# Module 1: When Correct Code Produces Wrong Answers
+
+## Module Arc
+
+- Separate execution from numerical validity
+- Identify sources of discrepancy
+- Replace plausibility with evidence
+- Introduce the investigation workflow
+
+::: notes
+Keep the opening example concrete. Do not front-load terminology before
+participants have seen a result that deserves suspicion.
+:::
+
+## Several Meanings Of "Correct"
+
+1. The program runs
+2. The implementation matches the algorithm
+3. The algorithm suits the mathematical problem
+4. The accuracy suits the scientific conclusion
+5. Independent evidence supports the claim
+
+::: notes
+Ask where the participants' normal unit and integration tests stop in this
+sequence.
+:::
+
+## Investigation Workflow
+
+- State the expected behaviour and required accuracy
+- Reproduce and characterize the discrepancy
+- Establish a reference or independent check
+- Diagnose sensitivity and failure modes
+- Validate the change and report limitations
+
+::: notes
+This workflow is the through-line for every later module and the capstone.
+:::

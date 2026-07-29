@@ -1,0 +1,40 @@
+# Module 7: Validating Scientific Computations
+
+## Module Arc
+
+- Match each claim to evidence
+- Use exact and limiting cases where possible
+- Test invariants and properties
+- Seek independent methods and refinement trends
+
+::: notes
+Frame validation as an evidence portfolio. One test rarely supports every
+scientific claim.
+:::
+
+## Sources Of Evidence
+
+- Analytical and manufactured solutions
+- High-precision or trusted reference calculations
+- Invariants, bounds, symmetry, and conservation
+- Refinement and convergence studies
+- Independent algorithms and implementations
+
+::: notes
+Discuss what shared assumptions could make two agreeing implementations wrong
+in the same way.
+:::
+
+## Build A Validation Matrix
+
+| Claim | Candidate evidence |
+|---|---|
+| equations are implemented | manufactured case |
+| important properties hold | invariants and bounds |
+| approximation is controlled | refinement study |
+| result is not method-specific | independent algorithm |
+
+::: notes
+Have participants create a matrix for the capstone or one of their own
+computations.
+:::

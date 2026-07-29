@@ -1,0 +1,38 @@
+# Module 8: Reproducibility Across Computing Environments
+
+## Module Arc
+
+- Identify sources of arithmetic variation
+- Choose the reproducibility level that matters
+- Treat parallel reductions as numerical algorithms
+- Record enough environment context
+
+::: notes
+Keep bitwise reproducibility and scientific reproducibility distinct throughout
+the section.
+:::
+
+## Why Results Change
+
+- Compiler transformations and fused operations
+- Math libraries and hardware instructions
+- Vectorization and aggressive optimization
+- Thread or process reduction order
+- Accelerators and mixed precision
+
+::: notes
+Use evidence from a controlled change rather than implying that every platform
+difference is a defect.
+:::
+
+## Which Guarantee Is Needed?
+
+1. Bitwise-identical output
+2. Numerical agreement within a justified tolerance
+3. Statistical equivalence
+4. The same scientific conclusion
+
+::: notes
+Ask participants which level their own workflow requires and what each stronger
+level would cost.
+:::

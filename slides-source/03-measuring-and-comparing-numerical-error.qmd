@@ -1,0 +1,43 @@
+# Module 3: Measuring And Comparing Numerical Error
+
+## Module Arc
+
+- Identify the comparison reference
+- Match the error measure to the scale
+- Treat near-zero values explicitly
+- Justify tolerances from requirements
+
+::: notes
+Use examples with units and several scales. A single generic `epsilon` should
+look increasingly inadequate as the section progresses.
+:::
+
+## Three Common Criteria
+
+```text
+absolute: |x - reference| <= atol
+
+relative: |x - reference| <= rtol * |reference|
+
+mixed:    |x - reference| <= atol + rtol * |reference|
+```
+
+- Each answers a different question
+- None chooses the tolerance for you
+
+::: notes
+Discuss the behaviour at zero and at very large magnitudes. Connect tolerance
+choices to the scientific decision.
+:::
+
+## A Tolerance Is A Claim
+
+- What scale matters?
+- Which units are used?
+- How accurate are the inputs and model?
+- What downstream decision depends on the result?
+- Which failures must the comparison detect?
+
+::: notes
+The key habit is to write the rationale before adjusting a test threshold.
+:::

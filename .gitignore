@@ -19,6 +19,12 @@ dist/
 .quarto/
 *_files/
 
+# Generated publication output
+/docs/learning-modules/
+/docs/slides/
+/_site/
+site/
+
 # Jupyter
 .jupyter/
 

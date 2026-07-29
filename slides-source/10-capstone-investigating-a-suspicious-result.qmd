@@ -1,0 +1,41 @@
+# Module 10: Capstone Investigation
+
+## The Task
+
+- Reproduce a suspicious numerical result
+- Establish a meaningful reference
+- Diagnose the dominant cause
+- Improve the computation
+- Validate and communicate the result
+
+::: notes
+Give participants the case, inputs, and evidence template. Do not reveal the
+intended diagnosis in the visible material.
+:::
+
+## Investigation Stages
+
+1. Characterize
+2. Reference
+3. Diagnose
+4. Improve
+5. Validate
+6. Report
+
+::: notes
+Use checkpoints to prevent teams from immediately rewriting the implementation
+without first measuring the problem.
+:::
+
+## Completion Criteria
+
+- The required accuracy is explicit
+- The diagnosis is supported by evidence
+- The improvement addresses the diagnosed cause
+- At least two complementary checks support the result
+- Remaining limitations are stated
+
+::: notes
+Bitwise agreement is not required unless the case specifically justifies it.
+Reward well-supported limits as much as successful fixes.
+:::

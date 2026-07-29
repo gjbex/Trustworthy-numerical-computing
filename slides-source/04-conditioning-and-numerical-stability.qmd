@@ -1,0 +1,35 @@
+# Module 4: Conditioning And Numerical Stability
+
+## Module Arc
+
+- Measure sensitivity in the problem
+- Measure error introduced by the method
+- Interpret residuals carefully
+- Choose a remedy that matches the cause
+
+::: notes
+This distinction is conceptually demanding. Use one problem solved by two
+algorithms and one ill-conditioned problem that defeats both at the requested
+accuracy.
+:::
+
+## Three Different Questions
+
+- **Conditioning:** How sensitive is the answer to the inputs?
+- **Stability:** How much additional error does the algorithm introduce?
+- **Implementation:** Does the program perform the intended algorithm?
+
+::: notes
+Return to these three questions in each later diagnosis.
+:::
+
+## Residual Is Not Error
+
+- A residual checks how well equations are satisfied
+- Forward error checks proximity to the desired result
+- Ill-conditioning can turn a small residual into a large error
+- Backward error connects the two perspectives
+
+::: notes
+Plan a visual example for this slide when detailed content is developed.
+:::

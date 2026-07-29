@@ -1,21 +1,15 @@
-# Source code
+# Demonstrations and numerical experiments
 
-Examples and demonstrations for the training material.
+This directory will contain the small, runnable examples used by the learning
+modules and slides.
 
+Examples should:
 
-## What is it?
+* expose one numerical behaviour or failure mode at a time;
+* state what participants should predict and observe;
+* include a reference or independent check when practical;
+* avoid long implementations that obscure the numerical idea;
+* document exact commands and expected output in a local `README.md`.
 
-Organize examples by topic, session, or framework. Each nontrivial subdirectory
-should include its own `README.md` with:
-
-* what the example demonstrates;
-* required input files or data;
-* commands to run or build it;
-* expected output or behavior;
-* known platform or dependency assumptions.
-
-
-## Conventions
-
-Keep examples small enough to run during the session. Avoid committing generated
-outputs unless they are part of the teaching material.
+Once the primary exercise language is selected, examples should be grouped by
+module or investigation rather than by language feature.

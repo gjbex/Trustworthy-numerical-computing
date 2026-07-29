@@ -1,0 +1,38 @@
+# Module 6: Iterative Algorithms And Convergence
+
+## Module Arc
+
+- Decide what can be observed
+- Relate a proxy to the required accuracy
+- Detect convergence and failure
+- Record why the algorithm stopped
+
+::: notes
+Choose one root finder or small solver that can converge, stagnate, and diverge
+under controlled conditions.
+:::
+
+## Error, Residual, Update
+
+- **Error:** distance from the desired result
+- **Residual:** how well equations are satisfied
+- **Update:** change between successive iterates
+
+> A small update can mean convergence—or that arithmetic has stagnated.
+
+::: notes
+Ask which quantity is actually available during the chosen experiment.
+:::
+
+## A Defensible Stop
+
+- Combine absolute and relative thresholds
+- Scale quantities meaningfully
+- Check for non-finite values and stagnation
+- Enforce an iteration budget
+- Return a termination reason with the result
+
+::: notes
+Show several termination reasons in the final exercise output, not a single
+boolean `converged`.
+:::

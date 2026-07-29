@@ -1,0 +1,52 @@
+# Course Overview
+
+## The Question
+
+> What evidence makes a computed scientific result trustworthy?
+
+- Successful execution is necessary
+- Ordinary tests are necessary
+- Neither establishes numerical validity on its own
+
+::: notes
+Open with a plausible but questionable result. Ask what evidence participants
+would need before using it in a scientific conclusion.
+:::
+
+## Course Arc
+
+1. Understand finite-precision arithmetic
+2. Measure and diagnose numerical error
+3. Stabilize algorithms and convergence decisions
+4. Validate across methods and environments
+5. Communicate the evidence
+
+::: notes
+Present this as one investigation workflow, not ten disconnected numerical
+analysis topics.
+:::
+
+## Working Style
+
+- Predict before running an experiment
+- Change one factor at a time
+- Prefer small revealing calculations
+- Record evidence, not only final values
+- Keep concepts independent of implementation language
+
+::: notes
+The exercise language is a vehicle. Keep attention on the numerical reasoning
+that transfers to other languages.
+:::
+
+## The Learning Path
+
+- **Foundations:** Modules 1–3
+- **Diagnosis and control:** Modules 4–6
+- **Evidence and reproducibility:** Modules 7–8
+- **Scientific judgment:** Modules 9–10
+
+::: notes
+Explain where breaks or half-day boundaries fit once the delivery duration is
+fixed.
+:::

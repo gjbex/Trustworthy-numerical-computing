@@ -1,0 +1,37 @@
+# Module 9: Communicating Numerical Reliability
+
+## Module Arc
+
+- State the computational claim
+- Separate sources of uncertainty
+- Summarize validation and convergence evidence
+- Report limitations and expected variability
+
+::: notes
+Use examples of overconfident and appropriately qualified result statements.
+Avoid making the reliable statement unreadably defensive.
+:::
+
+## What A Reader Needs
+
+- Quantity, units, and relevant scale
+- Algorithm and important numerical settings
+- Error measure and tolerance rationale
+- Convergence and validation evidence
+- Environment sensitivity and known limitations
+
+::: notes
+Connect every item to a decision a reviewer or future maintainer must make.
+:::
+
+## Reliability Statement
+
+1. State the claim
+2. Name the strongest evidence
+3. Quantify observed error or variability
+4. State important assumptions
+5. Identify limitations that could change the conclusion
+
+::: notes
+Participants will use this exact structure in the capstone report.
+:::

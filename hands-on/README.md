@@ -1,21 +1,17 @@
 # Hands-on exercises
 
-Participant-facing exercises and starter material.
-
-
-## What is it?
+This directory will contain participant-facing investigations aligned with the
+learning modules.
 
 Each exercise should include:
 
-* a short goal;
-* starter files or clear instructions for creating them;
-* concrete tasks;
-* commands to run;
-* expected output or checks;
-* optional extension tasks for faster participants.
+* a numerical question and required accuracy;
+* a prediction or hypothesis;
+* starter files or a precise setup procedure;
+* controlled variations to run;
+* evidence to record;
+* completion criteria;
+* optional extensions;
+* a clearly separated reference solution.
 
-
-## Solutions
-
-If reference solutions are included, keep them clearly separated from starter
-files, for example in a `solutions/` subdirectory.
+The final exercise will be the Module 10 capstone investigation.

@@ -1,80 +1,68 @@
 # Environment Setup
 
-This document describes how to set up the software environment for the training
-material. It assumes that you have access to a Linux-style terminal and are
-comfortable running shell commands.
+The current environment contains the tools needed to build the learning-module
+website and Quarto slide deck. Numerical libraries will be added when the
+primary language and exercises are selected.
 
 
-## Required Software
+## Create the environment
 
-Install the following software before the training:
-
-* {{PRIMARY_LANGUAGE_OR_TOOLCHAIN}};
-* {{BUILD_OR_RUNTIME_TOOL}};
-* {{NOTEBOOK_OR_EDITOR_REQUIREMENT}};
-* Git, if you plan to clone the repository.
-
-
-## Get The Repository
-
-Clone the repository with:
-
-```bash
-git clone {{REPOSITORY_URL}}
-cd {{REPOSITORY_NAME}}
-```
-
-
-## Conda Environment
-
-If this training uses `environment.yml`, create the environment with:
+From the repository root, create and activate the conda environment:
 
 ```bash
 mamba env create -f environment.yml
+mamba activate trustworthy_numerical_computing
 ```
 
-Activate it with:
+Verify the documentation tools:
 
 ```bash
-mamba activate {{CONDA_ENVIRONMENT_NAME}}
+mkdocs --version
+quarto --version
 ```
 
-If `environment.yml` changes later, update the environment with:
+
+## Build all published material
+
+Run:
 
 ```bash
-mamba env update -f environment.yml --prune
+scripts/build_training_site.sh
 ```
 
+This builds:
 
-## Verify The Setup
+* the course landing page at `_site/index.html`;
+* the MkDocs learning-module site under `_site/learning-modules/`;
+* the RevealJS slide deck under `_site/slides/`.
 
-Run a small example from the repository:
+The `_site/` directory is generated and ignored by Git. Remove it at any time;
+the build script recreates it from the tracked sources.
+
+
+## Preview while editing
+
+Preview the learning modules with:
 
 ```bash
-{{VERIFY_COMMAND}}
+mkdocs serve
 ```
 
-You should see output similar to:
+Preview the slides with:
 
-```text
-{{EXPECTED_OUTPUT}}
+```bash
+slides-source/preview.sh
 ```
 
 
-## Remote Or HPC Access
+## GitHub Pages
 
-If the training uses an HPC system, cloud environment, GPU node, database, or
-other remote service, verify the following before the session:
+The workflow in `.github/workflows/pages.yml`:
 
-* you can log in;
-* you can transfer or clone files;
-* you can load the required modules or activate the required environment;
-* you can run a minimal test job or command;
-* you know how to access local web applications if port forwarding is needed.
+* builds the complete site on pull requests to validate the sources;
+* uploads `_site/` as a GitHub Pages artifact after changes reach `main`;
+* deploys the artifact through the `github-pages` environment.
 
-
-## Useful References
-
-* {{REFERENCE_1}}
-* {{REFERENCE_2}}
-* {{REFERENCE_3}}
+In the repository settings, configure **Pages → Build and deployment → Source**
+to use **GitHub Actions**. Do not configure branch-based deployment from
+`docs/`; generated HTML is intentionally not committed.

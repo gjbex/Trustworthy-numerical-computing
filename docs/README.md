@@ -1,119 +1,120 @@
-{{TRAINING_SHORT_DESCRIPTION}}
+---
+title: "Trustworthy Numerical Computing"
+format:
+  html:
+    theme: cosmo
+    toc: true
+---
 
-This training introduces {{TRAINING_TOPIC}} and focuses on practical workflows,
-examples, and tradeoffs that participants can apply after the session.
+Trustworthy numerical results require more than code that compiles, runs, and
+passes ordinary tests. Scientific software must also account for finite
+precision, problem conditioning, algorithmic stability, convergence,
+validation, and variability across computing environments.
+
+This training develops a practical workflow for recognizing, investigating,
+preventing, and communicating numerical reliability problems. The concepts are
+language-agnostic and apply to scientific work in Python, Julia, C, C++,
+Fortran, R, MATLAB, Rust, and similar environments.
 
 
 ## Learning outcomes
 
 When you complete this training you will be able to
 
-* {{LEARNING_OUTCOME_1}};
-* {{LEARNING_OUTCOME_2}};
-* {{LEARNING_OUTCOME_3}};
-* {{LEARNING_OUTCOME_4}}.
+* explain how floating-point representation and rounding affect computations;
+* choose meaningful error measures and numerical tolerances;
+* distinguish an ill-conditioned problem from an unstable algorithm or an
+  implementation defect;
+* recognize common failure modes such as cancellation, overflow, underflow,
+  and accumulated rounding error;
+* define defensible convergence and stopping criteria;
+* validate computations using references, invariants, properties, refinement,
+  and independent methods;
+* reason about reproducibility across compilers, hardware, optimizations, and
+  parallel execution;
+* report numerical assumptions, limitations, and validation evidence clearly.
 
 
-## Schedule
+## Learning path
 
-Total duration: {{TRAINING_DURATION}}.
+The [learning modules](learning-modules/) are the self-contained reading
+material for the course. They follow a progression from the arithmetic model to
+diagnosis, validation, reproducibility, and communication.
 
-  | Subject                     | Duration |
-  |-----------------------------|----------|
-  | introduction and motivation |  5 min.  |
-  | {{SCHEDULE_TOPIC_1}}        | {{TIME}} |
-  | {{SCHEDULE_TOPIC_2}}        | {{TIME}} |
-  | coffee break                | 10 min.  |
-  | {{SCHEDULE_TOPIC_3}}        | {{TIME}} |
-  | hands-on session            | {{TIME}} |
-  | wrap up                     | 10 min.  |
+The [slide deck](slides/trustworthy-numerical-computing.html) supports
+instructor-led delivery. It provides teaching prompts, short examples, and
+discussion anchors rather than duplicating the complete reading material.
 
 
-## Training materials
+## Suggested schedule
 
-Slides are available in the
- [GitHub repository]({{REPOSITORY_URL}}),
-as well as example code and hands-on material.
+The modules are designed so that the core material can be delivered as a
+one-day course or split over two half-days. The exact timing will be refined
+when the computational experiments and capstone are complete.
 
-The repository contains:
-
-* `{{SLIDE_DECK_FILE}}`: main slide deck;
-* `source-code`: examples and demonstrations;
-* `hands-on`: participant exercises, if used;
-* `SETUP.md`: setup and verification instructions.
+| Course block | Modules |
+|---|---|
+| Motivation and arithmetic foundations | 1–3 |
+| Diagnosing and controlling numerical error | 4–6 |
+| Validation and reproducibility | 7–8 |
+| Communication and capstone investigation | 9–10 |
 
 
 ## Target audience
 
-This training is for you if {{TARGET_AUDIENCE_DESCRIPTION}}.
+This training is for scientists, research software engineers, and technical
+programmers who develop, review, or rely on numerical software and want stronger
+evidence that a computed result is scientifically defensible.
 
 
 ## Prerequisites
 
-You will need experience with {{PREREQUISITE_BACKGROUND}}. This is not a
-training that starts from scratch.
+Participants should already be able to read and modify small programs in at
+least one scientific-computing language. This course does not teach programming
+from scratch.
 
-If you plan to use the material in a Linux or HPC environment, you should be
-familiar with those environments as well.
+You should be comfortable with:
 
-More concretely, participants should already be comfortable with the following:
+* variables, expressions, functions, loops, and arrays;
+* basic algebra and scientific notation;
+* running a short program or notebook and inspecting its output;
+* interpreting tables and simple plots;
+* the idea that measurements and models have limited precision.
 
-* variables, expressions, control flow, and writing functions in a relevant
-  programming language;
-* basic data structures such as arrays/lists, maps/dictionaries, or sets;
-* reading short programs and understanding how data flows through them;
-* basic problem decomposition into helper functions or modules;
-* compiling or running programs from the command line at a basic level;
-* working in a shell environment well enough to edit files, run commands, and
-  inspect output.
-
-You do not need prior experience with {{TOPICS_TAUGHT_IN_TRAINING}}. Those are
-part of the training itself.
+Prior knowledge of IEEE 754, numerical analysis, parallel programming, or a
+specific implementation language is not required.
 
 
 ### Quick self-assessment
 
-If you can do most of the tasks below, you are likely ready for this training.
+You are likely ready if you can:
 
-* write a function that computes the average of a list of numbers;
-* loop over a collection and compute a derived result such as a sum or count;
-* use `if`/`else` or a `switch`-like construct to classify values into cases;
-* split a program into a few helper functions or files;
-* read data from a text file and print a simple summary;
-* read a short program and explain what it does;
-* compile or run a small program from the command line;
-* make a small change to an existing program and run it again.
-
-If several of these items still feel difficult, the training will probably move
-too fast. In that case, it is better to first take a short introductory course
-or refresh the basics.
+* implement or recognize a loop that sums a collection of numbers;
+* compare the output of two implementations;
+* explain why a calculated result should not report more meaningful digits than
+  its inputs support;
+* run the same calculation with a changed input or resolution;
+* describe what evidence would make you trust a scientific result.
 
 
 ### Software and access requirements
 
-To follow hands-on, you need a computer with {{SOFTWARE_REQUIREMENTS}}.
-
-If the training uses the provided conda environment, create it from the
-top-level `environment.yml` file. See `SETUP.md` for installation and
-verification commands.
-
-If examples require remote, HPC, cloud, GPU, database, or service access, make
-sure you can authenticate and run a minimal test before the session.
+The reading material and slides only require a web browser. Hands-on work will
+require a Linux-style terminal and the course environment described in
+`SETUP.md`. The primary exercise language will be selected while the detailed
+experiments are developed.
 
 
-## Level of the Material
+## Level of the material
 
-For participants who already have the prerequisite background, the material in
-this training is approximately
+For participants with the prerequisite programming background, the planned
+material is approximately:
 
-* Introductory: {{INTRODUCTORY_PERCENTAGE}} %
-* Intermediate: {{INTERMEDIATE_PERCENTAGE}} %
-* Advanced: {{ADVANCED_PERCENTAGE}} %
-
-These percentages describe the level of the training topics covered, not the
-participants' general programming background.
+* Introductory: 25%
+* Intermediate: 55%
+* Advanced: 20%
 
 
-## Trainer(s)
+## Trainer
 
-  * {{TRAINER_NAME}} ([{{TRAINER_EMAIL}}](mailto:{{TRAINER_EMAIL}}))
+Geert Jan Bex

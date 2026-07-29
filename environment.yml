@@ -1,0 +1,6 @@
+name: "{{CONDA_ENVIRONMENT_NAME}}"
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - jupyterlab

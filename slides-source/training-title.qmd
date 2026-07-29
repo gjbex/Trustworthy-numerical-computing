@@ -1,0 +1,20 @@
+---
+title: "{{TRAINING_TITLE}}"
+author: "{{TRAINER_NAME}}"
+format: revealjs
+---
+
+## {{TRAINING_TITLE}}
+
+{{TRAINING_SHORT_DESCRIPTION}}
+
+## Learning outcomes
+
+- {{LEARNING_OUTCOME_1}}
+- {{LEARNING_OUTCOME_2}}
+- {{LEARNING_OUTCOME_3}}
+
+## Wrap up
+
+- {{WRAP_UP_POINT_1}}
+- {{WRAP_UP_POINT_2}}

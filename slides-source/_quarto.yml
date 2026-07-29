@@ -1,0 +1,8 @@
+project:
+  title: "{{TRAINING_TITLE}}"
+  output-dir: "../docs/slides"
+
+format:
+  revealjs:
+    theme: simple
+    slide-number: true

@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+env/
+.env
+
+# Build directories
+build/
+cmake-build-*/
+_build/
+dist/
+
+# Quarto
+.quarto/
+*_files/
+
+# Jupyter
+.jupyter/
+
+# Generated outputs
+output/
+outputs/
+results/
+*.log
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*~

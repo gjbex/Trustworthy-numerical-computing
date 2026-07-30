@@ -6,6 +6,7 @@ execute:
   warning: false
 ---
 
+:::: {.cell .markdown}
 A program can run correctly and still produce a result that should not be
 trusted. In this experiment, two mathematically equivalent calculations give
 different answers to the same scientific question.
@@ -21,8 +22,10 @@ This activity accompanies
 This activity accompanies
 [Module 1: When Correct Code Produces Wrong Answers](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/01-when-correct-code-produces-wrong-answers.html).
 :::
+::::
 
 
+:::: {.cell .markdown}
 ## Learning goals
 
 After this experiment, you should be able to:
@@ -32,8 +35,10 @@ After this experiment, you should be able to:
 - use a reference calculation and an invariant as independent evidence;
 - change one factor at a time to characterize a discrepancy;
 - state what the evidence does—and does not—justify.
+::::
 
 
+:::: {.cell .markdown}
 ## The question
 
 A sensor records four event times in nanoseconds. We want the **population
@@ -44,6 +49,7 @@ $22.25\ \mathrm{ns}^2$.
 For this numerical experiment, treat the four recorded values as exact.
 Measurement uncertainty and whether variance is the best scientific metric are
 important, but deliberately outside the scope of this first investigation.
+::::
 
 ```{python}
 #| label: input-data
@@ -61,6 +67,7 @@ print(f"Flag the run above: {variance_limit_ns2} ns²")
 ```
 
 
+:::: {.cell .markdown}
 ## Two implementations
 
 Two colleagues implement algebraically equivalent formulas. For $n$ values
@@ -75,6 +82,7 @@ Before running the next cell, predict:
 - If they disagree, what evidence would you need before trusting either one?
 - Could ordinary tests that only check whether the functions run detect the
   problem?
+::::
 
 ```{python}
 #| label: candidate-calculations
@@ -102,6 +110,7 @@ for method, value in candidate_results.items():
     print(f"{method:18s}: {value:5.1f} ns²  -> {decision}")
 ```
 
+:::: {.cell .markdown}
 Both functions terminate normally and return ordinary numbers. Both values look
 plausible for measurements whose deviations differ by only a few nanoseconds,
 yet they lead to opposite monitoring decisions. An error of
@@ -112,8 +121,10 @@ consequential.
 Do not choose a result because its implementation looks more sophisticated or
 because its output has more digits. We need evidence tied to the numerical
 question.
+::::
 
 
+:::: {.cell .markdown}
 ## Establish an exact reference
 
 Python's `Fraction` type performs exact rational arithmetic. Because the inputs
@@ -122,6 +133,7 @@ reference that does not incur floating-point rounding during the calculation.
 
 This is useful evidence for this small case; it is not a general claim that
 exact arithmetic is practical for every scientific computation.
+::::
 
 ```{python}
 #| label: exact-reference
@@ -151,6 +163,7 @@ for method, value in candidate_results.items():
 ```
 
 
+:::: {.cell .markdown}
 ## Check an invariant
 
 Adding the same constant to every measurement changes their location but not
@@ -158,6 +171,7 @@ their spread. The population variance should therefore be **shift invariant**.
 
 The next cell keeps the deviations `[4, 7, 13, 16]` fixed and changes only the
 common offset. Predict how each implementation should behave before running it.
+::::
 
 ```{python}
 #| label: offset-sweep
@@ -187,6 +201,7 @@ for offset_ns in offsets_ns:
     print(f"{offset_ns:18.0f}  {centered:15.1f}  {shortcut:15.1f}")
 ```
 
+:::: {.cell .markdown}
 The centered implementation agrees with the exact reference and preserves the
 expected variance across these offsets. The shortcut implementation changes as
 the common offset grows; it eventually reports values that are zero or much
@@ -195,13 +210,16 @@ larger than the complete spread in the data.
 That evidence is enough to reject the shortcut implementation for this
 decision. It does not yet explain the arithmetic mechanism. Module 2 develops
 the finite-precision model needed for that explanation.
+::::
 
 
+:::: {.cell .markdown}
 ## Try one controlled variation
 
 Change `test_offset_ns` and rerun the cell. Find the smallest power of ten for
 which the shortcut result no longer agrees with the exact reference to within
 $0.1\ \mathrm{ns}^2$.
+::::
 
 ```{python}
 #| label: learner-variation
@@ -220,11 +238,13 @@ test_results
 ```
 
 
+:::: {.cell .markdown}
 ## Evidence record
 
 A compact record makes the conclusion reviewable. Notice that it includes the
 question, decision threshold, reference, observed discrepancy, invariant, and
 limitation—not just the preferred number.
+::::
 
 ```{python}
 #| label: evidence-record
@@ -244,6 +264,7 @@ evidence
 ```
 
 
+:::: {.cell .markdown}
 ## Reliability statement
 
 > For the four exact event times, the centered calculation gives a population
@@ -256,8 +277,10 @@ evidence
 
 Compare this statement with “the answer is 22.5.” Which parts make the
 conclusion easier to review or challenge?
+::::
 
 
+:::: {.cell .markdown}
 ## Optional extensions
 
 - Try `statistics.pvariance` from Python's standard library and decide whether
@@ -276,3 +299,4 @@ Next:
 Next:
 [Understanding Floating-Point Arithmetic](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/02-understanding-floating-point-arithmetic.html).
 :::
+::::

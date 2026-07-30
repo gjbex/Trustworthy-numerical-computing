@@ -217,6 +217,20 @@ modules; they do not replace every narrative page.
   `.qmd` files.
 - Treat each `.qmd` file as the authoritative source. Do not edit or commit the
   generated `.ipynb` file.
+- Wrap each logical text unit in an explicit Markdown cell:
+
+  ```markdown
+  :::: {.cell .markdown}
+  ## Section heading
+
+  Related explanatory text.
+  ::::
+  ```
+
+  Normally keep at most one section heading in each generated Markdown cell,
+  while keeping related paragraphs together. Leave executable Quarto chunks
+  outside these wrappers so they become separate code cells. Use a longer outer
+  fence when a Markdown cell contains nested fenced divs.
 - Quarto executes activity sources from a clean kernel during the complete site
   build and generates both HTML and a runnable notebook under `_site/notebooks/`.
 - Keep each activity deterministic, fast, and runnable from top to bottom.
@@ -422,6 +436,8 @@ For notebook changes:
   `_site/notebooks/`;
 - inspect the generated notebook for expected outputs, execution order,
   machine-local paths, and unnecessary metadata;
+- confirm that generated Markdown cells follow the intended logical boundaries
+  and normally contain no more than one section heading;
 - confirm that no generated `.ipynb` remains under the tracked `notebooks/`
   source directory.
 

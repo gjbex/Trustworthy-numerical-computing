@@ -1,9 +1,5 @@
 ---
 title: "Trustworthy Numerical Computing"
-format:
-  html:
-    theme: cosmo
-    toc: true
 ---
 
 Trustworthy numerical results require more than code that compiles, runs, and
@@ -44,6 +40,10 @@ diagnosis, validation, reproducibility, and communication.
 The [slide deck](slides/trustworthy-numerical-computing.html) supports
 instructor-led delivery. It provides teaching prompts, short examples, and
 discussion anchors rather than duplicating the complete reading material.
+
+The [opening numerical experiment](notebooks/01-opening-experiment.qmd) is a
+self-paced Jupyter activity in which two plausible variance calculations lead
+to opposite scientific decisions.
 
 
 ## Suggested schedule
@@ -100,9 +100,10 @@ You are likely ready if you can:
 ### Software and access requirements
 
 The reading material and slides only require a web browser. Hands-on work will
-require a Linux-style terminal and the course environment described in
-`SETUP.md`. The primary exercise language will be selected while the detailed
-experiments are developed.
+use short Python programs and Jupyter notebooks that can run locally or in a
+hosted notebook environment. Local work uses the course environment described
+in `SETUP.md`; the numerical concepts remain applicable across scientific
+programming languages.
 
 
 ## Level of the material

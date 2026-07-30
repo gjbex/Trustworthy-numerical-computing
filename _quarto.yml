@@ -1,0 +1,63 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - index.qmd
+    - learning-modules/*.md
+    - notebooks/*.qmd
+
+website:
+  title: "Trustworthy Numerical Computing"
+  site-url: "https://gjbex.github.io/Trustworthy-numerical-computing/"
+  navbar:
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Learning modules"
+        href: learning-modules/index.md
+      - text: "Slides"
+        href: slides/trustworthy-numerical-computing.html
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - text: "Learning modules"
+        href: learning-modules/index.md
+      - text: "Module structure"
+        href: learning-modules/learning-module-structure.md
+      - section: "Core course"
+        contents:
+          - text: "1. When Correct Code Produces Wrong Answers"
+            href: learning-modules/01-when-correct-code-produces-wrong-answers.md
+          - text: "2. Understanding Floating-Point Arithmetic"
+            href: learning-modules/02-understanding-floating-point-arithmetic.md
+          - text: "3. Measuring And Comparing Numerical Error"
+            href: learning-modules/03-measuring-and-comparing-numerical-error.md
+          - text: "4. Conditioning And Numerical Stability"
+            href: learning-modules/04-conditioning-and-numerical-stability.md
+          - text: "5. Common Numerical Failure Modes"
+            href: learning-modules/05-common-numerical-failure-modes.md
+          - text: "6. Iterative Algorithms And Convergence"
+            href: learning-modules/06-iterative-algorithms-and-convergence.md
+          - text: "7. Validating Scientific Computations"
+            href: learning-modules/07-validating-scientific-computations.md
+          - text: "8. Reproducibility Across Computing Environments"
+            href: learning-modules/08-reproducibility-across-computing-environments.md
+          - text: "9. Communicating Numerical Reliability"
+            href: learning-modules/09-communicating-numerical-reliability.md
+          - text: "10. Capstone Investigation"
+            href: learning-modules/10-capstone-investigating-a-suspicious-result.md
+      - section: "Interactive activities"
+        contents:
+          - text: "1. Two Plausible Variances"
+            href: notebooks/01-opening-experiment.qmd
+      - text: "Optional advanced topics"
+        href: learning-modules/optional-advanced-topics.md
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    link-external-newwindow: true

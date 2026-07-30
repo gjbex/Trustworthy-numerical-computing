@@ -17,16 +17,16 @@ dist/
 
 # Quarto
 .quarto/
+_freeze/
 *_files/
+**/*.quarto_ipynb
 
 # Generated publication output
-/docs/learning-modules/
-/docs/slides/
 /_site/
-site/
 
 # Jupyter
 .jupyter/
+/notebooks/*.ipynb
 
 # Generated outputs
 output/
@@ -38,3 +38,5 @@ results/
 .DS_Store
 Thumbs.db
 *~
+
+/.quarto/

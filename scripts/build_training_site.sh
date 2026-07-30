@@ -5,12 +5,10 @@ set -euo pipefail
 repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$repo_root"
 
-for command in mkdocs quarto; do
-    if ! command -v "$command" >/dev/null 2>&1; then
-        echo "Required command not found: $command" >&2
-        exit 127
-    fi
-done
+if ! command -v quarto >/dev/null 2>&1; then
+    echo "Required command not found: quarto" >&2
+    exit 127
+fi
 
 site_output_dir="$repo_root/_site"
 if [[ "$site_output_dir" != "$repo_root/_site" ]]; then
@@ -21,23 +19,25 @@ fi
 rm -rf -- "$site_output_dir"
 mkdir -p "$site_output_dir"
 
-echo "Building course landing page..."
-quarto render docs/README.md \
-    --to html \
-    --output-dir "$site_output_dir"
-mv "$site_output_dir/README.html" "$site_output_dir/index.html"
+echo "Building downloadable Jupyter notebooks..."
+for notebook_source in notebooks/*.qmd; do
+    quarto render "$notebook_source" --to ipynb --execute
+    generated_notebook_name=$(basename "${notebook_source%.qmd}.ipynb")
+    python scripts/sanitize_generated_notebook.py \
+        "$site_output_dir/notebooks/$generated_notebook_name"
+done
 
-echo "Building learning modules..."
-mkdocs build --strict --site-dir "$site_output_dir/learning-modules"
+echo "Building course website and learning modules..."
+quarto render --execute --no-clean
 
 echo "Building slide deck..."
-quarto render slides-source/trustworthy-numerical-computing.qmd \
-    --to revealjs \
-    --output-dir "$site_output_dir/slides"
+quarto render slides-source/trustworthy-numerical-computing.qmd
 
 for entry_point in \
     "$site_output_dir/index.html" \
     "$site_output_dir/learning-modules/index.html" \
+    "$site_output_dir/notebooks/01-opening-experiment.html" \
+    "$site_output_dir/notebooks/01-opening-experiment.ipynb" \
     "$site_output_dir/slides/trustworthy-numerical-computing.html"; do
     if [[ ! -f "$entry_point" ]]; then
         echo "Expected publication entry point not found: $entry_point" >&2

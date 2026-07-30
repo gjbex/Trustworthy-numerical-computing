@@ -29,15 +29,15 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: requirements-docs.txt
+          cache-dependency-path: requirements-notebooks.txt
 
-      - name: Install MkDocs dependencies
-        run: python -m pip install --requirement requirements-docs.txt
+      - name: Install notebook runtime dependencies
+        run: python -m pip install --requirement requirements-notebooks.txt
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
         with:
-          version: "1.9.35"
+          version: "1.9.38"
 
       - name: Build training site
         run: scripts/build_training_site.sh

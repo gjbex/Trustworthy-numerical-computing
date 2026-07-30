@@ -16,3 +16,7 @@ Please use the following workflow:
 When contributing examples or exercises, make sure they are easy for
 participants to run and that required software, data, and commands are
 documented close to the files that need them.
+
+Clear outputs from tutorial notebooks before committing them and verify that
+they execute in order from a clean kernel. Reusable numerical logic belongs in
+`source-code/` rather than being duplicated across notebooks.

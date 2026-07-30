@@ -48,15 +48,35 @@ Participants will use the following workflow in later modules:
 3. Establish a reference or independent check.
 4. Measure error using a scale-appropriate metric.
 5. Assess conditioning and likely failure modes.
-6. change one factor at a time.
-7. record the evidence and remaining limitations.
+6. Change one factor at a time.
+7. Record the evidence and remaining limitations.
 
 
 ## Opening experiment
 
-The first experiment should produce two reasonable-looking answers to the same
-question. Participants predict which result to trust, then identify what
-additional evidence is needed before either answer is defensible.
+The [opening experiment](../notebooks/01-opening-experiment.qmd) asks whether
+the population variance of four large-offset event times exceeds a monitoring
+threshold. Two algebraically equivalent implementations return
+$22.5\ \mathrm{ns}^2$ and $22.0\ \mathrm{ns}^2$. Both programs run normally and
+both answers initially look plausible, but they lead to opposite decisions.
+
+Before choosing an answer, participants:
+
+1. predict how the two implementations should behave;
+2. compare both results with an exact rational reference;
+3. test the invariant that variance is unchanged by a common offset;
+4. vary only that offset to characterize the discrepancy;
+5. record a conclusion and the limits of the available evidence.
+
+The activity deliberately establishes *which* result is defensible before
+explaining *why* the arithmetic differs. Preview the authoritative Quarto
+source from the repository root with:
+
+```bash
+quarto preview notebooks/01-opening-experiment.qmd
+```
+
+The complete site build also generates a downloadable Jupyter notebook.
 
 
 ## Connection to the next module

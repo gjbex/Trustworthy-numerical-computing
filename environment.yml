@@ -3,6 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - python=3.12
-  - mkdocs=1.6.1
-  - pymdown-extensions=10.21.2
-  - quarto=1.9.35
+  - ipykernel=7.3.0
+  - jupyterlab=4.6.2
+  - nbclient=0.10.2

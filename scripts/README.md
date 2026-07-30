@@ -8,7 +8,10 @@ Run the complete documentation build from the repository root:
 scripts/build_training_site.sh
 ```
 
-The script renders the course landing page, builds the MkDocs learning modules,
-and renders the Quarto RevealJS deck into one deployable `_site/` directory.
-GitHub Actions calls this same script for pull-request validation and Pages
-deployment.
+The script renders the Quarto course website, executes the interactive activity
+sources, generates runnable Jupyter notebooks, and renders the Quarto RevealJS
+deck into the same deployable `_site/` directory. GitHub Actions calls this same
+script for pull-request validation and Pages deployment.
+
+`sanitize_generated_notebook.py` removes machine-local kernel paths from the
+generated notebooks before they are published.

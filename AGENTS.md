@@ -45,18 +45,20 @@ that belong to the prerequisites.
 
 ## Repository map
 
-- `docs/README.md`: source for the course landing page.
-- `learning-modules/`: long-form Markdown reading material built with MkDocs.
+- `index.qmd`: source for the course landing page.
+- `learning-modules/`: long-form Markdown reading material built with Quarto.
 - `learning-modules/learning-module-structure.md`: prerequisite order and
   delivery structure.
+- `notebooks/`: authoritative Quarto `.qmd` sources for self-paced tutorial
+  activities; the build generates HTML and runnable Jupyter notebooks.
+- `_quarto.yml`: website navigation and HTML rendering configuration.
 - `slides-source/`: modular Quarto RevealJS sources aligned with the modules.
 - `slides-source/trustworthy-numerical-computing.qmd`: complete slide deck and
   include order.
 - `source-code/`: demonstrations and small numerical experiments.
 - `hands-on/`: participant exercises and the capstone investigation.
-- `mkdocs.yml`: learning-module navigation.
-- `requirements-docs.txt`: Python documentation-tool versions used by CI.
-- `environment.yml`: reproducible local course and authoring environment.
+- `environment.yml`: portable Python and Jupyter runtime for course activities.
+- `requirements-notebooks.txt`: notebook runtime dependencies installed by CI.
 - `scripts/build_training_site.sh`: complete local and CI publication build.
 - `.github/workflows/pages.yml`: pull-request validation and Pages deployment.
 - `_site/`: ignored, generated deployment artifact.
@@ -76,13 +78,13 @@ slides-source/04-conditioning-and-numerical-stability.qmd
 When adding, removing, renaming, reordering, or substantially changing a
 module:
 
-- update `mkdocs.yml`;
+- update `_quarto.yml`;
 - update `learning-modules/index.md`;
 - update `learning-modules/learning-module-structure.md`;
 - update the matching numbered slide source;
 - update the includes in
   `slides-source/trustworthy-numerical-computing.qmd`;
-- check `docs/README.md` learning outcomes and schedule;
+- check `index.qmd` learning outcomes and schedule;
 - check all named `source-code/` and `hands-on/` paths;
 - check `README.md` and `SETUP.md` when setup or navigation changes.
 
@@ -206,6 +208,27 @@ Avoid presenting implementation recipes without explaining how participants can
 judge whether they worked.
 
 
+## Interactive notebooks
+
+Interactive activities are self-paced tutorials that complement the reading
+modules; they do not replace every narrative page.
+
+- Put participant-facing activity sources in `notebooks/` as executable Quarto
+  `.qmd` files.
+- Treat each `.qmd` file as the authoritative source. Do not edit or commit the
+  generated `.ipynb` file.
+- Quarto executes activity sources from a clean kernel during the complete site
+  build and generates both HTML and a runnable notebook under `_site/notebooks/`.
+- Keep each activity deterministic, fast, and runnable from top to bottom.
+- Use explicit parameters and repository-relative paths.
+- Move reusable logic to `source-code/` rather than copying it between
+  notebooks.
+- Keep notebook dependencies synchronized between
+  `requirements-notebooks.txt` and `environment.yml`.
+- Add an **Open in Colab** link only when the generated notebook is reachable by
+  the intended learners.
+
+
 ## Slides
 
 Slides are instructor-led teaching aids. They should support discussion,
@@ -250,12 +273,12 @@ Prefer small experiments that isolate one effect. Avoid long implementations,
 network access, hidden data, long runtimes, unusual hardware, or fragile
 services unless they are central to the lesson.
 
-The primary exercise language has not yet been selected. Do not establish one
-implicitly by adding a large language-specific body of material. When it is
-selected, update `environment.yml`, `SETUP.md`, the landing page, example
-commands, module text, and slides together. Add equivalents in other languages
-only when they help the expected participants rather than multiplying
-maintenance cost.
+Python is the reference implementation language for short runnable examples and
+Jupyter tutorial notebooks. Keep the conceptual explanations language-agnostic,
+use the standard library where practical, and add third-party numerical
+dependencies only when they serve a specific learning goal. Add equivalents in
+other languages only when they help the expected participants rather than
+multiplying maintenance cost.
 
 
 ## Hands-on exercises and capstone
@@ -309,10 +332,19 @@ document its generating command and provenance.
 
 Keep dependencies conservative and tied to teaching needs.
 
-- `requirements-docs.txt` defines the Python documentation tools used by CI.
 - `.github/workflows/pages.yml` pins the Python and Quarto toolchains used for
   publication.
-- `environment.yml` provides the corresponding local authoring environment.
+- `requirements-notebooks.txt` pins the Jupyter runtime used to execute tutorial
+  notebooks in CI.
+- `environment.yml` pins the corresponding portable Python and Jupyter runtime
+  for participants and local notebook execution.
+- Quarto is a separately installed publishing application. Keep the supported
+  local version in `SETUP.md` aligned with the version pinned in
+  `.github/workflows/pages.yml`.
+- `actionlint` is an optional, separately installed maintainer tool; it does not
+  belong in the participant environment.
+- Do not add a platform-specific application to `environment.yml` without
+  checking Linux, macOS, Windows, and relevant CPU architectures.
 - When changing a documentation-tool version, update all affected files and run
   the full build.
 - When adding an exercise dependency, document why it is needed and how
@@ -328,7 +360,7 @@ packages, machine-local files, or credentials.
 The source repository does not track rendered HTML.
 
 - `scripts/build_training_site.sh` assembles the complete site in `_site/`.
-- `_site/`, `docs/learning-modules/`, and `docs/slides/` remain ignored.
+- `_site/`, `.quarto/`, `_freeze/`, and notebook checkpoints remain ignored.
 - Do not manually edit generated output.
 - Do not add a workflow that commits generated HTML back to `main`.
 - Pull requests build the complete artifact without deploying.
@@ -338,6 +370,8 @@ The complete build must produce:
 
 - `_site/index.html`;
 - `_site/learning-modules/index.html`;
+- `_site/notebooks/01-opening-experiment.html`;
+- `_site/notebooks/01-opening-experiment.ipynb`;
 - `_site/slides/trustworthy-numerical-computing.html`.
 
 Keep build logic in `scripts/build_training_site.sh`; the workflow should call
@@ -352,10 +386,10 @@ For any source or configuration change, first run:
 git diff --check
 ```
 
-For learning-module or navigation changes:
+For landing-page, learning-module, or navigation changes:
 
 ```bash
-mkdocs build --strict
+quarto render
 ```
 
 For slide changes:
@@ -380,6 +414,17 @@ For examples and exercises:
 - run the full publication build when paths or commands appear in modules or
   slides.
 
+For notebook changes:
+
+- run the authoritative `.qmd` source from a clean kernel through the complete
+  publication build;
+- confirm that Quarto generates both HTML and a runnable `.ipynb` under
+  `_site/notebooks/`;
+- inspect the generated notebook for expected outputs, execution order,
+  machine-local paths, and unnecessary metadata;
+- confirm that no generated `.ipynb` remains under the tracked `notebooks/`
+  source directory.
+
 For build or workflow changes:
 
 - run `bash -n scripts/build_training_site.sh`;
@@ -396,8 +441,8 @@ surfaces with `rg` and verify every reference.
 - Preserve existing user changes and avoid unrelated formatting churn.
 - Use `git mv` for tracked moves and renames.
 - Do not force a package-style `src/` layout onto the training repository.
-- Do not commit `_site/`, local Quarto state, notebook checkpoints, caches, or
-  transient experiment output.
+- Do not commit `_site/`, generated `.ipynb` files, local Quarto state, notebook
+  checkpoints, caches, or transient experiment output.
 - Keep small input data close to the example that consumes it.
 - Keep large or regenerated scientific data out of Git unless it is an
   intentional teaching asset with documented provenance.

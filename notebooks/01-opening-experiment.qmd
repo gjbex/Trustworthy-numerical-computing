@@ -1,0 +1,278 @@
+---
+title: "Opening experiment: Two plausible variances"
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+---
+
+A program can run correctly and still produce a result that should not be
+trusted. In this experiment, two mathematically equivalent calculations give
+different answers to the same scientific question.
+
+::: {.content-visible when-format="html"}
+This activity accompanies
+[Module 1: When Correct Code Produces Wrong Answers](../learning-modules/01-when-correct-code-produces-wrong-answers.md).
+
+[Download the executable Jupyter notebook](01-opening-experiment.ipynb){.btn .btn-primary download="01-opening-experiment.ipynb"}
+:::
+
+::: {.content-visible when-format="ipynb"}
+This activity accompanies
+[Module 1: When Correct Code Produces Wrong Answers](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/01-when-correct-code-produces-wrong-answers.html).
+:::
+
+
+## Learning goals
+
+After this experiment, you should be able to:
+
+- distinguish a successful program run from a trustworthy numerical result;
+- make a prediction before inspecting an answer;
+- use a reference calculation and an invariant as independent evidence;
+- change one factor at a time to characterize a discrepancy;
+- state what the evidence does—and does not—justify.
+
+
+## The question
+
+A sensor records four event times in nanoseconds. We want the **population
+variance** of those times as a measure of their spread. The monitoring rule
+flags the run when the variance is greater than
+$22.25\ \mathrm{ns}^2$.
+
+For this numerical experiment, treat the four recorded values as exact.
+Measurement uncertainty and whether variance is the best scientific metric are
+important, but deliberately outside the scope of this first investigation.
+
+```{python}
+#| label: input-data
+
+measurements_ns = [
+    100_000_004.0,
+    100_000_007.0,
+    100_000_013.0,
+    100_000_016.0,
+]
+variance_limit_ns2 = 22.25
+
+print("Measurements (ns):", measurements_ns)
+print(f"Flag the run above: {variance_limit_ns2} ns²")
+```
+
+
+## Two implementations
+
+Two colleagues implement algebraically equivalent formulas. For $n$ values
+with mean $\bar{x}$:
+
+1. **Centered formula:** $\frac{1}{n}\sum_i (x_i - \bar{x})^2$
+2. **Shortcut formula:** $\frac{1}{n}\sum_i x_i^2 - \bar{x}^2$
+
+Before running the next cell, predict:
+
+- Will the implementations return the same result?
+- If they disagree, what evidence would you need before trusting either one?
+- Could ordinary tests that only check whether the functions run detect the
+  problem?
+
+```{python}
+#| label: candidate-calculations
+
+def variance_centered(values):
+    """Population variance using deviations from the computed mean."""
+    mean = sum(values) / len(values)
+    return sum((value - mean) ** 2 for value in values) / len(values)
+
+
+def variance_shortcut(values):
+    """Population variance using an algebraically equivalent identity."""
+    mean = sum(values) / len(values)
+    mean_of_squares = sum(value**2 for value in values) / len(values)
+    return mean_of_squares - mean**2
+
+
+candidate_results = {
+    "centered formula": variance_centered(measurements_ns),
+    "shortcut formula": variance_shortcut(measurements_ns),
+}
+
+for method, value in candidate_results.items():
+    decision = "FLAG" if value > variance_limit_ns2 else "accept"
+    print(f"{method:18s}: {value:5.1f} ns²  -> {decision}")
+```
+
+Both functions terminate normally and return ordinary numbers. Both values look
+plausible for measurements whose deviations differ by only a few nanoseconds,
+yet they lead to opposite monitoring decisions. An error of
+$0.25\ \mathrm{ns}^2$ is already large enough to change the classification at
+this threshold, so the required numerical accuracy is scientifically
+consequential.
+
+Do not choose a result because its implementation looks more sophisticated or
+because its output has more digits. We need evidence tied to the numerical
+question.
+
+
+## Establish an exact reference
+
+Python's `Fraction` type performs exact rational arithmetic. Because the inputs
+in this exercise are exact integer-valued nanoseconds, it can provide a
+reference that does not incur floating-point rounding during the calculation.
+
+This is useful evidence for this small case; it is not a general claim that
+exact arithmetic is practical for every scientific computation.
+
+```{python}
+#| label: exact-reference
+
+from fractions import Fraction
+
+
+def exact_population_variance(values):
+    exact_values = [Fraction(value) for value in values]
+    exact_mean = sum(exact_values, start=Fraction(0)) / len(exact_values)
+    squared_deviations = (
+        (value - exact_mean) ** 2 for value in exact_values
+    )
+    return sum(squared_deviations, start=Fraction(0)) / len(exact_values)
+
+
+exact_variance = exact_population_variance(measurements_ns)
+reference_variance_ns2 = float(exact_variance)
+
+print(
+    f"Exact variance: {exact_variance} ns² = "
+    f"{reference_variance_ns2} ns²"
+)
+for method, value in candidate_results.items():
+    absolute_error = abs(value - reference_variance_ns2)
+    print(f"{method:18s}: absolute error = {absolute_error:.1f} ns²")
+```
+
+
+## Check an invariant
+
+Adding the same constant to every measurement changes their location but not
+their spread. The population variance should therefore be **shift invariant**.
+
+The next cell keeps the deviations `[4, 7, 13, 16]` fixed and changes only the
+common offset. Predict how each implementation should behave before running it.
+
+```{python}
+#| label: offset-sweep
+
+deviations_ns = [4.0, 7.0, 13.0, 16.0]
+offsets_ns = [
+    0.0,
+    10_000.0,
+    1_000_000.0,
+    100_000_000.0,
+    1_000_000_000.0,
+    10_000_000_000.0,
+    1_000_000_000_000.0,
+]
+
+print(
+    f"{'offset (ns)':>18s}  "
+    f"{'centered (ns²)':>15s}  "
+    f"{'shortcut (ns²)':>15s}"
+)
+for offset_ns in offsets_ns:
+    shifted_values = [
+        offset_ns + deviation for deviation in deviations_ns
+    ]
+    centered = variance_centered(shifted_values)
+    shortcut = variance_shortcut(shifted_values)
+    print(f"{offset_ns:18.0f}  {centered:15.1f}  {shortcut:15.1f}")
+```
+
+The centered implementation agrees with the exact reference and preserves the
+expected variance across these offsets. The shortcut implementation changes as
+the common offset grows; it eventually reports values that are zero or much
+larger than the complete spread in the data.
+
+That evidence is enough to reject the shortcut implementation for this
+decision. It does not yet explain the arithmetic mechanism. Module 2 develops
+the finite-precision model needed for that explanation.
+
+
+## Try one controlled variation
+
+Change `test_offset_ns` and rerun the cell. Find the smallest power of ten for
+which the shortcut result no longer agrees with the exact reference to within
+$0.1\ \mathrm{ns}^2$.
+
+```{python}
+#| label: learner-variation
+
+test_offset_ns = 10_000_000.0  # Try 10**k for different integer values of k.
+test_values = [
+    test_offset_ns + deviation for deviation in deviations_ns
+]
+
+test_results = {
+    "centered": variance_centered(test_values),
+    "shortcut": variance_shortcut(test_values),
+    "exact reference": float(exact_population_variance(test_values)),
+}
+test_results
+```
+
+
+## Evidence record
+
+A compact record makes the conclusion reviewable. Notice that it includes the
+question, decision threshold, reference, observed discrepancy, invariant, and
+limitation—not just the preferred number.
+
+```{python}
+#| label: evidence-record
+
+evidence = {
+    "question": "Is the population variance above 22.25 ns²?",
+    "assumption": "Input event times are exact for this experiment.",
+    "exact_reference_ns2": reference_variance_ns2,
+    "centered_result_ns2": candidate_results["centered formula"],
+    "shortcut_result_ns2": candidate_results["shortcut formula"],
+    "independent_check": "Variance should be unchanged by a common offset.",
+    "limitation": (
+        "Measurement uncertainty and metric choice were not assessed."
+    ),
+}
+evidence
+```
+
+
+## Reliability statement
+
+> For the four exact event times, the centered calculation gives a population
+> variance of $22.5\ \mathrm{ns}^2$. It agrees with an exact rational reference
+> and remains unchanged under the tested common offsets. The shortcut
+> calculation gives $22.0\ \mathrm{ns}^2$ for the original data and violates
+> shift invariance as the offset grows, so it is not reliable for the
+> $22.25\ \mathrm{ns}^2$ decision threshold. This experiment does not assess
+> measurement uncertainty or whether variance is the best scientific metric.
+
+Compare this statement with “the answer is 22.5.” Which parts make the
+conclusion easier to review or challenge?
+
+
+## Optional extensions
+
+- Try `statistics.pvariance` from Python's standard library and decide whether
+  agreement alone makes it an independent reference.
+- Change the deviations while keeping their spread small relative to the
+  offset.
+- Translate the two formulas into another scientific programming language and
+  repeat the invariant check.
+
+::: {.content-visible when-format="html"}
+Next:
+[Understanding Floating-Point Arithmetic](../learning-modules/02-understanding-floating-point-arithmetic.md).
+:::
+
+::: {.content-visible when-format="ipynb"}
+Next:
+[Understanding Floating-Point Arithmetic](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/02-understanding-floating-point-arithmetic.html).
+:::

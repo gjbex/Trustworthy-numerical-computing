@@ -169,14 +169,15 @@ for method, value in candidate_results.items():
 Adding the same constant to every measurement changes their location but not
 their spread. The population variance should therefore be **shift invariant**.
 
-The next cell keeps the deviations `[4, 7, 13, 16]` fixed and changes only the
-common offset. Predict how each implementation should behave before running it.
+The next cell keeps the event times relative to a common offset
+`[4, 7, 13, 16]` fixed and changes only that common offset. Predict how each
+implementation should behave before running it.
 ::::
 
 ```{python}
 #| label: offset-sweep
 
-deviations_ns = [4.0, 7.0, 13.0, 16.0]
+relative_times_ns = [4.0, 7.0, 13.0, 16.0]
 offsets_ns = [
     0.0,
     10_000.0,
@@ -194,7 +195,7 @@ print(
 )
 for offset_ns in offsets_ns:
     shifted_values = [
-        offset_ns + deviation for deviation in deviations_ns
+        offset_ns + relative_time for relative_time in relative_times_ns
     ]
     centered = variance_centered(shifted_values)
     shortcut = variance_shortcut(shifted_values)
@@ -226,7 +227,7 @@ $0.1\ \mathrm{ns}^2$.
 
 test_offset_ns = 10_000_000.0  # Try 10**k for different integer values of k.
 test_values = [
-    test_offset_ns + deviation for deviation in deviations_ns
+    test_offset_ns + relative_time for relative_time in relative_times_ns
 ]
 
 test_results = {
@@ -285,8 +286,8 @@ conclusion easier to review or challenge?
 
 - Try `statistics.pvariance` from Python's standard library and decide whether
   agreement alone makes it an independent reference.
-- Change the deviations while keeping their spread small relative to the
-  offset.
+- Change the relative event times while keeping their spread small relative to
+  the offset.
 - Translate the two formulas into another scientific programming language and
   repeat the invariant check.
 

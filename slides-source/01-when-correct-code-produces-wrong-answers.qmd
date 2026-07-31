@@ -14,11 +14,11 @@ participants have seen a result that deserves suspicion.
 
 ## Several Meanings Of "Correct"
 
-1. The program runs
-2. The implementation matches the algorithm
-3. The algorithm suits the mathematical problem
-4. The accuracy suits the scientific conclusion
-5. Independent evidence supports the claim
+1. Successful execution
+2. Implementation fidelity
+3. Mathematical suitability
+4. Numerical adequacy
+5. Scientific justification
 
 ::: notes
 Ask where the participants' normal unit and integration tests stop in this
@@ -43,11 +43,11 @@ floating-point representation; that explanation belongs to Module 2.
 
 ## Investigation Workflow
 
-- State the expected behaviour and required accuracy
+- State the expected behaviour and decision
 - Reproduce and characterize the discrepancy
-- Establish a reference or independent check
-- Diagnose sensitivity and failure modes
-- Validate the change and report limitations
+- Establish a reference or complementary check
+- Compare explanations by changing one factor
+- Judge the impact and report limitations
 
 ::: notes
 This workflow is the through-line for every later module and the capstone.

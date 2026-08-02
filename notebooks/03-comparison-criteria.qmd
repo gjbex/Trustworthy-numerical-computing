@@ -1,0 +1,527 @@
+---
+title: "Comparison criteria across scales"
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+---
+
+:::: {.cell .markdown}
+A numerical comparison needs more than two values. It needs a justified
+reference, a metric, units, tolerances, and a statement of what passing means.
+This tutorial compares the same constructed pressure results with absolute,
+relative, and mixed criteria.
+
+::: {.content-visible when-format="html"}
+This activity accompanies
+[Module 3: Measuring And Comparing Numerical Error](../learning-modules/03-measuring-and-comparing-numerical-error.md).
+
+[Download the executable Jupyter notebook](03-comparison-criteria.ipynb){.btn .btn-primary download="03-comparison-criteria.ipynb"}
+:::
+
+::: {.content-visible when-format="ipynb"}
+This activity accompanies
+[Module 3: Measuring And Comparing Numerical Error](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/03-measuring-and-comparing-numerical-error.html).
+:::
+::::
+
+
+:::: {.cell .markdown}
+## Learning goals
+
+After this experiment, you should be able to:
+
+- compute absolute and relative error with their correct units;
+- explain the behaviour of relative error at and near zero;
+- apply a mixed absolute-relative acceptance criterion;
+- show why machine epsilon is not a scientific tolerance;
+- reject non-finite values intentionally;
+- choose between component-wise, maximum, and root-mean-square comparisons.
+::::
+
+
+:::: {.cell .markdown}
+## Prerequisites
+
+Read
+[Module 2: Understanding Floating-Point Arithmetic](../learning-modules/02-understanding-floating-point-arithmetic.md)
+or complete the
+[floating-point landmarks](02-floating-point-landmarks.qmd)
+activity first. This tutorial assumes that you understand finite precision and
+machine epsilon but have not yet studied conditioning or numerical stability.
+::::
+
+
+:::: {.cell .markdown}
+## Outline
+
+1. State the comparison requirement.
+2. Compute absolute and relative errors.
+3. Compare absolute-only, relative-only, and mixed decisions.
+4. Change a tolerance and inspect the changed claim.
+5. Test boundaries and non-finite values.
+6. Compare collection summaries.
+7. Record the evidence and limitations.
+::::
+
+
+:::: {.cell .markdown}
+## State the requirement first
+
+The values below are constructed pressure results chosen to expose different
+scales; they are not measurements from an instrument. Treat each listed
+binary64 value as the designated reference for this tutorial. The activity does
+not assess decimal conversion or claim that these are exact physical values.
+
+The hypothetical requirement is:
+
+> Accept a computed pressure when its discrepancy is no greater than an
+> absolute allowance of $10^{-5}\ \mathrm{Pa}$ plus a relative allowance of
+> $10^{-6}$ times the reference magnitude.
+
+The absolute tolerance has units of pascals. The relative tolerance is
+dimensionless. Before running the comparisons, predict which cases an
+absolute-only, relative-only, and mixed criterion will accept.
+::::
+
+```{python}
+#| label: comparison-setup
+
+import math
+import sys
+
+
+absolute_tolerance_pa = 1.0e-5
+relative_tolerance = 1.0e-6
+
+cases = [
+    {"case": "zero", "reference_pa": 0.0, "computed_pa": 5.0e-6},
+    {"case": "near zero", "reference_pa": 1.0e-6, "computed_pa": 6.0e-6},
+    {"case": "order one", "reference_pa": 1.0, "computed_pa": 1.00002},
+    {"case": "large", "reference_pa": 1.0e6, "computed_pa": 1.0e6 + 0.5},
+]
+
+
+def absolute_error(computed, reference):
+    """Return absolute error in the units of the operands."""
+    return abs(computed - reference)
+
+
+def relative_error(computed, reference):
+    """Return relative error, or None when the reference is zero."""
+    if reference == 0.0:
+        return None
+    return absolute_error(computed, reference) / abs(reference)
+
+
+def allowed_discrepancy(reference, absolute_tolerance, relative_tolerance):
+    """Return a reference-anchored mixed tolerance."""
+    tolerances_are_valid = (
+        math.isfinite(absolute_tolerance)
+        and math.isfinite(relative_tolerance)
+        and absolute_tolerance >= 0.0
+        and relative_tolerance >= 0.0
+    )
+    if not tolerances_are_valid:
+        raise ValueError("Tolerances must be finite and non-negative.")
+    return absolute_tolerance + relative_tolerance * abs(reference)
+
+
+def within_tolerance(
+    computed,
+    reference,
+    absolute_tolerance,
+    relative_tolerance,
+):
+    """Apply the finite, reference-anchored mixed comparison policy."""
+    if not (math.isfinite(computed) and math.isfinite(reference)):
+        return False
+    return absolute_error(computed, reference) <= allowed_discrepancy(
+        reference,
+        absolute_tolerance,
+        relative_tolerance,
+    )
+
+
+print(f"absolute tolerance: {absolute_tolerance_pa:.1e} Pa")
+print(f"relative tolerance: {relative_tolerance:.1e}")
+```
+
+
+:::: {.cell .markdown}
+The helper functions make the convention explicit: the reference sets the
+relative scale, equality with the tolerance boundary passes, and non-finite
+operands are rejected. A different scientific contract may choose differently,
+but it should do so deliberately.
+::::
+
+
+:::: {.cell .markdown}
+## Compute absolute and relative error
+
+Absolute error retains pascals. Relative error is dimensionless and is reported
+as undefined when the designated reference is zero.
+::::
+
+```{python}
+#| label: error-table
+
+print(
+    f"{'case':>10s}  {'reference (Pa)':>16s}  {'computed (Pa)':>16s}  "
+    f"{'absolute (Pa)':>14s}  {'relative':>12s}"
+)
+for case in cases:
+    reference_pa = case["reference_pa"]
+    computed_pa = case["computed_pa"]
+    abs_error_pa = absolute_error(computed_pa, reference_pa)
+    rel_error = relative_error(computed_pa, reference_pa)
+    relative_text = "undefined" if rel_error is None else f"{rel_error:.3g}"
+    print(
+        f"{case['case']:>10s}  {reference_pa:16.10g}  "
+        f"{computed_pa:16.10g}  "
+        f"{abs_error_pa:14.6g}  {relative_text:>12s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The zero and near-zero cases have the same absolute error,
+$5\times10^{-6}\ \mathrm{Pa}$. Relative error is undefined for the zero
+reference and equals approximately 5 for the near-zero reference. The large
+case has the largest absolute error, $0.5\ \mathrm{Pa}$, but the smallest
+relative error, $5\times10^{-7}$.
+::::
+
+
+:::: {.cell .markdown}
+## Compare three criteria
+
+The absolute-only criterion asks whether the discrepancy is below the absolute
+floor. The relative-only criterion asks whether it is within one part per
+million of a nonzero reference. The mixed criterion applies the requirement as
+stated.
+::::
+
+```{python}
+#| label: criterion-decisions
+
+criterion_results = []
+
+print(
+    f"{'case':>10s}  {'abs only':>8s}  {'rel only':>8s}  "
+    f"{'mixed limit (Pa)':>16s}  {'mixed':>8s}"
+)
+for case in cases:
+    reference_pa = case["reference_pa"]
+    computed_pa = case["computed_pa"]
+    abs_error_pa = absolute_error(computed_pa, reference_pa)
+
+    absolute_pass = abs_error_pa <= absolute_tolerance_pa
+    if reference_pa == 0.0:
+        relative_pass = None
+        relative_text = "N/A"
+    else:
+        relative_pass = (
+            abs_error_pa <= relative_tolerance * abs(reference_pa)
+        )
+        relative_text = "pass" if relative_pass else "fail"
+
+    mixed_limit_pa = allowed_discrepancy(
+        reference_pa,
+        absolute_tolerance_pa,
+        relative_tolerance,
+    )
+    mixed_pass = within_tolerance(
+        computed_pa,
+        reference_pa,
+        absolute_tolerance_pa,
+        relative_tolerance,
+    )
+
+    criterion_results.append(
+        {
+            "case": case["case"],
+            "absolute_pass": absolute_pass,
+            "relative_pass": relative_pass,
+            "mixed_limit_pa": mixed_limit_pa,
+            "mixed_pass": mixed_pass,
+        }
+    )
+    print(
+        f"{case['case']:>10s}  "
+        f"{('pass' if absolute_pass else 'fail'):>8s}  "
+        f"{relative_text:>8s}  {mixed_limit_pa:16.6g}  "
+        f"{('pass' if mixed_pass else 'fail'):>8s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The mixed criterion does not conceal a special rule for zero. Its absolute
+term dominates there, while its relative term permits a scale-appropriate
+discrepancy for the large reference. The order-one case fails because its error
+exceeds the stated combined allowance.
+::::
+
+
+:::: {.cell .markdown}
+## Why machine epsilon answers another question
+
+Machine epsilon describes binary64 spacing near one. Compare that format
+property with the allowed pressure discrepancy derived from the stated
+requirement.
+::::
+
+```{python}
+#| label: epsilon-comparison
+
+machine_epsilon = sys.float_info.epsilon
+
+print(f"binary64 machine epsilon: {machine_epsilon:.6g}")
+print(
+    f"{'case':>10s}  {'error (Pa)':>12s}  {'mixed allowance (Pa)':>22s}  "
+    f"{'error <= epsilon?':>18s}"
+)
+for case in cases:
+    error_pa = absolute_error(case["computed_pa"], case["reference_pa"])
+    allowance_pa = allowed_discrepancy(
+        case["reference_pa"],
+        absolute_tolerance_pa,
+        relative_tolerance,
+    )
+    print(
+        f"{case['case']:>10s}  {error_pa:12.6g}  {allowance_pa:22.6g}  "
+        f"{str(error_pa <= machine_epsilon):>18s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+Using machine epsilon as an absolute pressure tolerance rejects every case, but
+that result has no physical rationale: machine epsilon is dimensionless, while
+the discrepancies are measured in pascals. A multiplier chosen only to obtain
+the desired pass/fail pattern would not repair the missing justification.
+::::
+
+
+:::: {.cell .markdown}
+## Exercise: change the tolerance claim
+
+Tighten `exercise_absolute_tolerance_pa` to $10^{-6}\ \mathrm{Pa}$ while keeping
+the relative tolerance unchanged. Predict which mixed decisions will change,
+then run the cell. Remember that editing the tolerance changes the requirement;
+it does not improve any computed value.
+::::
+
+```{python}
+#| label: learner-tolerance
+
+exercise_absolute_tolerance_pa = 1.0e-5  # Try 1.0e-6.
+exercise_relative_tolerance = 1.0e-6
+
+for case in cases:
+    accepted = within_tolerance(
+        case["computed_pa"],
+        case["reference_pa"],
+        exercise_absolute_tolerance_pa,
+        exercise_relative_tolerance,
+    )
+    print(f"{case['case']:>10s}: {'pass' if accepted else 'fail'}")
+```
+
+
+:::: {.cell .markdown}
+## Check the exercise
+
+The comparison below shows the baseline and tightened decisions side by side.
+Explain why the zero and near-zero cases change while the large case does not.
+::::
+
+```{python}
+#| label: tolerance-check
+
+for case in cases:
+    baseline_pass = within_tolerance(
+        case["computed_pa"],
+        case["reference_pa"],
+        1.0e-5,
+        1.0e-6,
+    )
+    tightened_pass = within_tolerance(
+        case["computed_pa"],
+        case["reference_pa"],
+        1.0e-6,
+        1.0e-6,
+    )
+    print(
+        f"{case['case']:>10s}: baseline = "
+        f"{'pass' if baseline_pass else 'fail'}, tightened = "
+        f"{'pass' if tightened_pass else 'fail'}"
+    )
+```
+
+
+:::: {.cell .markdown}
+## Test the boundary and non-finite values
+
+The criterion uses `<=`, so a value exactly on the boundary passes. The next
+representable value above that boundary fails. The explicit finite-value policy
+rejects `NaN` and infinity before arithmetic comparisons can obscure the
+intent.
+::::
+
+```{python}
+#| label: boundary-and-nonfinite
+
+zero_reference_pa = 0.0
+boundary_pa = absolute_tolerance_pa
+above_boundary_pa = math.nextafter(boundary_pa, math.inf)
+
+print(
+    "exactly on boundary:",
+    within_tolerance(
+        boundary_pa,
+        zero_reference_pa,
+        absolute_tolerance_pa,
+        relative_tolerance,
+    ),
+)
+print(
+    "next value above boundary:",
+    within_tolerance(
+        above_boundary_pa,
+        zero_reference_pa,
+        absolute_tolerance_pa,
+        relative_tolerance,
+    ),
+)
+
+for exceptional_value in [math.nan, math.inf, -math.inf]:
+    print(
+        f"computed = {exceptional_value!r:>4s}: ",
+        within_tolerance(
+            exceptional_value,
+            1.0,
+            absolute_tolerance_pa,
+            relative_tolerance,
+        ),
+    )
+```
+
+
+:::: {.cell .markdown}
+## Compare a collection
+
+Suppose a ten-point pressure profile must be within $0.5\ \mathrm{Pa}$ at
+every point. Nine computed values have errors of $0.1\ \mathrm{Pa}$ and one has
+an error of $1.0\ \mathrm{Pa}$. Predict whether maximum error and
+root-mean-square error lead to the same decision.
+::::
+
+```{python}
+#| label: collection-metrics
+
+reference_profile_pa = [100.0] * 10
+profile_errors_pa = [0.1] * 9 + [1.0]
+computed_profile_pa = [
+    reference + error
+    for reference, error in zip(reference_profile_pa, profile_errors_pa)
+]
+
+observed_errors_pa = [
+    computed - reference
+    for computed, reference in zip(computed_profile_pa, reference_profile_pa)
+]
+maximum_error_pa = max(abs(error) for error in observed_errors_pa)
+rms_error_pa = math.sqrt(
+    sum(error**2 for error in observed_errors_pa) / len(observed_errors_pa)
+)
+mean_absolute_error_pa = (
+    sum(abs(error) for error in observed_errors_pa) / len(observed_errors_pa)
+)
+per_point_limit_pa = 0.5
+
+print(f"maximum absolute error: {maximum_error_pa:.3f} Pa")
+print(f"root-mean-square error: {rms_error_pa:.3f} Pa")
+print(f"mean absolute error:    {mean_absolute_error_pa:.3f} Pa")
+print(f"maximum criterion passes: {maximum_error_pa <= per_point_limit_pa}")
+print(f"RMS criterion passes:     {rms_error_pa <= per_point_limit_pa}")
+```
+
+
+:::: {.cell .markdown}
+The RMS value passes $0.5\ \mathrm{Pa}$ because it describes a typical squared
+error across the collection. The maximum fails because one point violates the
+per-point requirement. RMS is not defective; it answers a different question.
+For this stated requirement, the component-wise or maximum criterion is the
+relevant one.
+::::
+
+
+:::: {.cell .markdown}
+## Evidence record
+
+A reviewable comparison records the reference status, units, metric, tolerance
+rationale, boundary policy, result, and limitations together.
+::::
+
+```{python}
+#| label: comparison-evidence
+
+evidence = {
+    "reference_status": (
+        "Designated constructed binary64 values for this tutorial."
+    ),
+    "quantity_and_units": "Pressure in pascals.",
+    "scalar_criterion": (
+        "abs(computed - reference) <= atol + rtol * abs(reference)"
+    ),
+    "absolute_tolerance_pa": absolute_tolerance_pa,
+    "relative_tolerance": relative_tolerance,
+    "rationale": (
+        "Hypothetical 1e-5 Pa near-zero floor plus a one-part-per-million "
+        "allowance; not inferred from machine epsilon."
+    ),
+    "nonfinite_policy": "Reject NaN and infinity.",
+    "mixed_decisions": {
+        result["case"]: result["mixed_pass"]
+        for result in criterion_results
+    },
+    "collection_requirement": "Every profile point within 0.5 Pa.",
+    "collection_maximum_error_pa": maximum_error_pa,
+    "collection_rms_error_pa": rms_error_pa,
+    "limitation": (
+        "Constructed references isolate comparison behaviour; no measurement "
+        "uncertainty, model error, or algorithmic cause was assessed."
+    ),
+}
+evidence
+```
+
+
+:::: {.cell .markdown}
+## Pitfalls and optional extensions
+
+- Do not replace a zero relative-error denominator with an undocumented
+  epsilon.
+- Do not copy a library's default tolerances without checking its formula and
+  relating both terms to the scientific requirement.
+- Do not let `NaN` pass or fail only because of incidental comparison semantics;
+  state the policy explicitly.
+- Add a value exactly on the relative part of a nonzero boundary and verify the
+  `<=` convention.
+- Reverse the roles of computed and reference values to observe that this
+  reference-anchored criterion is directional.
+- Construct a profile for which maximum error passes but a derived observable,
+  such as an integrated total, violates its own requirement.
+
+::: {.content-visible when-format="html"}
+Next:
+[Conditioning And Numerical Stability](../learning-modules/04-conditioning-and-numerical-stability.md).
+:::
+
+::: {.content-visible when-format="ipynb"}
+Next:
+[Conditioning And Numerical Stability](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/04-conditioning-and-numerical-stability.html).
+:::
+::::

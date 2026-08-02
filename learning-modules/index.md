@@ -43,7 +43,7 @@ Each module contributes to the same investigation workflow:
 ## Status
 
 The curriculum structure, module boundaries, and slide mapping are established.
-Modules 1 and 2 contain detailed reading material and executable Quarto
+Modules 1 through 3 contain detailed reading material and executable Quarto
 activities that generate self-paced Jupyter notebooks. Detailed explanations,
 computational experiments, and exercises for later modules will be developed
 within this structure.

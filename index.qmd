@@ -48,6 +48,10 @@ The follow-up
 [floating-point landmarks](notebooks/02-floating-point-landmarks.qmd)
 activity explains that discrepancy by examining representable spacing,
 rounding, special values, and evaluation order.
+The
+[comparison criteria across scales](notebooks/03-comparison-criteria.qmd)
+activity turns observed discrepancies into reviewable decisions using
+reference quality, units, error measures, and justified tolerances.
 
 
 ## Suggested schedule

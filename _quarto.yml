@@ -53,6 +53,8 @@ website:
             href: notebooks/01-opening-experiment.qmd
           - text: "2. Floating-Point Landmarks"
             href: notebooks/02-floating-point-landmarks.qmd
+          - text: "3. Comparison Criteria Across Scales"
+            href: notebooks/03-comparison-criteria.qmd
       - text: "Optional advanced topics"
         href: learning-modules/optional-advanced-topics.md
 

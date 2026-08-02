@@ -2,42 +2,152 @@
 
 ## Module Arc
 
-- Identify the comparison reference
+- Qualify the comparison reference
 - Match the error measure to the scale
-- Treat near-zero values explicitly
+- Treat zero and non-finite values explicitly
 - Justify tolerances from requirements
+- Match collection summaries to the scientific target
 
 ::: notes
-Use examples with units and several scales. A single generic `epsilon` should
-look increasingly inadequate as the section progresses.
+Module 2 explained why computations differ. Module 3 asks whether a discrepancy
+is acceptable, without yet diagnosing conditioning or stability.
 :::
 
-## Three Common Criteria
+## Name The Reference First
 
-```text
-absolute: |x - reference| <= atol
-
-relative: |x - reference| <= rtol * |reference|
-
-mixed:    |x - reference| <= atol + rtol * |reference|
-```
-
-- Each answers a different question
-- None chooses the tolerance for you
+- Exact value: error can be stated directly
+- High-accuracy result: justify its formulation and convergence
+- Benchmark: agreement under documented conditions
+- Independent estimate: complementary, not infallible
+- Expected range: consistency, not pointwise error
 
 ::: notes
-Discuss the behaviour at zero and at very large magnitudes. Connect tolerance
-choices to the scientific decision.
+Ask when “discrepancy from the reference” is more honest than “error.” More
+digits do not make a reference authoritative.
+:::
+
+## Absolute And Relative Error
+
+$$
+E_\mathrm{abs}=|\hat{x}-x_\mathrm{ref}|
+$$
+
+$$
+E_\mathrm{rel}=\frac{|\hat{x}-x_\mathrm{ref}|}{|x_\mathrm{ref}|}
+$$
+
+- Absolute error retains the quantity's units
+- Relative error is dimensionless
+- Relative error is undefined at a zero reference
+
+::: notes
+Use pressure in pascals as the running quantity. Ask what happens to relative
+error as a nonzero reference approaches zero.
+:::
+
+## Predict Across Scales
+
+Requirement:
+
+$$
+|\hat{x}-x_\mathrm{ref}|
+\leq 10^{-5}\ \mathrm{Pa}+10^{-6}|x_\mathrm{ref}|
+$$
+
+- Reference at zero
+- Reference near $10^{-6}\ \mathrm{Pa}$
+- Reference near $1\ \mathrm{Pa}$
+- Reference near $10^6\ \mathrm{Pa}$
+
+::: notes
+Use `notebooks/03-comparison-criteria.qmd`. Collect predictions for
+absolute-only, relative-only, and mixed criteria before displaying results.
+The references are designated binary64 values, not physical measurements.
+:::
+
+## A Mixed Criterion
+
+$$
+|\hat{x}-x_\mathrm{ref}|
+\leq a+r|x_\mathrm{ref}|
+$$
+
+- $a\geq0$: absolute tolerance in the quantity's units
+- $r\geq0$: dimensionless relative tolerance
+- Near zero, $a$ supplies the meaningful floor
+- At large scales, the relative term dominates
+
+::: notes
+This convention is anchored to a justified reference. If neither value is
+privileged, a symmetric convention may be more appropriate and must be stated.
+:::
+
+## Three Criteria, Four Decisions
+
+| Case | Absolute only | Relative only | Mixed |
+|---|---|---|---|
+| Zero | Pass | Undefined | Pass |
+| Near zero | Pass | Fail | Pass |
+| Order one | Fail | Fail | Fail |
+| Large | Fail | Pass | Pass |
+
+::: notes
+No column is universally correct. Each answers a different question. The mixed
+column matches the requirement because that requirement names both regimes.
 :::
 
 ## A Tolerance Is A Claim
 
-- What scale matters?
-- Which units are used?
-- How accurate are the inputs and model?
-- What downstream decision depends on the result?
-- Which failures must the comparison detect?
+- Name the quantity, units, and reference
+- Derive each term from a requirement
+- Define zero, boundary, `NaN`, and infinity policies
+- Test intended passes and failures
+- Record the rationale before adjusting the threshold
 
 ::: notes
-The key habit is to write the rationale before adjusting a test threshold.
+A tolerance does not repair a calculation or validate a reference. Widening it
+after a failure changes the claim and requires a new justification.
+:::
+
+## Machine Epsilon Is Not The Policy
+
+- Binary64 epsilon describes spacing near 1
+- It has no physical units
+- It does not encode input or model limitations
+- It does not know the downstream decision
+- An unexplained multiplier adds no scientific rationale
+
+::: notes
+Connect back to Module 2. Format properties can explain roundoff, but they do
+not define acceptable pressure error or any other scientific tolerance.
+:::
+
+## Collections Need A Target
+
+- Component-wise: enforce every local requirement
+- Maximum error: expose the worst component
+- RMS error: describe a typical squared-error scale
+- Derived observable: test the quantity driving the conclusion
+
+```text
+9 errors of 0.1 Pa, 1 error of 1.0 Pa
+maximum = 1.0 Pa, RMS = 0.33 Pa
+```
+
+::: notes
+With a 0.5 Pa per-point limit, RMS passes while maximum fails. Neither metric is
+defective; the per-point requirement selects the maximum/component-wise check.
+:::
+
+## From Size To Cause
+
+- A passed check supports one bounded comparison claim
+- Error, uncertainty, discretization, and variability remain distinct
+- A metric describes discrepancy size and structure
+- It does not identify why the discrepancy occurred
+
+::: notes
+Module 4 separates problem sensitivity, algorithmic behaviour, and
+implementation defects. Do not introduce those distinctions as already known
+in this module.
 :::

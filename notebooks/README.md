@@ -29,3 +29,6 @@ the intended learners can access.
 2. [Floating-point landmarks](02-floating-point-landmarks.qmd) maps
    representable spacing, exceptional values, and evaluation-order effects,
    then uses that model to explain the opening variance discrepancy.
+3. [Comparison criteria across scales](03-comparison-criteria.qmd) compares
+   absolute, relative, and mixed criteria near zero and across several scales,
+   then contrasts maximum and root-mean-square collection errors.

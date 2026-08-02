@@ -43,7 +43,7 @@ Each module contributes to the same investigation workflow:
 ## Status
 
 The curriculum structure, module boundaries, and slide mapping are established.
-The opening numerical experiment is implemented as an executable Quarto source
-that generates a self-paced Jupyter notebook. Detailed explanations, further
-computational experiments, and exercises will be developed within this
-structure.
+Modules 1 and 2 contain detailed reading material and executable Quarto
+activities that generate self-paced Jupyter notebooks. Detailed explanations,
+computational experiments, and exercises for later modules will be developed
+within this structure.

@@ -38,6 +38,8 @@ for entry_point in \
     "$site_output_dir/learning-modules/index.html" \
     "$site_output_dir/notebooks/01-opening-experiment.html" \
     "$site_output_dir/notebooks/01-opening-experiment.ipynb" \
+    "$site_output_dir/notebooks/02-floating-point-landmarks.html" \
+    "$site_output_dir/notebooks/02-floating-point-landmarks.ipynb" \
     "$site_output_dir/slides/trustworthy-numerical-computing.html"; do
     if [[ ! -f "$entry_point" ]]; then
         echo "Expected publication entry point not found: $entry_point" >&2

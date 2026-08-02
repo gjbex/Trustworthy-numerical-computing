@@ -3,35 +3,135 @@
 ## Module Arc
 
 - A finite set represents a wide numeric range
-- Each operation rounds
+- Spacing changes with magnitude
+- Each operation may round
 - Exceptional values carry information
 - Evaluation order can change the result
 
 ::: notes
-Use diagrams and live experiments when developing this section; avoid turning
-the deck into an IEEE 754 encoding reference.
+Connect immediately to the two variance results from Module 1. The purpose is
+to explain the discrepancy, not to memorize an IEEE 754 encoding table.
+:::
+
+## A Working Model
+
+$$
+x = (-1)^s \times m \times 2^e
+$$
+
+- Sign $s$: positive or negative
+- Significand $m$: retained binary detail
+- Exponent $e$: numeric scale and range
+- Only finitely many values are representable
+
+::: notes
+Define precision as retained detail and range as available magnitudes. The
+course environment uses binary64 with 53 bits of significand precision, but
+the reasoning applies to other floating-point formats.
 :::
 
 ## Predict Before Running
 
-- When does `x + small == x`?
-- Can a finite calculation produce infinity?
+- Is spacing constant near $10^{-6}$, $1$, and $10^{16}$?
+- For $x=2^{53}$, does `x + 1.0` change `x`?
 - Is `NaN == NaN`?
 - Does `(a + b) + c` equal `a + (b + c)`?
 
 ::: notes
-Collect predictions before showing results. Choose values that expose the
-behaviour clearly in the eventual exercise language.
+Use `notebooks/02-floating-point-landmarks.qmd`. Collect predictions before
+executing each corresponding cell.
 :::
 
-## What To Observe
+## Spacing Changes With Scale
 
-- Spacing grows with magnitude
-- Rounding is unavoidable but structured
-- Overflow and underflow affect intermediate values
-- Real-number algebra is not always a safe rewrite rule
+| Value | Upward binary64 spacing |
+|---:|---:|
+| $10^{-6}$ | $2.12\times10^{-22}$ |
+| $1$ | $2.22\times10^{-16}$ |
+| $2^{53}$ | $2$ |
+| $10^{16}$ | $2$ |
+
+- Machine epsilon describes spacing near 1
+- It is not a universal comparison tolerance
 
 ::: notes
-End by asking how a difference should be measured. That question leads directly
-to Module 3.
+Use `math.nextafter` or `math.ulp` in the live activity. Ask what happens when
+an increment is smaller than the local spacing. Tolerance policy belongs to
+Module 3.
+:::
+
+## Rounding Is Local
+
+1. Form the exact result of one operation
+2. Select a representable value
+3. Pass that rounded value to the next operation
+
+```text
+x = 2**53
+x + 1.0 == x      # True
+x + 2.0 == x      # False
+```
+
+::: notes
+The usual rule is round to nearest, ties to even. Emphasize that `1.0` did not
+become zero; it could not change the stored sum at that scale.
+:::
+
+## Numerical States At The Limits
+
+- Normal: full significand precision
+- Subnormal: gradual underflow with reduced precision
+- Signed zero: equal values with retained direction
+- Infinity: beyond the finite range
+- `NaN`: invalid or indeterminate numerical result
+
+::: notes
+Classify states with explicit operations such as `isfinite`, `isinf`, and
+`isnan`. Language policies differ: Python division by zero raises an exception
+even though binary64 includes infinities.
+:::
+
+## Evaluation Order Matters
+
+```text
+a = 1e16; b = -1e16; c = 1.0
+
+(a + b) + c  -> 1.0
+a + (b + c)  -> 0.0
+```
+
+- Real-number addition is associative
+- Floating-point addition is not generally associative
+- Algebraic equivalence does not ensure computational equivalence
+
+::: notes
+Ask participants to identify which intermediate addition loses `c`. Avoid
+general stability terminology; that distinction is introduced in Module 4.
+:::
+
+## Explain The Variance Result
+
+- Centered values: $[-6,-3,3,6]\ \mathrm{ns}$
+- Shortcut intermediates: approximately $10^{16}\ \mathrm{ns}^2$
+- Local spacing there: $2\ \mathrm{ns}^2$
+- Exact variance: $22.5\ \mathrm{ns}^2$
+- Computed shortcut variance: $22.0\ \mathrm{ns}^2$
+
+::: notes
+The large intermediates are rounded before subtraction. Their stored values no
+longer contain enough information to recover the exact difference. This
+explains Module 1 without claiming that every centered computation is reliable.
+:::
+
+## From Explanation To Comparison
+
+- Record the format and rounding assumptions
+- Inspect important intermediate scales
+- Classify exceptional values explicitly
+- Treat evaluation order as part of the computation
+- Next question: does the discrepancy matter?
+
+::: notes
+Module 2 explains why results can differ. Module 3 introduces absolute,
+relative, and mixed criteria for judging a discrepancy at the relevant scale.
 :::

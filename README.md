@@ -50,8 +50,9 @@ Quarto is installed separately from the conda environment; see
 
 ## Current status
 
-The overall learning path and publication layout are in place. The module and
-slide files provide the structure for developing the detailed reading,
+The overall learning path and publication layout are in place. Modules 1 and 2
+include detailed reading and executable self-paced activities; the remaining
+module and slide files provide the structure for developing later reading,
 experiments, and exercises.
 
 

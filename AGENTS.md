@@ -386,6 +386,8 @@ The complete build must produce:
 - `_site/learning-modules/index.html`;
 - `_site/notebooks/01-opening-experiment.html`;
 - `_site/notebooks/01-opening-experiment.ipynb`;
+- `_site/notebooks/02-floating-point-landmarks.html`;
+- `_site/notebooks/02-floating-point-landmarks.ipynb`;
 - `_site/slides/trustworthy-numerical-computing.html`.
 
 Keep build logic in `scripts/build_training_site.sh`; the workflow should call

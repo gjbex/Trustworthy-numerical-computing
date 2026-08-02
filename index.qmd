@@ -41,9 +41,13 @@ The [slide deck](slides/trustworthy-numerical-computing.html) supports
 instructor-led delivery. It provides teaching prompts, short examples, and
 discussion anchors rather than duplicating the complete reading material.
 
-The [opening numerical experiment](notebooks/01-opening-experiment.qmd) is a
-self-paced Jupyter activity in which two plausible variance calculations lead
-to opposite scientific decisions.
+The self-paced Jupyter activities begin with the
+[opening numerical experiment](notebooks/01-opening-experiment.qmd), in which
+two plausible variance calculations lead to opposite scientific decisions.
+The follow-up
+[floating-point landmarks](notebooks/02-floating-point-landmarks.qmd)
+activity explains that discrepancy by examining representable spacing,
+rounding, special values, and evaluation order.
 
 
 ## Suggested schedule

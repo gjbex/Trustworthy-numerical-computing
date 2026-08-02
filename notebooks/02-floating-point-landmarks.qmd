@@ -1,0 +1,433 @@
+---
+title: "Floating-point landmarks"
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+---
+
+:::: {.cell .markdown}
+Floating-point behaviour is systematic: the format, the scale of the values,
+and the order of operations constrain what a computation can retain. This
+tutorial makes those constraints observable and uses them to explain the
+variance discrepancy from Module 1.
+
+::: {.content-visible when-format="html"}
+This activity accompanies
+[Module 2: Understanding Floating-Point Arithmetic](../learning-modules/02-understanding-floating-point-arithmetic.md).
+
+[Download the executable Jupyter notebook](02-floating-point-landmarks.ipynb){.btn .btn-primary download="02-floating-point-landmarks.ipynb"}
+:::
+
+::: {.content-visible when-format="ipynb"}
+This activity accompanies
+[Module 2: Understanding Floating-Point Arithmetic](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/02-understanding-floating-point-arithmetic.html).
+:::
+::::
+
+
+:::: {.cell .markdown}
+## Learning goals
+
+After this experiment, you should be able to:
+
+- inspect the floating-point format used by a Python environment;
+- observe how representable spacing changes with magnitude;
+- predict when an increment will be rounded away;
+- classify normal, subnormal, infinite, zero, and `NaN` values;
+- demonstrate that evaluation order can change a computed result;
+- use local spacing to explain the Module 1 variance discrepancy.
+::::
+
+
+:::: {.cell .markdown}
+## Prerequisites
+
+Complete the
+[opening experiment](01-opening-experiment.qmd)
+or read
+[Module 1: When Correct Code Produces Wrong Answers](../learning-modules/01-when-correct-code-produces-wrong-answers.md)
+first. You need basic Python expressions and loops, but no knowledge of the
+IEEE 754 encoding.
+::::
+
+
+:::: {.cell .markdown}
+## Outline
+
+1. Confirm the floating-point format.
+2. Inspect a decimal value that is not exactly representable.
+3. Map spacing at several magnitudes.
+4. Observe when an increment has no effect.
+5. Classify values at the edges of the format.
+6. Compare evaluation orders.
+7. Explain the variance discrepancy.
+::::
+
+
+:::: {.cell .markdown}
+## Confirm the working format
+
+The published course environment uses IEEE 754 binary64 for Python's `float`.
+The assertions make that assumption explicit: if this notebook runs in a
+different environment, it should stop instead of silently attaching binary64
+claims to another format.
+::::
+
+```{python}
+#| label: format-information
+
+import math
+import sys
+
+
+assert sys.float_info.radix == 2, "This activity expects binary floating point."
+assert sys.float_info.mant_dig == 53, "This activity expects binary64 precision."
+assert sys.float_info.max_exp == 1024, "This activity expects binary64 range."
+
+print(f"radix:                 {sys.float_info.radix}")
+print(f"significand precision: {sys.float_info.mant_dig} bits")
+print(f"largest finite value:  {sys.float_info.max:.6e}")
+print(f"smallest normal value: {sys.float_info.min:.6e}")
+print(f"epsilon near one:      {sys.float_info.epsilon:.6e}")
+```
+
+
+:::: {.cell .markdown}
+The significand precision describes how much binary detail a normal value can
+retain. The exponent range allows magnitudes from approximately $10^{-308}$ to
+$10^{308}$, but it does not make every number in that interval representable.
+::::
+
+
+:::: {.cell .markdown}
+## Inspect a stored decimal fraction
+
+Before running the cell, predict whether the exact stored value of `0.1` is the
+rational number $1/10$. The hexadecimal form is a compact, exact description of
+the stored binary floating-point value.
+::::
+
+```{python}
+#| label: stored-decimal
+
+value = 0.1
+numerator, denominator = value.as_integer_ratio()
+
+print(f"usual display:       {value}")
+print(f"17 significant digits: {value:.17g}")
+print(f"exact stored ratio:  {numerator} / {denominator}")
+print(f"exact hexadecimal:   {value.hex()}")
+print(f"stored value equals 1/10: {numerator * 10 == denominator}")
+```
+
+
+:::: {.cell .markdown}
+The stored ratio is close to, but not equal to, $1/10$. Python's usual display
+uses the shortest decimal text that converts back to the same stored value.
+Showing more digits reveals the approximation; it does not alter it.
+::::
+
+
+:::: {.cell .markdown}
+## Map the local spacing
+
+`math.nextafter(x, math.inf)` gives the next representable value above `x`.
+Predict whether the absolute gap will remain constant as `x` grows.
+::::
+
+```{python}
+#| label: spacing-by-scale
+
+scales = [1.0e-6, 1.0, 1.0e6, float(2**53), 1.0e16]
+
+print(f"{'x':>24s}  {'next value':>24s}  {'upward gap':>14s}")
+for x in scales:
+    next_value = math.nextafter(x, math.inf)
+    upward_gap = next_value - x
+    print(f"{x:24.17g}  {next_value:24.17g}  {upward_gap:14.6g}")
+```
+
+
+:::: {.cell .markdown}
+The absolute gap grows with magnitude. Near one, it is approximately
+$2.22\times10^{-16}$; at $2^{53}$ and $10^{16}$, it is 2. Values that differ
+by less than a local gap may map to the same floating-point value.
+
+`math.ulp(x)` reports a related local spacing measure. An ulp is meaningful at
+the scale of `x`; it is not one global comparison tolerance.
+::::
+
+
+:::: {.cell .markdown}
+## Observe a lost increment
+
+At $2^{53}$, adjacent binary64 values are two units apart. Predict the result of
+adding each increment before running the cell.
+::::
+
+```{python}
+#| label: lost-increment
+
+base = float(2**53)
+increments = [0.5, 1.0, 2.0, 3.0, 4.0]
+
+print(f"base = {base:.0f}, upward gap = {math.ulp(base):.0f}")
+print(f"{'increment':>10s}  {'computed sum':>18s}  {'changed?':>8s}")
+for increment in increments:
+    computed_sum = base + increment
+    print(
+        f"{increment:10.1f}  {computed_sum:18.0f}  "
+        f"{str(computed_sum != base):>8s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+`base + 1.0` is exactly halfway between two representable values. Under the
+default round-to-nearest, ties-to-even rule, it rounds back to `base`. The
+increment is not zero; its contribution is absent from this stored sum.
+::::
+
+
+:::: {.cell .markdown}
+## Exercise: find an effective increment
+
+Change `test_increment` and find the smallest positive integer increment for
+which the computed sum differs from `base`. Predict the answer from the local
+spacing before rerunning the cell.
+::::
+
+```{python}
+#| label: learner-increment
+
+test_increment = 1.0  # Change this value.
+test_sum = base + test_increment
+
+print(f"base:      {base:.0f}")
+print(f"increment: {test_increment:.1f}")
+print(f"sum:       {test_sum:.0f}")
+print(f"changed:   {test_sum != base}")
+```
+
+
+:::: {.cell .markdown}
+## Check the exercise
+
+The next cell checks the first four positive integer increments. Explain why
+the first effective increment agrees with the spacing observed above.
+::::
+
+```{python}
+#| label: increment-check
+
+for integer_increment in range(1, 5):
+    computed_sum = base + float(integer_increment)
+    print(
+        f"increment {integer_increment}: "
+        f"sum = {computed_sum:.0f}, changed = {computed_sum != base}"
+    )
+```
+
+
+:::: {.cell .markdown}
+## Classify exceptional numerical states
+
+The following classifier makes each state explicit. Before running it, predict
+which operations create infinity, a subnormal number, and `NaN`.
+::::
+
+```{python}
+#| label: exceptional-states
+
+def classify_float(value):
+    """Classify a Python float under the expected binary64 format."""
+    if math.isnan(value):
+        return "NaN"
+    if math.isinf(value):
+        return "+infinity" if value > 0.0 else "-infinity"
+    if value == 0.0:
+        sign = math.copysign(1.0, value)
+        return "+zero" if sign > 0.0 else "-zero"
+    if abs(value) < sys.float_info.min:
+        return "subnormal"
+    return "normal finite"
+
+
+largest_finite = sys.float_info.max
+smallest_normal = sys.float_info.min
+smallest_subnormal = math.ulp(0.0)
+
+states = [
+    ("ordinary", 1.0),
+    ("overflowed", largest_finite * 2.0),
+    ("smallest normal", smallest_normal),
+    ("half smallest normal", smallest_normal / 2.0),
+    ("smallest subnormal", smallest_subnormal),
+    ("underflowed", smallest_subnormal / 2.0),
+    ("negative zero", -0.0),
+    ("indeterminate", math.inf - math.inf),
+]
+
+print(f"{'source':>22s}  {'stored value':>24s}  {'classification':>14s}")
+for source, state_value in states:
+    print(
+        f"{source:>22s}  {state_value:24.17g}  "
+        f"{classify_float(state_value):>14s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+Subnormal values fill part of the gap between the smallest normal magnitude and
+zero, but with progressively fewer significant bits. The transition through
+that region is gradual underflow. A still smaller result rounds to signed zero.
+
+Do not test for `NaN` with equality. `NaN` is unordered and is not equal to
+itself; use a classification operation such as `math.isnan`.
+::::
+
+
+```{python}
+#| label: special-comparisons
+
+not_a_number = float("nan")
+
+print(f"NaN equals itself:       {not_a_number == not_a_number}")
+print(f"math.isnan(NaN):         {math.isnan(not_a_number)}")
+print(f"positive and negative zero compare equal: {0.0 == -0.0}")
+print(f"sign of +0.0:            {math.copysign(1.0, 0.0):+.0f}")
+print(f"sign of -0.0:            {math.copysign(1.0, -0.0):+.0f}")
+```
+
+
+:::: {.cell .markdown}
+## Change the evaluation order
+
+Both expressions below equal 1 in real arithmetic. Predict their
+floating-point results by considering the first addition in each expression.
+::::
+
+```{python}
+#| label: nonassociative-addition
+
+a = 1.0e16
+b = -1.0e16
+c = 1.0
+
+left_grouped = (a + b) + c
+right_grouped = a + (b + c)
+
+print(f"(a + b) + c = {left_grouped:.1f}")
+print(f"a + (b + c) = {right_grouped:.1f}")
+print(f"results equal: {left_grouped == right_grouped}")
+```
+
+
+:::: {.cell .markdown}
+The first grouping cancels `a` and `b` exactly before adding `c`. In the second
+grouping, adding `c` to `b` is rounded back to `b`, so the later sum is zero.
+Floating-point addition is therefore not generally associative.
+::::
+
+
+:::: {.cell .markdown}
+## Return to the variance experiment
+
+The shortcut formula subtracts two intermediate values near
+$10^{16}\ \mathrm{ns}^2$. Inspect their local spacing and compare the result
+with the centered calculation and the exact reference established in Module 1.
+::::
+
+```{python}
+#| label: variance-intermediates
+
+measurements_ns = [
+    100_000_004.0,
+    100_000_007.0,
+    100_000_013.0,
+    100_000_016.0,
+]
+
+mean_ns = sum(measurements_ns) / len(measurements_ns)
+centered_variance_ns2 = sum(
+    (value - mean_ns) ** 2 for value in measurements_ns
+) / len(measurements_ns)
+mean_of_squares_ns2 = sum(
+    value**2 for value in measurements_ns
+) / len(measurements_ns)
+square_of_mean_ns2 = mean_ns**2
+shortcut_variance_ns2 = mean_of_squares_ns2 - square_of_mean_ns2
+
+print(f"mean:                         {mean_ns:.1f} ns")
+print(f"centered values:              {[value - mean_ns for value in measurements_ns]} ns")
+print(f"mean of squares:              {mean_of_squares_ns2:.17g} ns²")
+print(f"square of mean:               {square_of_mean_ns2:.17g} ns²")
+print(f"spacing at mean of squares:   {math.ulp(mean_of_squares_ns2):.1f} ns²")
+print(f"centered variance:            {centered_variance_ns2:.1f} ns²")
+print(f"shortcut variance:            {shortcut_variance_ns2:.1f} ns²")
+print(f"exact reference from Module 1: {22.5:.1f} ns²")
+```
+
+
+:::: {.cell .markdown}
+The centered calculation works with values near the spread of the data. The
+shortcut calculation first rounds much larger intermediate values whose local
+spacing is $2\ \mathrm{ns}^2$, then subtracts them. The rounded intermediates no
+longer contain enough information to recover $22.5\ \mathrm{ns}^2$.
+
+This explains the observation; it does not prove that every centered variance
+calculation is reliable or determine an acceptable error for another use case.
+::::
+
+
+:::: {.cell .markdown}
+## Evidence record
+
+Record the environment assumption, observations, explanation, and limitation
+together. This makes clear which claims may need to be revisited in another
+language or floating-point format.
+::::
+
+```{python}
+#| label: evidence-record
+
+evidence = {
+    "format": "IEEE 754 binary64",
+    "rounding_assumption": "round to nearest, ties to even",
+    "spacing_at_2**53": math.ulp(float(2**53)),
+    "lost_increment": float(2**53) + 1.0 == float(2**53),
+    "addition_is_associative_for_test": left_grouped == right_grouped,
+    "variance_reference_ns2": 22.5,
+    "centered_variance_ns2": centered_variance_ns2,
+    "shortcut_variance_ns2": shortcut_variance_ns2,
+    "limitation": (
+        "No acceptable-error criterion or measurement uncertainty was assessed."
+    ),
+}
+evidence
+```
+
+
+:::: {.cell .markdown}
+## Pitfalls and optional extensions
+
+- Do not infer stored accuracy from the number of printed digits.
+- Do not use machine epsilon as a universal comparison tolerance.
+- Do not assume every language produces infinity for division by zero; Python
+  raises `ZeroDivisionError` for `1.0 / 0.0`.
+- Try `math.nextafter(x, -math.inf)` as well as the upward direction, especially
+  at exact powers of two.
+- Repeat the spacing and grouping experiments with another language or numeric
+  type, and document the format before comparing results.
+
+::: {.content-visible when-format="html"}
+Next:
+[Measuring And Comparing Numerical Error](../learning-modules/03-measuring-and-comparing-numerical-error.md).
+:::
+
+::: {.content-visible when-format="ipynb"}
+Next:
+[Measuring And Comparing Numerical Error](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/03-measuring-and-comparing-numerical-error.html).
+:::
+::::

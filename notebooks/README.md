@@ -26,3 +26,6 @@ the intended learners can access.
 1. [Opening experiment: two plausible variances](01-opening-experiment.qmd)
    uses an exact reference and shift invariance to investigate two conflicting
    variance calculations.
+2. [Floating-point landmarks](02-floating-point-landmarks.qmd) maps
+   representable spacing, exceptional values, and evaluation-order effects,
+   then uses that model to explain the opening variance discrepancy.

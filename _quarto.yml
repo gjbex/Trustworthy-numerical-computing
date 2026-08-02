@@ -51,6 +51,8 @@ website:
         contents:
           - text: "1. Two Plausible Variances"
             href: notebooks/01-opening-experiment.qmd
+          - text: "2. Floating-Point Landmarks"
+            href: notebooks/02-floating-point-landmarks.qmd
       - text: "Optional advanced topics"
         href: learning-modules/optional-advanced-topics.md
 

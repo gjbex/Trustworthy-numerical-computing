@@ -95,8 +95,8 @@ the algorithm is stuck far from a solution.
 | Residual $r_k$ | Equation or constraint satisfaction | Yes | Its relation to error is problem-dependent |
 | Update $\Delta x_k$ | Movement of the iterate | Yes | Small movement can be stagnation |
 
-No one column can replace the others. A useful termination policy combines
-independent evidence where practical.
+None of these quantities can replace the others. A useful termination policy
+combines independent evidence where practical.
 
 
 ## Stopping is a numerical claim
@@ -125,9 +125,11 @@ $$
 
 but a fixed physical or application scale can be better near zero.
 
-The letters are not a universal API. A production solver may normalize the
-initial residual, use componentwise scaling, apply a preconditioned norm, or
-monitor a backward-error estimate. The contract must state:
+The notation and precise form of these criteria are not universal. Different
+texts and solver interfaces use different symbols, terminology, normalization,
+and scaling conventions. A production solver may normalize the initial
+residual, use componentwise scaling, apply a preconditioned norm, or monitor a
+backward-error estimate. The contract must state:
 
 * the quantity being measured and its units;
 * the norm or aggregation rule;

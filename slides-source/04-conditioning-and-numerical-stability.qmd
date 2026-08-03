@@ -2,34 +2,176 @@
 
 ## Module Arc
 
-- Measure sensitivity in the problem
-- Measure error introduced by the method
-- Interpret residuals carefully
-- Choose a remedy that matches the cause
+- Separate the problem, algorithm, and implementation
+- Measure input-to-output sensitivity
+- Compare forward and backward error
+- Interpret residuals using conditioning
+- Match the remedy to the diagnosed cause
 
 ::: notes
-This distinction is conceptually demanding. Use one problem solved by two
-algorithms and one ill-conditioned problem that defeats both at the requested
-accuracy.
+Module 3 measured discrepancy size. Module 4 diagnoses where it comes from.
+Keep the three objects separate throughout the discussion.
 :::
 
 ## Three Different Questions
 
-- **Conditioning:** How sensitive is the answer to the inputs?
-- **Stability:** How much additional error does the algorithm introduce?
-- **Implementation:** Does the program perform the intended algorithm?
+| Question | Object |
+|---|---|
+| How sensitive is the answer to input? | Mathematical problem |
+| Does the method add avoidable error? | Algorithm |
+| Does the code perform that method? | Implementation |
 
 ::: notes
-Return to these three questions in each later diagnosis.
+A program can correctly implement an unstable algorithm or incorrectly
+implement a stable one. Conditioning can be studied without either program.
 :::
 
-## Residual Is Not Error
+## Observe Problem Sensitivity
 
-- A residual checks how well equations are satisfied
-- Forward error checks proximity to the desired result
-- Ill-conditioning can turn a small residual into a large error
-- Backward error connects the two perspectives
+$$
+\kappa_\mathrm{obs}=
+\frac{\|\Delta x\|/\|x\|}
+     {\|\Delta b\|/\|b\|}
+$$
+
+- State the norm and scaling
+- Perturb inputs independently of the algorithm
+- One direction is not the worst-case condition number
 
 ::: notes
-Plan a visual example for this slide when detailed content is developed.
+The activity uses the maximum norm on dimensionless quantities and 80-digit
+decimal arithmetic to isolate problem sensitivity from binary64 effects.
+:::
+
+## Two Nearly Dependent Equations
+
+$$
+x_1+x_2=2
+$$
+
+$$
+x_1+(1+\delta)x_2=2+\delta
+$$
+
+With a $10^{-16}$ right-hand-side perturbation:
+
+| $\delta$ | Relative output change | Amplification |
+|---:|---:|---:|
+| $1$ | $10^{-16}$ | $3$ |
+| $10^{-12}$ | $10^{-4}$ | $2\times10^{12}$ |
+
+::: notes
+Ask for predictions before running
+`notebooks/04-sensitivity-stability-residuals.qmd`. The amplification follows
+from $\eta/\delta$ and persists in high precision.
+:::
+
+## Backward Stability
+
+- Forward error: is the computed answer close?
+- Backward error: is it exact for a nearby input?
+- Stable algorithms introduce a small backward perturbation
+- Ill-conditioning can amplify that perturbation
+
+$$
+\text{forward error}
+\lesssim \kappa\times\text{backward error}
+$$
+
+::: notes
+Present the inequality as a first-order guide under stated assumptions, not a
+universal equality. Define the perturbation model and norm every time.
+:::
+
+## Hold The Problem Fixed
+
+Small root of $x^2-10^8x+1=0$:
+
+$$
+\frac{10^8-\sqrt{10^{16}-4}}{2}
+\quad\text{or}\quad
+\frac{2}{10^8+\sqrt{10^{16}-4}}
+$$
+
+- Same polynomial and binary64 format
+- Algebraically equivalent algorithms
+- 80- and 100-digit reference calculations agree
+
+::: notes
+Ask which expression forms a small result by subtracting nearby large values.
+Module 5 will name and generalize the failure pattern; focus here on the
+diagnostic distinction.
+:::
+
+## Compare The Algorithms
+
+| Method | Forward error | Coefficient backward error |
+|---|---:|---:|
+| Direct | $2.55\times10^{-1}$ | $1.46\times10^{-1}$ |
+| Reformulated | $7.91\times10^{-17}$ | $3.95\times10^{-17}$ |
+
+- Conditioning is shared by both methods
+- Their numerical behaviour is not
+- Evidence applies to this tested coefficient set
+
+::: notes
+The scaled polynomial residual defines the coefficient backward-error measure.
+Do not turn one case into a general stability theorem.
+:::
+
+## Residual Is Not Forward Error
+
+For $A\hat{x}=b-r$:
+
+- Residual: $r=b-A\hat{x}$
+- RHS backward error: $\|r\|/\|b\|$
+- Forward error: $\|\hat{x}-x\|/\|x\|$
+
+::: notes
+Residual can be computed without the exact solution. Forward error needs a
+reference. A scaled residual still needs conditioning to relate it to solution
+error.
+:::
+
+## Small Residual, Wrong Answer
+
+Nearly dependent system with $\delta=10^{-12}$:
+
+| Quantity | Value |
+|---|---:|
+| Exact solution | $(1,1)$ |
+| Candidate | $(0,2)$ |
+| Relative forward error | $1$ |
+| Relative RHS backward error | $5\times10^{-13}$ |
+
+::: notes
+The candidate exactly solves a nearby system. The problem amplifies that small
+right-hand-side change. Connect this result to residual-based stopping criteria
+in Module 6.
+:::
+
+## Match Evidence To Cause
+
+- High-precision input perturbation → conditioning evidence
+- Equivalent algorithm comparison → formulation evidence
+- Forward plus backward error → accuracy and nearby-problem evidence
+- Known cases and invariants → implementation evidence
+- Precision change alone → useful, but not a complete diagnosis
+
+::: notes
+Ask which experiment should be run next for each type of suspicious result.
+Complementary checks are stronger than one precision sweep or residual.
+:::
+
+## Match Remedy To Cause
+
+- Ill-conditioned problem: improve data, reformulate, or revise the claim
+- Unstable algorithm: change formulation, scaling, library, or precision
+- Implementation defect: fix the code and add a regression test
+- Regularization changes the problem and must be documented
+
+::: notes
+Nondimensionalization can remove artificial scale disparities but cannot
+restore information absent from the inputs. Module 5 applies these distinctions
+to recurring finite-precision failure patterns.
 :::

@@ -55,6 +55,8 @@ website:
             href: notebooks/02-floating-point-landmarks.qmd
           - text: "3. Comparison Criteria Across Scales"
             href: notebooks/03-comparison-criteria.qmd
+          - text: "4. Sensitivity, Stability, And Residuals"
+            href: notebooks/04-sensitivity-stability-residuals.qmd
       - text: "Optional advanced topics"
         href: learning-modules/optional-advanced-topics.md
 

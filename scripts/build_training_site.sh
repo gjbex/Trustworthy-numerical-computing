@@ -42,6 +42,8 @@ for entry_point in \
     "$site_output_dir/notebooks/02-floating-point-landmarks.ipynb" \
     "$site_output_dir/notebooks/03-comparison-criteria.html" \
     "$site_output_dir/notebooks/03-comparison-criteria.ipynb" \
+    "$site_output_dir/notebooks/04-sensitivity-stability-residuals.html" \
+    "$site_output_dir/notebooks/04-sensitivity-stability-residuals.ipynb" \
     "$site_output_dir/slides/trustworthy-numerical-computing.html"; do
     if [[ ! -f "$entry_point" ]]; then
         echo "Expected publication entry point not found: $entry_point" >&2

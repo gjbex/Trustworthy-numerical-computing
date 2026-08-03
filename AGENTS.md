@@ -390,6 +390,8 @@ The complete build must produce:
 - `_site/notebooks/02-floating-point-landmarks.ipynb`;
 - `_site/notebooks/03-comparison-criteria.html`;
 - `_site/notebooks/03-comparison-criteria.ipynb`;
+- `_site/notebooks/04-sensitivity-stability-residuals.html`;
+- `_site/notebooks/04-sensitivity-stability-residuals.ipynb`;
 - `_site/slides/trustworthy-numerical-computing.html`.
 
 Keep build logic in `scripts/build_training_site.sh`; the workflow should call

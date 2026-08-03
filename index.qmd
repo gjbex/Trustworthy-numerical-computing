@@ -52,6 +52,10 @@ The
 [comparison criteria across scales](notebooks/03-comparison-criteria.qmd)
 activity turns observed discrepancies into reviewable decisions using
 reference quality, units, error measures, and justified tolerances.
+The
+[sensitivity, stability, and residuals](notebooks/04-sensitivity-stability-residuals.qmd)
+activity then separates intrinsic problem sensitivity from avoidable
+algorithmic error and implementation defects.
 
 
 ## Suggested schedule

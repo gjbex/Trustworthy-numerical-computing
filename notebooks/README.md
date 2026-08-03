@@ -32,3 +32,6 @@ the intended learners can access.
 3. [Comparison criteria across scales](03-comparison-criteria.qmd) compares
    absolute, relative, and mixed criteria near zero and across several scales,
    then contrasts maximum and root-mean-square collection errors.
+4. [Sensitivity, stability, and residuals](04-sensitivity-stability-residuals.qmd)
+   separates problem conditioning from algorithmic behaviour and demonstrates
+   why a small residual need not imply a small forward error.

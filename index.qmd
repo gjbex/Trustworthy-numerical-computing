@@ -65,6 +65,11 @@ The
 activity separates forward error, residual, and update size; classifies
 convergence and failure; and uses a tolerance study to find an attainable
 binary64 accuracy floor.
+The
+[validation evidence portfolio](notebooks/07-validation-evidence.qmd)
+activity combines exact cases, method properties, refinement rates, convexity
+bounds, and a separately bounded series while keeping code verification,
+solution verification, and model validation distinct.
 
 
 ## Suggested schedule

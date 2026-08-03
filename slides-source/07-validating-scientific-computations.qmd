@@ -2,39 +2,320 @@
 
 ## Module Arc
 
-- Match each claim to evidence
-- Use exact and limiting cases where possible
-- Test invariants and properties
-- Seek independent methods and refinement trends
+- Separate implementation, solution, and model claims
+- Match each claim to evidence that can challenge it
+- Test exact cases, properties, and refinement rates
+- Prefer comparison methods that fail differently
+- Preserve observations and limitations as a portfolio
 
 ::: notes
-Frame validation as an evidence portfolio. One test rarely supports every
-scientific claim.
+Module 6 supplied honest termination evidence. Open this module by asking what
+that record still cannot establish about equations, discretization, or reality.
 :::
 
-## Sources Of Evidence
+## Three Questions, Three Evidence Needs
 
-- Analytical and manufactured solutions
-- High-precision or trusted reference calculations
-- Invariants, bounds, symmetry, and conservation
-- Refinement and convergence studies
-- Independent algorithms and implementations
+- **Code verification:** Is the method implemented correctly?
+- **Solution verification:** Is numerical error controlled here?
+- **Model validation:** Does the model represent the intended system?
+
+Analytic tests cannot replace experimental evidence.
 
 ::: notes
-Discuss what shared assumptions could make two agreeing implementations wrong
-in the same way.
+Terminology varies by field, but the distinction prevents an exact test problem
+from being presented as validation of a physical model.
 :::
 
-## Build A Validation Matrix
+## Start With The Claim
 
 | Claim | Candidate evidence |
 |---|---|
-| equations are implemented | manufactured case |
-| important properties hold | invariants and bounds |
-| approximation is controlled | refinement study |
-| result is not method-specific | independent algorithm |
+| Method is implemented | Exact case or method property |
+| Approximation is controlled | Refinement trend and error estimate |
+| Result is not method-specific | Independent algorithm |
+| Model represents reality | Experimental or observational data |
 
 ::: notes
-Have participants create a matrix for the capstone or one of their own
-computations.
+Ask learners which row a solver residual belongs to. It supports iteration
+error, not every other claim.
+:::
+
+## References Have Different Authority
+
+- Exact analytic value
+- Manufactured or limiting case
+- Checked high-precision calculation
+- Published benchmark with matching conditions
+- Experimental data with uncertainty
+
+State what each reference shares with the candidate.
+
+::: notes
+A previous result is a regression baseline, not automatic truth. Extra digits
+can reproduce the same unstable formula or modelling error.
+:::
+
+## Properties Reject Impossible Results
+
+- Conservation and balance
+- Positivity and bounds
+- Symmetry and monotonicity
+- Dimensional consistency
+- Exactness for a class of inputs
+
+Necessary does not mean sufficient.
+
+::: notes
+Prefer the strongest property justified by the method. Broad bounds may pass a
+wrong algorithm while affine exactness probes its contract directly.
+:::
+
+## Validation Problem: One Integral
+
+$$
+I=\int_0^1 e^x\,\mathrm{d}x=e-1
+$$
+
+- Positive, increasing, and convex integrand
+- Exact analytic reference
+- Predicted quadrature orders
+- Independent factorial-series formulation
+
+::: notes
+The problem is dimensionless. A physical exponential would need a scale in the
+exponent and corresponding output units.
+:::
+
+## Two Claimed Trapezoidal Candidates
+
+$$
+T_n=h\left[\frac{f(0)}2+\sum_{i=1}^{n-1}f(ih)+\frac{f(1)}2\right]
+$$
+
+$$
+S_n=h\sum_{i=0}^{n-1}f(ih)
+$$
+
+Which reference input distinguishes them?
+
+::: notes
+The suspicious candidate is the left-endpoint rule. Let learners inspect the
+weights before naming it.
+:::
+
+## Prediction: Constant Exactness
+
+For $f(x)=1$ on $[0,1]$ with $n=8$:
+
+- Exact integral: $1$
+- What does $T_8$ return?
+- What does $S_8$ return?
+- Which endpoint-weight claim is tested?
+
+::: notes
+Both return one. Pause before revealing the result on the next slide. The case
+checks interval scaling but cannot distinguish sample weights.
+:::
+
+## One Pass Is Not A Portfolio
+
+| Candidate | Constant result | Error |
+|---|---:|---:|
+| Intended trapezoidal | $1$ | $0$ |
+| Suspicious candidate | $1$ | $0$ |
+
+The test does not exercise endpoint weights.
+
+::: notes
+Ask for a function whose values differ across the interval and whose integral
+is still exact and easy to justify.
+:::
+
+## Prediction: Affine Exactness
+
+For $f(x)=x$ on $[0,1]$:
+
+$$
+\int_0^1x\,\mathrm{d}x=\frac12
+$$
+
+The trapezoidal rule must integrate every affine function exactly.
+
+::: notes
+This property targets the claimed method rather than selecting another
+arbitrary function.
+:::
+
+## The Stronger Case Diagnoses The Method
+
+| Candidate | Result at $n=8$ | Error |
+|---|---:|---:|
+| Intended trapezoidal | $0.5$ | $0$ |
+| Suspicious candidate | $0.4375$ | $0.0625$ |
+
+The suspicious code implements a first-order left rule.
+
+::: notes
+The algorithm itself is valid when requested. The defect is the mismatch
+between implementation and claimed trapezoidal contract.
+:::
+
+## A Broad Bound Still Passes
+
+For positive, increasing $e^x$:
+
+$$
+1\le Q_n\le e
+$$
+
+- Trapezoidal: passes
+- Midpoint: passes
+- Suspicious left rule: passes
+
+Plausibility is useful but incomplete.
+
+::: notes
+A value outside the bound would be impossible. A value inside it need not use
+the intended weights or have sufficient accuracy.
+:::
+
+## Prediction: Refinement Rate
+
+If $E(h)\approx Ch^p$, then
+
+$$
+p_{\mathrm{obs}}=log_2\frac{|E_n|}{|E_{2n}|}
+$$
+
+- Trapezoidal prediction: $p=2$
+- Midpoint prediction: $p=2$
+- Left-endpoint prediction: $p=1$
+
+::: notes
+Ask why decreasing error alone cannot distinguish these methods.
+:::
+
+## Refinement Identifies The Contract
+
+| Method | Error, $n=8$ | Error, $n=64$ | Observed $p$ |
+|---|---:|---:|---:|
+| Trapezoidal | $2.24\times10^{-3}$ | $3.50\times10^{-5}$ | $2.00$ |
+| Midpoint | $1.12\times10^{-3}$ | $1.75\times10^{-5}$ | $2.00$ |
+| Suspicious | $1.05\times10^{-1}$ | $1.34\times10^{-2}$ | $1.00$ |
+
+::: notes
+The suspicious method converges to the correct limit, but at the wrong rate
+for its claimed implementation. Mention coarse, asymptotic, and roundoff
+regimes.
+:::
+
+## Convexity Brackets The Integral
+
+For convex $e^x$:
+
+$$
+M_n\le I\le T_n
+$$
+
+At $n=8$:
+
+$$
+1.717163664995687<I<1.720518592164302
+$$
+
+::: notes
+The bracket does not need the decimal digits of the exact answer once the
+implementations and convexity argument are trusted. Its width shrinks at about
+second order.
+:::
+
+## How Independent Is Agreement?
+
+Midpoint and trapezoidal rules differ in:
+
+- sample locations;
+- leading-error signs;
+- lower versus upper convexity bounds.
+
+They still share the integrand, interval, language, and loop structure.
+
+::: notes
+Independence is a gradient. Two filenames or two wrappers around one library
+routine do not make a strong cross-check.
+:::
+
+## A Different Calculation: Exact Series
+
+$$
+e-1=\sum_{k=1}^{\infty}\frac1{k!}
+$$
+
+For exact rational $P_N$:
+
+$$
+0<(e-1)-P_N\le
+\frac1{(N+1)!}\frac{N+2}{N+1}
+$$
+
+::: notes
+At N=18 the reference gap is 8.6522e-18 and the proved bound is 8.6533e-18.
+This calculation has substantially different failure modes from quadrature.
+:::
+
+## Check High Precision, Too
+
+- Evaluate the analytic expression at 80 and 100 digits
+- Check that the reference digits stabilize
+- Preserve input information before raising precision
+- Add a bound or different formulation
+
+More digits do not establish authority by themselves.
+
+::: notes
+Converting an already rounded binary64 input to decimal does not restore lost
+information. Higher precision can also repeat the same unstable formula.
+:::
+
+## Run The Validation Activity
+
+```{.bash}
+quarto preview notebooks/07-validation-evidence.qmd
+```
+
+- Predict before each check
+- Add one refinement level
+- Compare claims with observations
+- Retain failed and successful evidence
+
+::: notes
+Switch to the authoritative Quarto tutorial. The complete build executes it
+and publishes a downloadable Jupyter notebook.
+:::
+
+## Keep Claims And Limitations Together
+
+| Claim | Observation | Scope |
+|---|---|---|
+| Constant case works | Both return $1$ | Weights untested |
+| Candidate is trapezoidal | Affine case fails | Claim rejected |
+| Error is controlled | Expected order observed | Tested grids only |
+| Model represents reality | No observations | Not established |
+
+::: notes
+Avoid a single validated=true flag. Later reviewers need to know what evidence
+supports each claim and what remains outside it.
+:::
+
+## Module 7 Takeaways
+
+- Separate code, solution, and model claims
+- Choose evidence that can challenge each claim
+- Predict properties and rates before measuring them
+- Prefer methods with different failure modes
+- Check reference calculations and retain limitations
+
+::: notes
+Transition to Module 8: all evidence so far comes from one environment. Ask
+which conclusions must survive changes in compiler, library, hardware, order,
+or precision.
 :::

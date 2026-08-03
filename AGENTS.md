@@ -396,6 +396,8 @@ The complete build must produce:
 - `_site/notebooks/05-failure-mode-lab.ipynb`;
 - `_site/notebooks/06-convergence-and-stopping.html`;
 - `_site/notebooks/06-convergence-and-stopping.ipynb`;
+- `_site/notebooks/07-validation-evidence.html`;
+- `_site/notebooks/07-validation-evidence.ipynb`;
 - `_site/slides/trustworthy-numerical-computing.html`.
 
 Keep build logic in `scripts/build_training_site.sh`; the workflow should call

@@ -53,7 +53,9 @@ attainable binary64 accuracy floor.
 ### Module 7: Validating Scientific Computations
 
 Combines reference cases, invariants, properties, refinement studies, and
-independent methods into a validation strategy.
+independent methods into a validation strategy. A companion activity diagnoses
+a suspicious quadrature implementation by combining exact cases, observed
+orders, convexity bounds, and an independently bounded series.
 
 ### Module 8: Reproducibility Across Computing Environments
 

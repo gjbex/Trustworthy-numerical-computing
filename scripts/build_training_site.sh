@@ -48,6 +48,8 @@ for entry_point in \
     "$site_output_dir/notebooks/05-failure-mode-lab.ipynb" \
     "$site_output_dir/notebooks/06-convergence-and-stopping.html" \
     "$site_output_dir/notebooks/06-convergence-and-stopping.ipynb" \
+    "$site_output_dir/notebooks/07-validation-evidence.html" \
+    "$site_output_dir/notebooks/07-validation-evidence.ipynb" \
     "$site_output_dir/slides/trustworthy-numerical-computing.html"; do
     if [[ ! -f "$entry_point" ]]; then
         echo "Expected publication entry point not found: $entry_point" >&2

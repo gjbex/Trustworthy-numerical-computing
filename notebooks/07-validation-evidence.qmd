@@ -1,0 +1,647 @@
+---
+title: "Validation Evidence Portfolio"
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+---
+
+:::: {.cell .markdown}
+A scientific-computing claim needs several kinds of evidence that fail in
+different ways. This tutorial uses a deliberately suspicious quadrature
+implementation to compare exact cases, properties, refinement rates,
+independent algorithms, and a bounded high-precision reference.
+
+::: {.content-visible when-format="html"}
+This activity accompanies
+[Module 7: Validating Scientific Computations](../learning-modules/07-validating-scientific-computations.md).
+
+[Download the executable Jupyter notebook](07-validation-evidence.ipynb){.btn .btn-primary download="07-validation-evidence.ipynb"}
+:::
+
+::: {.content-visible when-format="ipynb"}
+This activity accompanies
+[Module 7: Validating Scientific Computations](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/07-validating-scientific-computations.html).
+:::
+::::
+
+
+:::: {.cell .markdown}
+## Learning goals
+
+After this activity, you should be able to:
+
+- match an implementation or accuracy claim to relevant evidence;
+- explain why one passing reference case or invariant is insufficient;
+- use exactness properties to test a numerical-method contract;
+- measure an observed refinement order and compare it with a prediction;
+- assess how independently two comparison methods can fail;
+- check a high-precision value with an exact series and proved remainder bound;
+- record claims, observations, and limitations instead of one verdict flag.
+::::
+
+
+:::: {.cell .markdown}
+## Prerequisites
+
+Complete
+[Module 6: Iterative Algorithms And Convergence](../learning-modules/06-iterative-algorithms-and-convergence.md)
+or the
+[convergence and stopping diagnostics](06-convergence-and-stopping.qmd) first.
+This tutorial assumes that you can interpret absolute error, distinguish error
+from residual, and read a convergence record. It extends those ideas from
+termination evidence to a broader validation portfolio.
+::::
+
+
+:::: {.cell .markdown}
+## Outline
+
+1. Compare two quadrature candidates on constant and affine exact cases.
+2. Test a broad bound and identify what it does not establish.
+3. Construct an independently checked reference for $e-1$.
+4. Refine three quadrature methods and estimate their observed orders.
+5. Bracket the integral using convexity and different sample locations.
+6. Recompute the analytic value with an exact rational series.
+7. Assemble a claim-evidence-limitation record.
+::::
+
+
+:::: {.cell .markdown}
+## Establish the arithmetic and reporting tools
+
+All calculations are dimensionless. Binary64 candidates use Python `float`.
+The standard-library `Decimal` and `Fraction` types provide high-precision and
+exact-rational checks without adding notebook dependencies. The examples are
+deterministic and require no external data.
+::::
+
+```{python}
+#| label: validation-setup
+
+from decimal import Decimal, localcontext
+from fractions import Fraction
+import math
+import sys
+
+
+D = Decimal
+
+
+def decimal_error(candidate, reference):
+    """Return the absolute error of a binary64 value as a Decimal."""
+    return abs(D.from_float(candidate) - reference)
+
+
+def format_decimal(value):
+    """Format exact zero plainly and other Decimal values scientifically."""
+    return "0" if value == 0 else f"{value:.5E}"
+
+
+print(f"Python: {sys.version.split()[0]}")
+print("candidate arithmetic: Python float (binary64)")
+print("reference arithmetic: Decimal and exact Fraction")
+```
+
+
+:::: {.cell .markdown}
+## Define three quadrature candidates
+
+The intended composite trapezoidal rule gives half weight to both endpoints.
+The suspicious candidate omits the right endpoint and samples every left
+endpoint with full weight. The midpoint method samples different locations and
+will later provide a cross-method comparison.
+
+Read the three functions and predict which inputs can distinguish their
+contracts. `math.fsum` reduces incidental accumulation error; it does not
+change the quadrature formula.
+::::
+
+```{python}
+#| label: quadrature-candidates
+
+def composite_trapezoid(function, lower, upper, subintervals):
+    """Integrate with the composite trapezoidal rule."""
+    if subintervals <= 0:
+        raise ValueError("subintervals must be positive")
+    width = (upper - lower) / subintervals
+    interior = math.fsum(
+        function(lower + index * width)
+        for index in range(1, subintervals)
+    )
+    return width * (
+        0.5 * function(lower)
+        + interior
+        + 0.5 * function(upper)
+    )
+
+
+def suspicious_candidate(function, lower, upper, subintervals):
+    """A candidate claimed to be trapezoidal, but using left endpoints."""
+    if subintervals <= 0:
+        raise ValueError("subintervals must be positive")
+    width = (upper - lower) / subintervals
+    return width * math.fsum(
+        function(lower + index * width)
+        for index in range(subintervals)
+    )
+
+
+def composite_midpoint(function, lower, upper, subintervals):
+    """Integrate with the composite midpoint rule."""
+    if subintervals <= 0:
+        raise ValueError("subintervals must be positive")
+    width = (upper - lower) / subintervals
+    return width * math.fsum(
+        function(lower + (index + 0.5) * width)
+        for index in range(subintervals)
+    )
+```
+
+
+:::: {.cell .markdown}
+## Prediction: a constant reference case
+
+Both candidates integrate $f(x)=1$ on $[0,1]$ with eight subintervals. Predict
+whether the constant case can detect the missing right-endpoint contribution.
+The exact integral is one.
+::::
+
+```{python}
+#| label: constant-reference-case
+
+constant_function = lambda x: 1.0
+constant_reference = D(1)
+constant_results = {
+    "trapezoidal": composite_trapezoid(constant_function, 0.0, 1.0, 8),
+    "suspicious": suspicious_candidate(constant_function, 0.0, 1.0, 8),
+}
+
+print(f"{'candidate':>14s}  {'value':>10s}  {'absolute error':>16s}")
+for name, value in constant_results.items():
+    print(
+        f"{name:>14s}  {value:10.7f}  "
+        f"{format_decimal(decimal_error(value, constant_reference)):>16s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+Both candidates return one exactly. This verifies the interval width and basic
+accumulation for one simple case, but it does not exercise the endpoint weights.
+A passing test supports only the behaviour it actually distinguishes.
+::::
+
+
+:::: {.cell .markdown}
+## Prediction: affine exactness
+
+The trapezoidal rule integrates every affine function exactly in exact
+arithmetic. For $f(x)=x$ on $[0,1]$, the reference is $1/2$. Predict which
+candidate now satisfies the claimed contract and how the missing endpoint
+affects the other result.
+::::
+
+```{python}
+#| label: affine-reference-case
+
+affine_function = lambda x: x
+affine_reference = D("0.5")
+affine_results = {
+    "trapezoidal": composite_trapezoid(affine_function, 0.0, 1.0, 8),
+    "suspicious": suspicious_candidate(affine_function, 0.0, 1.0, 8),
+}
+
+print(f"{'candidate':>14s}  {'value':>10s}  {'absolute error':>16s}")
+for name, value in affine_results.items():
+    print(
+        f"{name:>14s}  {value:10.7f}  "
+        f"{format_decimal(decimal_error(value, affine_reference)):>16s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The intended rule returns $0.5$ exactly for these binary64 inputs. The
+suspicious result is $0.4375$, exposing the left-endpoint rule. Constant
+exactness was too broad; affine exactness directly tests the trapezoidal
+contract.
+::::
+
+
+:::: {.cell .markdown}
+## Test a necessary but insufficient bound
+
+For $f(x)=e^x$ on $[0,1]$, positivity and monotonicity imply
+
+$$
+1\le \int_0^1 e^x\,\mathrm{d}x\le e.
+$$
+
+Predict whether this broad property rejects the suspicious candidate. A pass
+means that an impossible result was not observed; it does not identify which
+quadrature rule was implemented.
+::::
+
+```{python}
+#| label: broad-bound
+
+bound_subintervals = 8
+bound_results = {
+    "trapezoidal": composite_trapezoid(
+        math.exp, 0.0, 1.0, bound_subintervals
+    ),
+    "midpoint": composite_midpoint(
+        math.exp, 0.0, 1.0, bound_subintervals
+    ),
+    "suspicious": suspicious_candidate(
+        math.exp, 0.0, 1.0, bound_subintervals
+    ),
+}
+
+print(f"broad admissible interval: [1, {math.e:.15f}]")
+for name, value in bound_results.items():
+    inside = 1.0 <= value <= math.e
+    print(f"{name:>14s}: {value:.15f}, inside bound = {inside}")
+```
+
+
+:::: {.cell .markdown}
+All three estimates pass. The property is still useful because it could reject
+a negative value or one larger than $e$. Its success cannot repair the failed
+affine-exactness evidence.
+::::
+
+
+:::: {.cell .markdown}
+## Construct and check a decimal reference
+
+The analytic answer is $e-1$. Evaluate it independently at 80 and 100 decimal
+digits and measure their relative change. The word “analytic” justifies the
+formula; agreement between precisions checks that the digits used below have
+stabilized in this decimal calculation.
+::::
+
+```{python}
+#| label: decimal-reference
+
+def decimal_exp_increment(precision):
+    """Evaluate exp(1)-1 at the requested decimal precision."""
+    with localcontext() as context:
+        context.prec = precision
+        return +(D(1).exp() - D(1))
+
+
+reference_80 = decimal_exp_increment(80)
+reference_100 = decimal_exp_increment(100)
+reference_change = abs(reference_80 - reference_100) / abs(reference_100)
+
+print(f"100-digit reference:     {reference_100:.40f}")
+print(f"80/100 relative change:  {reference_change:.3E}")
+```
+
+
+:::: {.cell .markdown}
+## Predict the refinement rates
+
+If a method has error $E(h)\approx Ch^p$, halving $h$ should reduce the error
+by about $2^p$. The trapezoidal and midpoint rules are predicted to have order
+two for this smooth integrand. The diagnosed left-endpoint rule has order one.
+
+Before running the cell, predict the observed orders and whether simply seeing
+all errors decrease would have been enough to verify the claimed method.
+::::
+
+```{python}
+#| label: quadrature-refinement
+
+def observed_order(coarse_error, fine_error):
+    """Estimate p when halving h changes error from coarse to fine."""
+    return math.log2(float(coarse_error / fine_error))
+
+
+quadrature_methods = {
+    "trapezoidal": composite_trapezoid,
+    "midpoint": composite_midpoint,
+    "suspicious": suspicious_candidate,
+}
+refinement_levels = [4, 8, 16, 32, 64]
+refinement_records = []
+
+print(
+    f"{'method':>14s}  {'n':>4s}  {'value':>19s}  "
+    f"{'absolute error':>16s}  {'order':>7s}"
+)
+for name, method in quadrature_methods.items():
+    previous_error = None
+    for subintervals in refinement_levels:
+        value = method(math.exp, 0.0, 1.0, subintervals)
+        error = decimal_error(value, reference_100)
+        order = (
+            None
+            if previous_error is None
+            else observed_order(previous_error, error)
+        )
+        refinement_records.append(
+            {
+                "method": name,
+                "subintervals": subintervals,
+                "value": value,
+                "absolute_error": error,
+                "observed_order": order,
+            }
+        )
+        order_text = "-" if order is None else f"{order:.4f}"
+        print(
+            f"{name:>14s}  {subintervals:4d}  {value:19.15f}  "
+            f"{error:16.5E}  {order_text:>7s}"
+        )
+        previous_error = error
+```
+
+
+:::: {.cell .markdown}
+The two intended rules approach order two. The suspicious candidate approaches
+order one: it converges to the analytic value, but not with the leading error of
+the method it was claimed to implement. A decreasing error is useful evidence;
+the predicted rate makes it diagnostic.
+
+The table covers selected resolutions in one arithmetic environment. It is not
+a proof for every integrand or an assurance that arbitrarily fine grids will
+remain in the asymptotic regime.
+::::
+
+
+:::: {.cell .markdown}
+## Exercise: add a refinement level
+
+Choose a positive number of subintervals, preferably twice one of the tabulated
+levels. Predict the ordering of the three estimates and compare each absolute
+error. If you choose a very small grid, explain whether asymptotic rates should
+already be expected.
+::::
+
+```{python}
+#| label: learner-refinement
+
+learner_subintervals = 128  # Change this after writing down a prediction.
+if learner_subintervals <= 0:
+    raise ValueError("learner_subintervals must be positive")
+
+for name, method in quadrature_methods.items():
+    value = method(math.exp, 0.0, 1.0, learner_subintervals)
+    error = decimal_error(value, reference_100)
+    print(
+        f"{name:>14s}: value = {value:.15f}, "
+        f"absolute error = {error:.5E}"
+    )
+```
+
+
+:::: {.cell .markdown}
+## Use convexity to bracket the answer
+
+For a convex function, the composite midpoint estimate lies below the exact
+integral and the composite trapezoidal estimate lies above it. This produces a
+reference-free bracket once the implementations and convexity assumption are
+trusted.
+
+Predict how the bracket width changes when the number of subintervals doubles.
+The decimal reference is shown only to check the expected ordering in this
+teaching example.
+::::
+
+```{python}
+#| label: convex-bracket
+
+bracket_records = []
+print(
+    f"{'n':>4s}  {'lower midpoint':>18s}  {'upper trapezoid':>18s}  "
+    f"{'width':>12s}  {'contains ref':>12s}"
+)
+for subintervals in refinement_levels:
+    lower_estimate = composite_midpoint(
+        math.exp, 0.0, 1.0, subintervals
+    )
+    upper_estimate = composite_trapezoid(
+        math.exp, 0.0, 1.0, subintervals
+    )
+    width = upper_estimate - lower_estimate
+    contains_reference = (
+        D.from_float(lower_estimate)
+        <= reference_100
+        <= D.from_float(upper_estimate)
+    )
+    bracket_records.append(
+        {
+            "subintervals": subintervals,
+            "lower": lower_estimate,
+            "upper": upper_estimate,
+            "width": width,
+            "contains_reference": contains_reference,
+        }
+    )
+    print(
+        f"{subintervals:4d}  {lower_estimate:18.15f}  "
+        f"{upper_estimate:18.15f}  {width:12.5e}  "
+        f"{str(contains_reference):>12s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+Every tested bracket contains the reference, and doubling the grid reduces its
+width by approximately four. Midpoint and trapezoidal quadrature have different
+sample locations and leading-error signs, but these implementations still share
+the same language, integrand, interval, and similar loop structure. That limits
+their independence.
+::::
+
+
+:::: {.cell .markdown}
+## Check the reference with a bounded exact series
+
+Use
+
+$$
+e-1=\sum_{k=1}^{\infty}\frac{1}{k!}.
+$$
+
+`Fraction` forms the partial sum $P_N$ exactly. For the omitted tail,
+
+$$
+0<(e-1)-P_N
+\le
+\frac{1}{(N+1)!}\frac{N+2}{N+1}.
+$$
+
+This formulation uses factorials, rational arithmetic, and a proved tail bound
+rather than quadrature samples and weights.
+::::
+
+```{python}
+#| label: bounded-series-reference
+
+series_terms = 18
+exact_partial = sum(
+    (Fraction(1, math.factorial(index)) for index in range(1, series_terms + 1)),
+    start=Fraction(0, 1),
+)
+remainder_bound = (
+    Fraction(1, math.factorial(series_terms + 1))
+    * Fraction(series_terms + 2, series_terms + 1)
+)
+
+with localcontext() as context:
+    context.prec = 100
+    partial_decimal = D(exact_partial.numerator) / D(exact_partial.denominator)
+    bound_decimal = D(remainder_bound.numerator) / D(
+        remainder_bound.denominator
+    )
+
+reference_gap = reference_100 - partial_decimal
+inside_series_bound = D(0) < reference_gap <= bound_decimal
+
+print(f"terms retained:       {series_terms}")
+print(f"exact partial sum:    {partial_decimal:.40f}")
+print(f"reference gap:        {reference_gap:.6E}")
+print(f"proved tail bound:    {bound_decimal:.6E}")
+print(f"reference in interval: {inside_series_bound}")
+```
+
+
+:::: {.cell .markdown}
+The reference gap is approximately $8.6522\times10^{-18}$ and the bound is
+approximately $8.6533\times10^{-18}$. The decimal reference lies inside the
+independently bounded interval. This is stronger than agreement between two
+nearly identical loops, although it still verifies only this analytic
+calculation—not a physical model.
+::::
+
+
+:::: {.cell .markdown}
+## Assemble a claim-evidence-limitation record
+
+The final record keeps successful and failed checks together. It does not
+collapse them to `validated=True`: each result supports or rejects a particular
+claim and retains its scope.
+::::
+
+```{python}
+#| label: validation-evidence-record
+
+trapezoidal_orders = [
+    record["observed_order"]
+    for record in refinement_records
+    if record["method"] == "trapezoidal"
+    and record["observed_order"] is not None
+]
+suspicious_orders = [
+    record["observed_order"]
+    for record in refinement_records
+    if record["method"] == "suspicious"
+    and record["observed_order"] is not None
+]
+
+evidence_record = [
+    {
+        "claim": "basic constant case is integrated",
+        "observation": "both candidates return 1 exactly",
+        "status": "supported for this case",
+        "limitation": "endpoint weights are not distinguished",
+    },
+    {
+        "claim": "suspicious candidate is trapezoidal",
+        "observation": "affine result is 0.4375 instead of 0.5",
+        "status": "rejected",
+        "limitation": "diagnoses the tested implementation and interval",
+    },
+    {
+        "claim": "intended rules show predicted refinement",
+        "observation": (
+            f"final observed order: trapezoidal {trapezoidal_orders[-1]:.4f}; "
+            f"suspicious {suspicious_orders[-1]:.4f}"
+        ),
+        "status": "supported on tested grids",
+        "limitation": "other integrands and finer grids remain untested",
+    },
+    {
+        "claim": "analytic integral is not method-specific",
+        "observation": "convex brackets and bounded series contain reference",
+        "status": "supported for this problem",
+        "limitation": "computational checks do not validate a physical model",
+    },
+]
+
+for index, item in enumerate(evidence_record, start=1):
+    print(f"evidence item {index}")
+    for key, value in item.items():
+        print(f"  {key}: {value}")
+```
+
+
+:::: {.cell .markdown}
+## What the experiments establish
+
+The exact cases confirm that the intended trapezoidal implementation satisfies
+constant and affine exactness, while the suspicious candidate does not satisfy
+the claimed method contract. The refinement study observes the predicted
+second-order trend for midpoint and trapezoidal quadrature and the diagnosed
+first-order trend for the left-endpoint candidate. Convexity brackets the exact
+integral, and an exact rational series with a proved tail bound checks the
+decimal reference through a different formulation.
+
+The evidence is deliberately bounded. It uses one smooth integrand on one
+interval, similar local implementations for the quadrature methods, and no
+experimental observations. It does not validate physical modelling choices,
+input uncertainty, behaviour at discontinuities or singularities, or results
+in another computing environment.
+::::
+
+
+:::: {.cell .markdown}
+## Reflection questions
+
+1. Which claim does the constant case support, and which claim does it fail to
+   test?
+2. Why does observing first-order convergence diagnose more than observing a
+   decreasing error?
+3. Which assumptions and code paths are shared by the midpoint and trapezoidal
+   comparisons?
+4. Why does increasing decimal precision not by itself establish an
+   authoritative reference?
+5. What external evidence would be required if $e^x$ represented a physical
+   rate model rather than a dimensionless test function?
+::::
+
+
+:::: {.cell .markdown}
+## Suggested answers
+
+1. It supports basic interval scaling and accumulation for that input, but does
+   not distinguish the endpoint weighting required by the trapezoidal rule.
+2. The rate tests the leading error predicted for the claimed method. The
+   suspicious result improves, but at the rate of another algorithm.
+3. They share the integrand, interval, binary64 arithmetic, language, and
+   similar loop structure; their sample locations and leading-error signs
+   differ.
+4. A higher-precision calculation can share the same unstable formulation,
+   defect, or modelling assumption. Precision stability and an independent
+   property, bound, or method are stronger evidence.
+5. Measurements or trusted observations with units, uncertainty, calibration,
+   and an intended-use regime, together with sensitivity to uncertain inputs
+   and modelling choices.
+::::
+
+
+:::: {.cell .markdown}
+## Takeaways
+
+- Begin with a claim and choose evidence that can actually challenge it.
+- A passing reference case or invariant establishes only its declared scope.
+- Refinement rates can distinguish algorithms that converge to the same limit.
+- Independence depends on shared mathematics, code, data, and assumptions.
+- Check high-precision references with precision sweeps, bounds, or other
+  formulations.
+- Preserve claims, observations, and limitations as a reviewable portfolio.
+::::

@@ -41,3 +41,6 @@ the intended learners can access.
 6. [Convergence and stopping diagnostics](06-convergence-and-stopping.qmd)
    compares mixed residual and update criteria, classifies several termination
    reasons, and uses a tolerance study to expose an attainable binary64 floor.
+7. [Validation evidence portfolio](07-validation-evidence.qmd) uses exact
+   cases, properties, refinement rates, convexity bounds, and an independently
+   bounded series to test distinct claims about one quadrature calculation.

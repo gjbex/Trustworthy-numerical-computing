@@ -57,6 +57,8 @@ website:
             href: notebooks/03-comparison-criteria.qmd
           - text: "4. Sensitivity, Stability, And Residuals"
             href: notebooks/04-sensitivity-stability-residuals.qmd
+          - text: "5. Failure-Mode Laboratory"
+            href: notebooks/05-failure-mode-lab.qmd
       - text: "Optional advanced topics"
         href: learning-modules/optional-advanced-topics.md
 

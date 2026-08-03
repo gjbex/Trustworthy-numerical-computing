@@ -35,7 +35,9 @@ introduced by the selected algorithm and its implementation.
 ### Module 5: Common Numerical Failure Modes
 
 Applies the previous distinctions to cancellation, accumulation, scaling,
-overflow, underflow, and order-dependent arithmetic.
+overflow, underflow, and order-dependent arithmetic. A companion laboratory
+compares specialized functions, reduction algorithms, scaled norms, regrouped
+products, and log-domain calculations against references and invariants.
 
 ### Module 6: Iterative Algorithms And Convergence
 

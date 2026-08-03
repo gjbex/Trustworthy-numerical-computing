@@ -1,0 +1,587 @@
+---
+title: "Failure-Mode Laboratory"
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+---
+
+:::: {.cell .markdown}
+Real-arithmetic identities do not prescribe a safe floating-point evaluation.
+This tutorial isolates cancellation, accumulated rounding, overflow, and
+underflow, then compares each unsafe calculation with a targeted alternative.
+
+::: {.content-visible when-format="html"}
+This activity accompanies
+[Module 5: Common Numerical Failure Modes](../learning-modules/05-common-numerical-failure-modes.md).
+
+[Download the executable Jupyter notebook](05-failure-mode-lab.ipynb){.btn .btn-primary download="05-failure-mode-lab.ipynb"}
+:::
+
+::: {.content-visible when-format="ipynb"}
+This activity accompanies
+[Module 5: Common Numerical Failure Modes](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/05-common-numerical-failure-modes.html).
+:::
+::::
+
+
+:::: {.cell .markdown}
+## Learning goals
+
+After this activity, you should be able to:
+
+- identify the intermediate operation responsible for a numerical failure;
+- distinguish a poorly evaluated expression from an ill-conditioned problem;
+- compare sequential, magnitude-ordered, pairwise, and compensated sums;
+- keep norm and product intermediates inside a useful floating-point range;
+- use an exact value, high-precision reference, or invariant to validate a
+  reformulation;
+- record the input range and limitations of the resulting evidence.
+::::
+
+
+:::: {.cell .markdown}
+## Prerequisites
+
+Complete
+[Module 4: Conditioning And Numerical Stability](../learning-modules/04-conditioning-and-numerical-stability.md)
+or the
+[sensitivity, stability, and residuals](04-sensitivity-stability-residuals.qmd)
+activity first. This tutorial assumes that you can interpret relative forward
+error and distinguish problem conditioning from algorithmic behaviour. It also
+uses the binary64 range and subnormal-value model introduced in Module 2 and the
+scale-aware comparison criteria introduced in Module 3.
+::::
+
+
+:::: {.cell .markdown}
+## Outline
+
+1. Compare direct and specialized evaluation of $e^x-1$ near zero.
+2. Sum one exact sequence using several reduction algorithms and orders.
+3. Scale a Euclidean norm before its intermediate squares overflow.
+4. Regroup a product whose first intermediate underflows.
+5. Compare underflowed likelihoods in the log domain.
+6. Record what each experiment establishes and what remains unproven.
+::::
+
+
+:::: {.cell .markdown}
+## Establish the arithmetic and reference tools
+
+All experimental inputs are dimensionless. Binary64 calculations use Python
+`float`; high-precision reference calculations use the standard-library
+`Decimal` type. The cancellation reference is recomputed at 80 and 100 digits;
+the norm reference is complemented by an independent range invariant.
+::::
+
+```{python}
+#| label: failure-mode-setup
+
+from decimal import Decimal, localcontext
+import math
+import sys
+
+
+D = Decimal
+
+
+def relative_error(candidate, reference):
+    """Return a Decimal relative error for a binary64 candidate."""
+    if reference == 0:
+        raise ValueError("A relative error needs a nonzero reference.")
+    candidate_decimal = D.from_float(candidate)
+    return abs(candidate_decimal - reference) / abs(reference)
+
+
+def format_error(error):
+    """Format an exact zero plainly and other Decimal errors scientifically."""
+    return "0" if error == 0 else f"{error:.3E}"
+
+
+minimum_subnormal = math.ulp(0.0)
+
+print(f"Python: {sys.version.split()[0]}")
+print(f"largest finite binary64:  {sys.float_info.max:.6e}")
+print(f"smallest normal binary64: {sys.float_info.min:.6e}")
+print(f"smallest positive value:  {minimum_subnormal:.6e}")
+```
+
+
+:::: {.cell .markdown}
+## Predict cancellation in a small increment
+
+The exact function $f(x)=e^x-1$ is well-conditioned near zero: its relative
+condition number tends to one. Predict what happens when `math.exp(x)` is first
+rounded near one and one is then subtracted for $x=10^{-16}$.
+
+The specialized `math.expm1(x)` computes the increment without requiring that
+it survive inside a rounded value near one.
+::::
+
+```{python}
+#| label: cancellation-candidates
+
+def decimal_expm1(x_text, precision):
+    """Evaluate exp(x) - 1 at a requested decimal precision."""
+    with localcontext() as context:
+        context.prec = precision
+        x_decimal = D(x_text)
+        return +(x_decimal.exp() - D(1))
+
+
+cancellation_x_text = "1e-16"
+cancellation_x = float(cancellation_x_text)
+reference_80 = decimal_expm1(cancellation_x_text, 80)
+reference_100 = decimal_expm1(cancellation_x_text, 100)
+reference_difference = abs(reference_80 - reference_100) / abs(reference_100)
+
+direct_increment = math.exp(cancellation_x) - 1.0
+specialized_increment = math.expm1(cancellation_x)
+
+direct_increment_error = relative_error(direct_increment, reference_100)
+specialized_increment_error = relative_error(
+    specialized_increment,
+    reference_100,
+)
+
+print(f"x:                         {cancellation_x:.1e}")
+print(f"100-digit reference:       {reference_100:.18E}")
+print(f"80/100 reference change:   {reference_difference:.3E}")
+print(f"direct exp(x) - 1:         {direct_increment:.18e}")
+print(f"specialized expm1(x):      {specialized_increment:.18e}")
+print(f"direct relative error:     {direct_increment_error:.3E}")
+print(f"specialized relative error: {specialized_increment_error:.3E}")
+```
+
+
+:::: {.cell .markdown}
+The direct result is zero and has relative forward error one. The specialized
+result retains the increment and agrees with the independently checked decimal
+reference to binary64 accuracy. Because the exact problem is well-conditioned
+near zero, this comparison diagnoses avoidable error in the direct evaluation.
+::::
+
+
+:::: {.cell .markdown}
+## Sweep the separation from one
+
+Predict how the direct relative error changes as $x$ decreases. The sweep holds
+the mathematical function fixed and recomputes a 100-digit reference for each
+input. It samples selected values; it is not a proof over a continuous domain.
+::::
+
+```{python}
+#| label: cancellation-sweep
+
+print(
+    f"{'x':>10s}  {'direct':>14s}  {'expm1':>14s}  "
+    f"{'direct error':>14s}  {'expm1 error':>14s}"
+)
+for x_text in ["1e-2", "1e-4", "1e-8", "1e-12", "1e-16", "1e-17"]:
+    x_value = float(x_text)
+    reference = decimal_expm1(x_text, 100)
+    direct = math.exp(x_value) - 1.0
+    specialized = math.expm1(x_value)
+    print(
+        f"{x_text:>10s}  {direct:14.6e}  {specialized:14.6e}  "
+        f"{relative_error(direct, reference):14.3E}  "
+        f"{relative_error(specialized, reference):14.3E}"
+    )
+```
+
+
+:::: {.cell .markdown}
+## Exercise: choose another increment
+
+Before running the cell, choose a power of ten between $10^{-2}$ and
+$10^{-17}$ and predict both errors. Identify the first operation that produces
+an intermediate indistinguishable from one in binary64.
+::::
+
+```{python}
+#| label: learner-cancellation
+
+learner_x_text = "1e-10"  # Change this after making a prediction.
+learner_x = float(learner_x_text)
+learner_reference = decimal_expm1(learner_x_text, 100)
+learner_direct = math.exp(learner_x) - 1.0
+learner_specialized = math.expm1(learner_x)
+
+print(f"x: {learner_x_text}")
+print(f"direct result:      {learner_direct:.18e}")
+print(f"specialized result: {learner_specialized:.18e}")
+print(f"direct error:       {relative_error(learner_direct, learner_reference):.3E}")
+print(
+    "specialized error:  "
+    f"{relative_error(learner_specialized, learner_reference):.3E}"
+)
+```
+
+
+:::: {.cell .markdown}
+## Treat summation as a choice of algorithm
+
+The next input contains the exactly representable values $10^{16}$,
+$-10^{16}$, and ten thousand copies of one. Its exact sum is the integer
+$10\,000$.
+
+Predict the result of an explicit left-to-right loop. Then compare increasing
+magnitude, a recursive pairwise tree, Neumaier compensation, and the documented
+standard-library `math.fsum` implementation. No method should be judged without
+the same exact reference.
+::::
+
+```{python}
+#| label: summation-algorithms
+
+def sequential_sum(values):
+    """Sum values explicitly from left to right."""
+    total = 0.0
+    for value in values:
+        total += value
+    return total
+
+
+def pairwise_sum(values, start=0, stop=None):
+    """Sum values with a fixed balanced recursive tree."""
+    if stop is None:
+        stop = len(values)
+    length = stop - start
+    if length == 0:
+        return 0.0
+    if length == 1:
+        return values[start]
+    middle = start + length // 2
+    return pairwise_sum(values, start, middle) + pairwise_sum(
+        values,
+        middle,
+        stop,
+    )
+
+
+def neumaier_sum(values):
+    """Sum values while compensating for discarded low-order parts."""
+    total = 0.0
+    compensation = 0.0
+    for value in values:
+        updated = total + value
+        if abs(total) >= abs(value):
+            compensation += (total - updated) + value
+        else:
+            compensation += (value - updated) + total
+        total = updated
+    return total + compensation
+
+
+repeat_count = 10_000
+large_value = 1.0e16
+sum_values = [large_value] + [1.0] * repeat_count + [-large_value]
+exact_sum = D(repeat_count)
+sum_condition_number = (
+    D("2e16") + D(repeat_count)
+) / exact_sum
+
+summation_methods = {
+    "left-to-right": lambda values: sequential_sum(values),
+    "magnitude order": lambda values: sequential_sum(
+        sorted(values, key=abs)
+    ),
+    "pairwise tree": lambda values: pairwise_sum(values),
+    "Neumaier": lambda values: neumaier_sum(values),
+    "math.fsum": lambda values: math.fsum(values),
+}
+
+summation_results = {}
+for name, method in summation_methods.items():
+    result = method(sum_values)
+    error = relative_error(result, exact_sum)
+    summation_results[name] = {"result": result, "relative_error": error}
+
+print(f"exact sum: {exact_sum}")
+print(f"summation condition number: {sum_condition_number:.6E}")
+print(f"{'method':>18s}  {'result':>12s}  {'relative error':>16s}")
+for name, diagnostics in summation_results.items():
+    error_text = format_error(diagnostics["relative_error"])
+    print(
+        f"{name:>18s}  {diagnostics['result']:12.1f}  "
+        f"{error_text:>16s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The sequential loop loses every unit contribution while the running total is
+$10^{16}$. Pairwise summation loses two units for this particular tree but
+reduces the relative error from one to $2\times10^{-4}$. Magnitude ordering,
+Neumaier compensation, and `math.fsum` return the exact integer for this input.
+
+The summation condition number is approximately $2\times10^{12}$. Better
+algorithms reduce arithmetic error for these fixed exact inputs; they do not
+remove sensitivity to uncertainty in real input data.
+
+That result does not make magnitude ordering universally best or compensation
+exact. Each method has costs and failure cases. Pairwise trees are especially
+useful in parallel reductions; compensation can also be applied within blocks
+before block results are combined.
+::::
+
+
+:::: {.cell .markdown}
+## Exercise: preserve the multiset and change only its order
+
+All four sequences below contain exactly the same binary64 values. Predict the
+explicit sequential result for each. This isolates evaluation order: the
+mathematical data and exact reference do not change.
+::::
+
+```{python}
+#| label: summation-order
+
+orderings = {
+    "large first": sum_values,
+    "large last": list(reversed(sum_values)),
+    "small first": [1.0] * repeat_count + [large_value, -large_value],
+    "cancel first": [large_value, -large_value] + [1.0] * repeat_count,
+}
+
+for name, values in orderings.items():
+    result = sequential_sum(values)
+    error_text = format_error(relative_error(result, exact_sum))
+    print(
+        f"{name:>12s}: result = {result:8.1f}, "
+        f"relative error = {error_text}"
+    )
+```
+
+
+:::: {.cell .markdown}
+## Predict overflow in a representable norm
+
+For $x=y=10^{308}$, the Euclidean norm is finite and representable. Predict the
+intermediate value of $x^2+y^2$ in binary64.
+
+The scaled algorithm divides by the largest magnitude before squaring. The
+independent invariant
+$\max(|x|,|y|)\le\|(x,y)\|_2\le\sqrt{2}\max(|x|,|y|)$
+provides a check even without an exact reference.
+::::
+
+```{python}
+#| label: scaled-norm
+
+def scaled_euclidean_norm(values):
+    """Compute a small-vector Euclidean norm after scaling."""
+    scale = max(abs(value) for value in values)
+    if scale == 0.0:
+        return 0.0
+    return scale * math.sqrt(
+        sequential_sum([(value / scale) ** 2 for value in values])
+    )
+
+
+norm_values = [1.0e308, 1.0e308]
+naive_squared_norm = (
+    norm_values[0] * norm_values[0]
+    + norm_values[1] * norm_values[1]
+)
+naive_norm = math.sqrt(naive_squared_norm)
+scaled_norm = scaled_euclidean_norm(norm_values)
+library_norm = math.hypot(*norm_values)
+
+with localcontext() as context:
+    context.prec = 100
+    norm_reference = D(2).sqrt() * D("1e308")
+
+scale = max(abs(value) for value in norm_values)
+lower_bound = scale
+upper_bound = math.sqrt(2.0) * scale
+
+print(f"naive squared norm:       {naive_squared_norm}")
+print(f"naive norm:               {naive_norm}")
+print(f"scaled norm:              {scaled_norm:.17e}")
+print(f"math.hypot:               {library_norm:.17e}")
+print(f"100-digit reference:      {norm_reference:.17E}")
+print(f"scaled relative error:    {relative_error(scaled_norm, norm_reference):.3E}")
+print(f"hypot relative error:     {relative_error(library_norm, norm_reference):.3E}")
+print(f"scaled result in bounds:  {lower_bound <= scaled_norm <= upper_bound}")
+print(f"naive result in bounds:   {lower_bound <= naive_norm <= upper_bound}")
+```
+
+
+:::: {.cell .markdown}
+The final norm fits, but the naive intermediate squares do not. Scaling and the
+library implementation produce a finite result consistent with both the
+decimal reference and the range invariant. The short helper illustrates the
+idea for two components; production vector norms should use a tested general
+implementation.
+::::
+
+
+:::: {.cell .markdown}
+## Predict underflow before later rescaling
+
+In real arithmetic, multiplication is associative. Compare the two evaluation
+orders for
+$10^{-200}\times10^{-200}\times10^{200}$, whose exact result is the normal,
+representable value $10^{-200}$.
+::::
+
+```{python}
+#| label: underflow-order
+
+small_factor = 1.0e-200
+large_factor = 1.0e200
+
+left_grouped_product = (small_factor * small_factor) * large_factor
+right_grouped_product = small_factor * (small_factor * large_factor)
+exact_product = D("1e-200")
+
+print(f"smallest positive binary64: {minimum_subnormal:.6e}")
+print(f"left-grouped result:         {left_grouped_product:.17e}")
+print(f"right-grouped result:        {right_grouped_product:.17e}")
+print(
+    "left-grouped error:          "
+    f"{relative_error(left_grouped_product, exact_product):.3E}"
+)
+print(
+    "right-grouped error:         "
+    f"{relative_error(right_grouped_product, exact_product):.3E}"
+)
+```
+
+
+:::: {.cell .markdown}
+The first grouping creates $10^{-400}$ and rounds it to zero before the large
+factor can rescale it. The second grouping happens to remain in range. This is
+evidence for the cause, not a general product algorithm: another set of
+exponents could make the second order fail instead.
+::::
+
+
+:::: {.cell .markdown}
+## Keep likelihood comparisons in the log domain
+
+Two positive likelihoods can both underflow to zero and become impossible to
+rank directly. Predict the products of $(10^{-200},10^{-200})$ and
+$(10^{-200},10^{-201})$. Then compare their sums of logarithms.
+::::
+
+```{python}
+#| label: log-domain-products
+
+likelihood_factors = {
+    "model A": [1.0e-200, 1.0e-200],
+    "model B": [1.0e-200, 1.0e-201],
+}
+
+likelihood_results = {}
+for name, factors in likelihood_factors.items():
+    direct_product = math.prod(factors)
+    log_likelihood = math.fsum(math.log(value) for value in factors)
+    likelihood_results[name] = {
+        "direct_product": direct_product,
+        "log_likelihood": log_likelihood,
+    }
+    print(
+        f"{name}: product = {direct_product:.1e}, "
+        f"log likelihood = {log_likelihood:.15e}"
+    )
+
+log_difference = (
+    likelihood_results["model A"]["log_likelihood"]
+    - likelihood_results["model B"]["log_likelihood"]
+)
+
+print(f"log-likelihood difference A - B: {log_difference:.15e}")
+print(f"log(10) reference:               {math.log(10.0):.15e}")
+print("larger likelihood in log domain: model A")
+```
+
+
+:::: {.cell .markdown}
+Both direct products are zero, but the log likelihoods remain finite. Their
+difference agrees with $\log(10)$, so model A is correctly identified as ten
+times more likely for these constructed factors. Exponentiating either log
+likelihood would still underflow; the comparison should remain in the log
+domain. Zeros, negative factors, and normalization require separate handling.
+::::
+
+
+:::: {.cell .markdown}
+## Evidence record
+
+A useful result records the failed intermediate, the alternative, the
+reference or invariant, and the scope of the evidence. The values below are
+small enough to review directly and are regenerated from a clean kernel by the
+course build.
+::::
+
+```{python}
+#| label: failure-mode-evidence
+
+evidence = {
+    "cancellation": {
+        "input": cancellation_x_text,
+        "unsafe_relative_error": direct_increment_error,
+        "alternative_relative_error": specialized_increment_error,
+        "reference_check": reference_difference,
+        "limitation": "Selected x values and the tested math library.",
+    },
+    "summation": {
+        "exact_sum": exact_sum,
+        "condition_number": sum_condition_number,
+        "sequential_result": summation_results["left-to-right"]["result"],
+        "pairwise_result": summation_results["pairwise tree"]["result"],
+        "compensated_result": summation_results["Neumaier"]["result"],
+        "limitation": "One exact multiset and selected reduction trees.",
+    },
+    "range": {
+        "naive_norm": naive_norm,
+        "scaled_norm": scaled_norm,
+        "invariant_satisfied": lower_bound <= scaled_norm <= upper_bound,
+        "left_grouped_product": left_grouped_product,
+        "right_grouped_product": right_grouped_product,
+        "limitation": "Constructed scales, not a complete range analysis.",
+    },
+    "log_domain": {
+        "direct_products": {
+            name: result["direct_product"]
+            for name, result in likelihood_results.items()
+        },
+        "log_difference": log_difference,
+        "reference": math.log(10.0),
+        "limitation": "Positive nonzero factors only.",
+    },
+}
+evidence
+```
+
+
+:::: {.cell .markdown}
+## Pitfalls and optional extensions
+
+- Do not label every subtraction catastrophic; determine whether the desired
+  information survived in the operands.
+- Do not infer a universal summation ranking from one sequence. Try another
+  sign pattern while retaining an exact or high-precision reference.
+- Do not use a stable reduction to dismiss input uncertainty in an
+  ill-conditioned sum.
+- Do not assume a regrouping that works once covers every exponent pattern.
+- Try `math.log1p(x)` against `math.log(1.0 + x)` and explain the parallel with
+  the cancellation experiment.
+- Try norm components near the smallest normal value and observe when scaling
+  protects an otherwise underflowing squared norm.
+- For a long positive product, investigate a representation that tracks a
+  mantissa and exponent separately, then compare it with the log-domain result.
+
+::: {.content-visible when-format="html"}
+Next:
+[Iterative Algorithms And Convergence](../learning-modules/06-iterative-algorithms-and-convergence.md).
+:::
+
+::: {.content-visible when-format="ipynb"}
+Next:
+[Iterative Algorithms And Convergence](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/06-iterative-algorithms-and-convergence.html).
+:::
+::::

@@ -2,37 +2,262 @@
 
 ## Module Arc
 
-- Cancellation loses significant information
-- Reductions accumulate rounding
-- Intermediate range matters
-- Stable reformulations preserve useful information
+- Diagnose a failed intermediate, not “floating point” in general
+- Preserve small increments and low-order contributions
+- Keep intermediates inside the usable range
+- Match reformulation to cause and validate the result
 
 ::: notes
-This module should be experiment-heavy. Use several small failures rather than
-one long implementation.
+Module 4 supplied the distinction between conditioning and stability. Module 5
+applies it to recurring arithmetic patterns. Ask for a prediction before every
+result slide.
 :::
 
-## Diagnose The Pattern
+## Carry The Module 4 Questions Forward
 
-- Subtracting nearly equal quantities
-- Mixing very large and very small magnitudes
-- Overflow before a representable final result
-- Underflow in products or probabilities
-- Strong dependence on evaluation order
+1. Is the exact problem sensitive?
+2. Does the algorithm introduce avoidable error?
+3. Does the implementation perform that algorithm?
+
+- Hold the mathematical input-output map fixed
+- Compare against a reference or invariant
 
 ::: notes
-Ask participants to name the dangerous operation before showing an improved
-formulation.
+A dangerous operation is a hypothesis, not a diagnosis. Keep input uncertainty
+and implementation defects separate from the algorithm comparisons here.
 :::
 
-## Summation Is An Algorithm
+## Prediction: A Small Increment
 
-- Naive sequential order
-- Magnitude-aware order
-- Pairwise reduction
-- Compensated summation
-- Accuracy, cost, and parallelism trade-offs
+For $x=10^{-16}$, compare
+
+$$
+e^x-1
+$$
+
+using:
+
+- `exp(x) - 1`
+- `expm1(x)`
+- an independently checked decimal reference
 
 ::: notes
-Use the same input for every method and compare against a stronger reference.
+Ask which intermediate must retain the increment. The exact function is
+well-conditioned near zero; its relative condition number tends to one.
+:::
+
+## Cancellation Result
+
+| Method | Result | Relative error |
+|---|---:|---:|
+| `exp(x) - 1` | $0$ | $1$ |
+| `expm1(x)` | $1.0\times10^{-16}$ | $7.09\times10^{-17}$ |
+
+- Reference: $1.00000000000000005\times10^{-16}$
+- 80- and 100-digit reference calculations agree
+
+::: notes
+The increment is rounded away when `exp(x)` is formed near one. Cancellation
+exposes that loss. The specialized function evaluates the increment directly.
+Do not claim that every subtraction is catastrophic.
+:::
+
+## Diagnose Cancellation
+
+- Identify the nearby operands and desired difference
+- Ask whether operand errors dominate that difference
+- Sweep the separation while holding the exact function fixed
+- Prefer a validated identity or specialized operation
+
+Examples: `expm1`, `log1p`, reformulated quadratic roots
+
+::: notes
+Higher precision can be a diagnostic or requirement, but it usually postpones
+rather than removes an unstable structure.
+:::
+
+## Prediction: One Sum, Five Algorithms
+
+$$
+[10^{16},\underbrace{1,\ldots,1}_{10\,000},-10^{16}]
+$$
+
+- All inputs are exactly representable
+- Exact sum: $10\,000$
+- Which contributions survive each evaluation tree?
+
+::: notes
+Open `notebooks/05-failure-mode-lab.qmd` if demonstrating live. Emphasize that
+the sequential method is an explicit loop; language built-ins can change their
+algorithm across versions.
+:::
+
+## Summation Results
+
+| Method | Result | Relative error |
+|---|---:|---:|
+| Left to right | $0$ | $1$ |
+| Magnitude order | $10\,000$ | $0$ |
+| Pairwise tree | $9\,998$ | $2\times10^{-4}$ |
+| Neumaier compensation | $10\,000$ | $0$ |
+| `math.fsum` | $10\,000$ | $0$ |
+
+::: notes
+These results rank methods only for this sequence. The pairwise split loses two
+units but preserves almost everything the sequential order discards.
+:::
+
+## Sum Conditioning Still Matters
+
+$$
+\kappa_{\mathrm{sum}}=
+\frac{\sum_i |x_i|}{|\sum_i x_i|}
+$$
+
+- A stable reduction reduces arithmetic error
+- A large $\kappa_{\mathrm{sum}}$ exposes input sensitivity
+- No summation method recovers information absent from the data
+
+::: notes
+Connect directly to Module 4. Fixed exact inputs let us compare algorithmic
+error, but real measurements near $10^{16}$ may not support unit-scale claims.
+:::
+
+## Choose A Reduction Contract
+
+- Sequential: simple, error can grow with $n$
+- Pairwise: tree depth near $\log_2 n$, parallel-friendly
+- Compensated: retains discarded low-order information
+- Magnitude ordering: sometimes helpful, costs sorting
+- Library reduction: prefer documented guarantees
+
+::: notes
+Avoid promising exactness. Overflow, subnormals, mixed signs, conditioning, and
+the actual tree can dominate qualitative first-order comparisons.
+:::
+
+## Prediction: A Finite Norm
+
+For $x=y=10^{308}$:
+
+$$
+\sqrt{x^2+y^2}
+\approx 1.4142\times10^{308}
+$$
+
+- The final result is representable
+- Are the intermediate squares representable?
+- Which bound can detect a failed result?
+
+::: notes
+Ask for the intermediate before revealing infinity. The invariant is
+$m\le\|(x,y)\|_2\le\sqrt{2}m$ with $m=\max(|x|,|y|)$.
+:::
+
+## Scale Before Squaring
+
+$$
+m=\max(|x|,|y|),\qquad
+\|(x,y)\|_2=m\sqrt{(x/m)^2+(y/m)^2}
+$$
+
+| Method | Result |
+|---|---:|
+| Naive squares | $\infty$ |
+| Scaled formula | $1.4142135623730951\times10^{308}$ |
+| `hypot` | $1.4142135623730951\times10^{308}$ |
+
+::: notes
+The scaled and library results satisfy the invariant and agree with a
+100-digit reference to relative error $5.77\times10^{-17}$. Use a tested
+general norm routine for production vectors.
+:::
+
+## Underflow Depends On Intermediates
+
+$$
+10^{-200}\times10^{-200}\times10^{200}=10^{-200}
+$$
+
+| Evaluation | Result |
+|---|---:|
+| $(10^{-200}10^{-200})10^{200}$ | $0$ |
+| $10^{-200}(10^{-200}10^{200})$ | $10^{-200}$ |
+
+::: notes
+Regrouping diagnoses the avoidable intermediate; it is not a universal product
+algorithm. Other exponent combinations can make the alternative order fail.
+:::
+
+## Compare Likelihoods In Log Space
+
+$$
+\log\left(\prod_i p_i\right)=\sum_i\log p_i
+$$
+
+- $10^{-400}$ and $10^{-401}$ both become zero in binary64
+- Log likelihoods remain finite
+- Their difference is $\log(10)$
+- Keep comparison and normalization in log space
+
+::: notes
+Exponentiating the result can still underflow. Positive nonzero factors are
+assumed here; zeros, signs, and invalid probabilities need explicit policies.
+:::
+
+## Run The Failure-Mode Lab
+
+```{.bash}
+quarto preview notebooks/05-failure-mode-lab.qmd
+```
+
+- Predict before each execution
+- Record the failed intermediate
+- Compare with the stated reference or invariant
+- Change one scale or order at a time
+
+::: notes
+Switch to the tutorial. The full build also publishes a downloadable Jupyter
+notebook; the `.qmd` remains authoritative.
+:::
+
+## Match Remedy To Cause
+
+| Failure | Targeted response |
+|---|---|
+| Nearby subtraction | Identity or specialized function |
+| Lost reduction terms | Pairwise or compensation |
+| Overflowing powers | Scale first |
+| Underflowing product | Rescale, split exponent, or use logs |
+| Order dependence | Select and document the tree |
+
+::: notes
+Ask what evidence would show that each response worked over the intended input
+range. “Use more precision” is an experiment, not the default answer.
+:::
+
+## Evidence Has A Scope
+
+- Decimal references are checked at two precisions
+- The summation reference is exact
+- The norm has a reference and an independent bound
+- Examples isolate arithmetic, not measurement uncertainty
+- Selected cases do not establish global stability theorems
+
+::: notes
+Library implementations and edge cases can differ. Encourage a claim about the
+tested data and range rather than a timeless label for an operation.
+:::
+
+## Module 5 Takeaways
+
+- Find the first intermediate that loses useful information
+- Treat summation order as part of the numerical method
+- Scale intermediates before they leave the usable range
+- Match reformulation to the diagnosed failure
+- Validate the change and state its limits
+
+::: notes
+Transition to Module 6: an update that rounds to zero may be convergence or may
+be stagnation. The same diagnostics are needed inside iterative algorithms.
 :::

@@ -56,6 +56,10 @@ The
 [sensitivity, stability, and residuals](notebooks/04-sensitivity-stability-residuals.qmd)
 activity then separates intrinsic problem sensitivity from avoidable
 algorithmic error and implementation defects.
+The
+[failure-mode laboratory](notebooks/05-failure-mode-lab.qmd)
+applies that diagnosis to cancellation, summation order, overflow, underflow,
+scaling, and log-domain reformulations.
 
 
 ## Suggested schedule

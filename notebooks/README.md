@@ -35,3 +35,6 @@ the intended learners can access.
 4. [Sensitivity, stability, and residuals](04-sensitivity-stability-residuals.qmd)
    separates problem conditioning from algorithmic behaviour and demonstrates
    why a small residual need not imply a small forward error.
+5. [Failure-mode laboratory](05-failure-mode-lab.qmd) diagnoses cancellation,
+   reduction-order error, overflowing norm intermediates, underflowing products,
+   and log-domain comparisons using references and invariants.

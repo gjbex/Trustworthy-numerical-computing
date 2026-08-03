@@ -66,11 +66,58 @@ Ask for predictions before running
 from $\eta/\delta$ and persists in high precision.
 :::
 
+## Formal Forward Error
+
+Let $S(d)$ be the acceptable exact solutions for data $d$:
+
+$$
+e_{\mathrm{fwd}}(\hat{x};d)=
+\inf_{x\in S(d)} \rho_X(\hat{x},x)
+$$
+
+For a unique nonzero solution $x$:
+
+$$
+e_{\mathrm{fwd,rel}}=
+\frac{\|\hat{x}-x\|_X}{\|x\|_X}
+$$
+
+- Must state the solution or branch, norm, and scaling
+
+::: notes
+Use an absolute or component-scaled measure when the exact solution is zero or
+components have different units. A value computed against a justified
+numerical reference estimates the unknown exact forward error.
+:::
+
+## Formal Backward Error
+
+Let $S(d)$ be the exact solutions for data $d$:
+
+$$
+\eta(\hat{x};d)=
+\inf_{\Delta d\ \mathrm{admissible}}
+\left\{
+\rho_D(d,d+\Delta d):
+\hat{x}\in S(d+\Delta d)
+\right\}
+$$
+
+- Infimum of allowed data changes that make $\hat{x}$ exact
+- Must state structure, norm, and scaling
+
+::: notes
+The word "nearby" is defined by $\rho_D$ and the admissible perturbations. For
+a relative normwise measure, $\rho_D=\|\Delta d\|_D/\|d\|_D$. Absolute or
+component-scaled measures can be more meaningful for zero or differently
+scaled data.
+:::
+
 ## Backward Stability
 
 - Forward error: is the computed answer close?
 - Backward error: is it exact for a nearby input?
-- Stable algorithms introduce a small backward perturbation
+- Backward stable: $\eta(\hat{x};d)\le C u$ for a stated input class
 - Ill-conditioning can amplify that perturbation
 
 $$

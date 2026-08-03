@@ -149,13 +149,104 @@ quarto preview notebooks/04-sensitivity-stability-residuals.qmd
 The complete site build also generates a downloadable Jupyter notebook.
 
 
+## Forward and backward error can be defined formally
+
+Let $d$ denote the supplied problem data and let $S(d)$ be the set of exact
+solutions for those data. For a computed result $\hat{x}$, define the forward
+error by
+
+$$
+e_{\mathrm{fwd}}(\hat{x};d)
+=
+\inf_{x\in S(d)} \rho_X(\hat{x},x),
+$$
+
+where $\rho_X$ measures distance in the solution space. If the problem has a
+unique exact solution $x$, a common relative normwise choice is
+
+$$
+e_{\mathrm{fwd,rel}}(\hat{x};d)
+=
+\frac{\|\hat{x}-x\|_X}{\|x\|_X},
+\qquad x\ne 0.
+$$
+
+For a problem with multiple solutions, $S(d)$ must contain the solutions that
+are acceptable for the scientific question. If a particular solution branch
+is intended, measuring the distance to any other branch could understate the
+error. An absolute or component-scaled measure is needed when a relative norm
+is undefined or inappropriate, for example when $x=0$ or components have
+different units. When $x$ is approximated by a high-precision or independent
+reference, the result is a measured forward-error estimate rather than the
+unknown exact forward error, and the reference must be justified.
+
+The backward error instead measures distance in the data space. Define it by
+
+$$
+\eta(\hat{x};d)
+=
+\inf_{\Delta d\ \text{admissible}}
+\left\{
+\rho_D(d,d+\Delta d)
+\;:\;
+\hat{x}\in S(d+\Delta d)
+\right\}.
+$$
+
+Here $\Delta d$ ranges only over **admissible perturbations**: changes that
+preserve whatever structure belongs to the problem, such as matrix symmetry,
+positive parameters, or fixed coefficients. The function $\rho_D$ measures
+the size of the data change. For nonzero data, a common normwise relative
+choice is
+
+$$
+\rho_D(d,d+\Delta d)=\frac{\|\Delta d\|_D}{\|d\|_D},
+$$
+
+but an absolute or component-scaled measure may be more meaningful when some
+data are zero, have different units, or vary over very different scales. If no
+admissible perturbation makes $\hat{x}$ exact, the backward error is infinite.
+Thus a numerical value for backward error is meaningful only together with its
+data, perturbation model, norm, and scaling.
+
+For example, consider $Ax=b$ with $A$ held fixed. If
+$r=b-A\hat{x}$, then $\hat{x}$ exactly solves the nearby problem
+
+$$
+A\hat{x}=b+\Delta b,
+\qquad \Delta b=-r.
+$$
+
+Under a relative normwise perturbation of the right-hand side, the backward
+error is therefore
+
+$$
+\eta_b(\hat{x};A,b)
+=
+\frac{\|r\|}{\|b\|},
+\qquad b\ne 0.
+$$
+
+Allowing perturbations in $A$ as well would define a different backward error;
+that choice must be stated rather than assumed.
+
+The two definitions expose the central contrast:
+
+* forward error asks how far $\hat{x}$ is from an acceptable exact solution;
+* backward error asks how far the supplied data must move to make $\hat{x}$
+  exact.
+
+
 ## Stability measures algorithmic behaviour
 
-An algorithm is **backward stable** for a class of inputs when its computed
-answer can be interpreted as the exact answer to a nearby problem, with the
-required input perturbation small under a stated measure. This definition asks
-whether the algorithm behaves as if it introduced only a small disturbance to
-the supplied data.
+An algorithm is **backward stable** for a stated class of inputs when every
+computed answer has a small backward error under the selected perturbation
+model. In floating-point analysis this is often expressed as
+$\eta(\hat{x};d)\le C u$, where $u$ is the unit roundoff and $C$ is a modest
+factor that may depend on the problem size or input class. This asks whether
+the algorithm behaves as if it introduced only a small disturbance to the
+supplied data; it does not assert that the computed answer is close to the
+desired answer.
 
 Backward stability does not guarantee small forward error. If the problem is
 ill-conditioned, a tiny backward error can be amplified into a large output

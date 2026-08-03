@@ -229,6 +229,46 @@ for delta_text in ["1", "1e-4", "1e-8", "1e-12"]:
 
 
 :::: {.cell .markdown}
+## Define forward and backward error formally
+
+Let $d$ denote the supplied problem data and let $S(d)$ be the set of exact
+solutions. The forward error of a computed result $\hat{x}$ is
+
+$$
+e_{\mathrm{fwd}}(\hat{x};d)
+=
+\inf_{x\in S(d)} \rho_X(\hat{x},x).
+$$
+
+For a unique nonzero exact solution $x$, a common relative normwise choice is
+$\rho_X=\|\hat{x}-x\|_X/\|x\|_X$. With multiple solutions, $S(d)$ must
+represent the acceptable solutions or the intended branch. If $x$ is replaced
+by a justified numerical reference, the measured value is an estimate of the
+unknown exact forward error.
+
+The backward error instead measures distance in the data space:
+
+$$
+\eta(\hat{x};d)
+=
+\inf_{\Delta d\ \text{admissible}}
+\left\{
+\rho_D(d,d+\Delta d)
+\;:\;
+\hat{x}\in S(d+\Delta d)
+\right\}.
+$$
+
+This definition asks for the infimum of the sizes of admissible input changes
+that make the computed result exact. It is incomplete unless the allowed
+changes, preserved structure, norm, and scaling in $\rho_D$ are stated. For
+$Ax=b$ with $A$ fixed and $r=b-A\hat{x}$, choosing
+$\rho_D=\|\Delta b\|/\|b\|$ gives $\eta_b=\|r\|/\|b\|$, because $\hat{x}$
+exactly solves $A\hat{x}=b-r$.
+::::
+
+
+:::: {.cell .markdown}
 ## Hold the problem fixed and change the algorithm
 
 Now consider the dimensionless polynomial

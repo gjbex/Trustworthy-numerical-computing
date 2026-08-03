@@ -38,3 +38,6 @@ the intended learners can access.
 5. [Failure-mode laboratory](05-failure-mode-lab.qmd) diagnoses cancellation,
    reduction-order error, overflowing norm intermediates, underflowing products,
    and log-domain comparisons using references and invariants.
+6. [Convergence and stopping diagnostics](06-convergence-and-stopping.qmd)
+   compares mixed residual and update criteria, classifies several termination
+   reasons, and uses a tolerance study to expose an attainable binary64 floor.

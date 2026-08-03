@@ -2,37 +2,276 @@
 
 ## Module Arc
 
-- Decide what can be observed
-- Relate a proxy to the required accuracy
-- Detect convergence and failure
-- Record why the algorithm stopped
+- Separate desired error from observable proxies
+- Give stopping criteria scales and units
+- Detect convergence and recognizable failure
+- Find an attainable accuracy floor
+- Record why the iteration ended
 
 ::: notes
-Choose one root finder or small solver that can converge, stagnate, and diverge
-under controlled conditions.
+Module 5 ended with an update that could round away. Module 6 puts that failure
+inside an iterative method. Ask for a prediction before each result slide.
 :::
 
-## Error, Residual, Update
+## Error, Residual, And Update
 
-- **Error:** distance from the desired result
-- **Residual:** how well equations are satisfied
-- **Update:** change between successive iterates
+$$
+e_k=x_k-x^*,\qquad r_k=f(x_k),\qquad
+\Delta x_k=x_{k+1}-x_k
+$$
 
-> A small update can mean convergence—or that arithmetic has stagnated.
+| Quantity | Question | Observable? |
+|---|---|---:|
+| Error | How far from the desired answer? | Usually no |
+| Residual | How well is the equation satisfied? | Usually yes |
+| Update | How much did the iterate move? | Yes |
 
 ::: notes
-Ask which quantity is actually available during the chosen experiment.
+The residual may have different units from the solution. A small residual
+implies small error only through a problem-specific conditioning argument.
 :::
 
-## A Defensible Stop
+## Stopping Is A Claim
 
-- Combine absolute and relative thresholds
-- Scale quantities meaningfully
-- Check for non-finite values and stagnation
-- Enforce an iteration budget
-- Return a termination reason with the result
+$$
+\lVert r_k\rVert\le a_r+\rho_r R
+$$
+
+$$
+\lVert\Delta x_k\rVert\le a_x+\rho_x X_k
+$$
+
+- Name each quantity, norm, unit, and scale
+- Keep an absolute floor near zero
+- Decide which criteria must hold together
 
 ::: notes
-Show several termination reasons in the final exercise output, not a single
-boolean `converged`.
+In the activity both criteria must hold. That conservative choice is useful
+for comparison, not a universal solver theorem. A production method may use
+an initial residual, component scales, or a backward-error estimate.
+:::
+
+## Prediction: One Relative Error, Two Scales
+
+Solve $x=b$ with a candidate $x=0.9b$:
+
+| $b$ | $|b-x|$ | Relative residual |
+|---:|---:|---:|
+| $10^{-12}$ | $10^{-13}$ | $0.1$ |
+| $10^{12}$ | $10^{11}$ | $0.1$ |
+
+What does an absolute threshold of $10^{-6}$ report?
+
+::: notes
+It accepts the small-scale candidate and rejects the large-scale candidate.
+The same relative quality gets opposite decisions. The absolute component is
+still needed at zero; it should represent an application scale.
+:::
+
+## A Controlled Relaxation
+
+$$
+x_{k+1}=x_k+\omega(b-x_k)
+$$
+
+For $x^*=b$:
+
+$$
+e_{k+1}=(1-\omega)e_k
+$$
+
+- $0<\omega<2$: contraction
+- $\omega=2$: two-cycle
+- $\omega>2$: growing error
+
+::: notes
+In this deliberately well-conditioned scalar problem, residual magnitude and
+forward-error magnitude are equal. Explicitly prevent learners from carrying
+that identity to arbitrary systems.
+:::
+
+## Prediction: Classify Four Runs
+
+| Case | $b$ | $x_0$ | $\omega$ |
+|---|---:|---:|---:|
+| Contracting | $1$ | $0$ | $0.5$ |
+| Two-cycle | $1$ | $0$ | $2$ |
+| Growing | $1$ | $0$ | $3$ |
+| Tiny step | $2$ | $1$ | $10^{-20}$ |
+
+Predict the iterate pattern and termination reason.
+
+::: notes
+Have participants use $|1-\omega|$ for the first three. For the last case,
+compare the requested update with binary64 spacing near one.
+:::
+
+## Four Runs, Four Reasons
+
+| Case | Iterations | Final residual | Final update | Reason |
+|---|---:|---:|---:|---|
+| Contracting | 27 | $7.45\times10^{-9}$ | $7.45\times10^{-9}$ | `converged` |
+| Two-cycle | 2 | $1$ | $-2$ | `oscillating` |
+| Growing | 3 | $-8$ | $12$ | `diverging` |
+| Tiny step | 1 | $1$ | $0$ | `stagnated` |
+
+::: notes
+The detector uses an exact two-cycle and three consecutive residual increases.
+These are declared tutorial policies, not universal classifiers.
+:::
+
+## A Zero Update Can Be False Convergence
+
+For $b=2$, $x_0=1$, $\omega=10^{-20}$:
+
+$$
+x_1=\operatorname{fl}(1+10^{-20})=1
+$$
+
+- Computed update: $0$
+- Residual: $1$
+- Update-only decision: accept
+- Combined decision: `stagnated`
+
+::: notes
+The requested step is nonzero but smaller than binary64 spacing near one,
+about $2.22\times10^{-16}$. Checking the stored candidate reveals the loss.
+:::
+
+## Failure Is A Reportable Result
+
+- `converged`: all required criteria hold
+- `stagnated`: no computed movement while criteria fail
+- `oscillating`: a declared cycle detector triggers
+- `diverging`: a declared growth detector triggers
+- `non_finite`: an iterate or diagnostic is NaN or infinite
+- `max_iterations`: the budget is exhausted
+
+::: notes
+Check order can change the returned reason. The tutorial checks non-finite
+values, success, stagnation, cycling, growth, and finally the budget.
+:::
+
+## Prediction: Newton Meets Binary64
+
+$$
+x_{k+1}=\frac12\left(x_k+\frac{2}{x_k}\right),
+\qquad r_k=x_k^2-2
+$$
+
+From $x_0=1$, compare relative tolerances:
+
+- practical: $10^{-14}$
+- strict: $10^{-16}$
+
+Will the stricter request improve the answer?
+
+::: notes
+The high-precision value of square root two is used only to assess forward
+error after each run, never as the stopping rule.
+:::
+
+## Same Answer, Different Evidence
+
+| Request | Iterations | Relative residual | Forward error | Reason |
+|---|---:|---:|---:|---|
+| $10^{-14}$ | 6 | $2.22\times10^{-16}$ | $8.87\times10^{-17}$ | `converged` |
+| $10^{-16}$ | 6 | $2.22\times10^{-16}$ | $8.87\times10^{-17}$ | `stagnated` |
+
+Both return `1.414213562373095`.
+
+::: notes
+At the strict request, the update rounds to zero before the residual threshold
+holds. More iterations cannot change this binary64 iterate.
+:::
+
+## Why The Residual Is Informative Here
+
+For the positive root:
+
+$$
+x-\sqrt{2}=\frac{x^2-2}{x+\sqrt{2}}
+$$
+
+- Numerator: the observed residual
+- Denominator: well-scaled near the root
+- Decimal reference: independent forward-error check
+
+This relationship is problem-specific.
+
+::: notes
+Connect back to Module 4. A residual needs conditioning information or a direct
+identity before it can support a forward-error conclusion.
+:::
+
+## Tolerance Study
+
+| Relative tolerance | Iterations | Forward error | Reason |
+|---:|---:|---:|---|
+| $10^{-2}$ | 3 | $1.50\times10^{-6}$ | converged |
+| $10^{-4}$ | 4 | $1.13\times10^{-12}$ | converged |
+| $10^{-8}$ | 5 | $8.87\times10^{-17}$ | converged |
+| $10^{-14}$ | 6 | $8.87\times10^{-17}$ | converged |
+| $10^{-16}$ | 6 | $8.87\times10^{-17}$ | stagnated |
+
+::: notes
+Forward error plateaus. Tightening the tolerance past the attainable region
+changes the reason, not the approximation. Iteration count alone is not a
+quality metric.
+:::
+
+## Record The Termination Contract
+
+- Problem, method, arithmetic environment
+- Initial value and solver parameters
+- Residual and update definitions
+- Norms, scales, absolute and relative tolerances
+- Iteration count and termination reason
+- Final residual, update, and selected history
+
+::: notes
+The notebook prints a compact evidence record. Larger solvers may also require
+preconditioner details, component scales, rate estimates, and software versions.
+:::
+
+## Run The Convergence Activity
+
+```{.bash}
+quarto preview notebooks/06-convergence-and-stopping.qmd
+```
+
+- Predict before each run
+- Change one relaxation factor
+- Compare update-only and combined decisions
+- Locate the Newton accuracy floor
+
+::: notes
+Switch to the authoritative Quarto tutorial. The complete build executes it
+and publishes a downloadable Jupyter notebook.
+:::
+
+## Evidence Has A Scope
+
+- Relaxation behaviour is checked against a known recurrence
+- Newton forward error uses a 100-digit decimal reference
+- A direct identity relates residual and error for this root
+- Cycle and growth detectors are intentionally simple
+- No model, input, or discretization has been validated
+
+::: notes
+The tolerance study changes only solver tolerance. Module 7 adds independent
+references, invariants, cross-method checks, and refinement evidence.
+:::
+
+## Module 6 Takeaways
+
+- Error, residual, and update answer different questions
+- Give every tolerance a quantity, unit, norm, and scale
+- Reject small-update false convergence with independent evidence
+- Report failure reasons and exhausted budgets explicitly
+- Use tolerance studies to find attainable accuracy
+
+::: notes
+Transition to Module 7: honest termination is one item in a validation
+portfolio, not proof that the scientific result is correct.
 :::

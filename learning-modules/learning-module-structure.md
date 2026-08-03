@@ -43,7 +43,9 @@ products, and log-domain calculations against references and invariants.
 
 Extends error reasoning to algorithms that produce a sequence of approximations.
 Participants distinguish error, residual, update size, stagnation, divergence,
-and false convergence.
+and false convergence. A companion activity compares mixed stopping criteria,
+classifies controlled relaxation runs, and uses Newton's method to identify an
+attainable binary64 accuracy floor.
 
 
 ## Part III: Evidence And Reproducibility

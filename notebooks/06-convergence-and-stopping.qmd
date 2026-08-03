@@ -1,0 +1,703 @@
+---
+title: "Convergence And Stopping Diagnostics"
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+---
+
+:::: {.cell .markdown}
+Iterative algorithms need a termination contract: observable criteria,
+diagnosed failure modes, an iteration budget, and a record of why the run
+ended. This activity compares residual and update tests in two small problems
+whose exact behaviour can be checked independently.
+
+::: {.content-visible when-format="html"}
+This activity accompanies
+[Module 6: Iterative Algorithms And Convergence](../learning-modules/06-iterative-algorithms-and-convergence.md).
+
+[Download the executable Jupyter notebook](06-convergence-and-stopping.ipynb){.btn .btn-primary download="06-convergence-and-stopping.ipynb"}
+:::
+
+::: {.content-visible when-format="ipynb"}
+This activity accompanies
+[Module 6: Iterative Algorithms And Convergence](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/06-iterative-algorithms-and-convergence.html).
+:::
+::::
+
+
+:::: {.cell .markdown}
+## Learning goals
+
+After this activity, you should be able to:
+
+- distinguish true forward error from observable residual and update size;
+- use mixed absolute-relative stopping criteria with documented scales;
+- demonstrate why a small update can be false convergence;
+- classify convergence, stagnation, oscillation, divergence, and an exhausted
+  iteration budget;
+- use a tolerance study to identify an attainable floating-point floor;
+- preserve enough evidence to review a termination claim.
+::::
+
+
+:::: {.cell .markdown}
+## Prerequisites
+
+Complete
+[Module 5: Common Numerical Failure Modes](../learning-modules/05-common-numerical-failure-modes.md)
+or the [failure-mode laboratory](05-failure-mode-lab.qmd) first. This tutorial
+uses the mixed comparison criteria from Module 3, the residual-error distinction
+from Module 4, and the finite-precision failure patterns from Module 5.
+::::
+
+
+:::: {.cell .markdown}
+## Outline
+
+1. Compare an absolute residual threshold across two problem scales.
+2. Implement a relaxation iteration with residual and update criteria.
+3. Classify contraction, oscillation, divergence, and stagnation.
+4. Run Newton's method for $\sqrt{2}$ with practical and strict tolerances.
+5. Sweep tolerances and locate the binary64 accuracy floor.
+6. Assemble an auditable evidence record and state its limitations.
+::::
+
+
+:::: {.cell .markdown}
+## Establish the arithmetic and reporting tools
+
+All examples are dimensionless and use Python `float`, which is binary64 in
+this environment. `Decimal` supplies an independently computed square-root
+reference for measuring forward error after the Newton runs. It is never used
+by either iterative method to decide when to stop.
+::::
+
+```{python}
+#| label: convergence-setup
+
+from decimal import Decimal, localcontext
+import math
+import sys
+
+
+def mixed_limit(absolute_tolerance, relative_tolerance, scale):
+    """Return an absolute-plus-relative threshold for a nonnegative scale."""
+    return absolute_tolerance + relative_tolerance * abs(scale)
+
+
+def format_float(value):
+    """Format a diagnostic value compactly."""
+    return f"{value:.6e}"
+
+
+print(f"Python: {sys.version.split()[0]}")
+print(f"binary64 epsilon: {sys.float_info.epsilon:.6e}")
+print(f"binary64 spacing at 1: {math.ulp(1.0):.6e}")
+```
+
+
+:::: {.cell .markdown}
+## Prediction: the same relative error at two scales
+
+The equation is $x=b$. Both candidates below underestimate $b$ by ten percent.
+Before running the cell, predict which candidate an absolute residual threshold
+of $10^{-6}$ accepts. Then decide whether that outcome reflects their common
+relative quality.
+::::
+
+```{python}
+#| label: residual-scaling
+
+scale_cases = [
+    {"label": "small scale", "b": 1.0e-12, "x": 0.9e-12},
+    {"label": "large scale", "b": 1.0e12, "x": 0.9e12},
+]
+absolute_only_tolerance = 1.0e-6
+mixed_absolute_tolerance = 1.0e-15
+mixed_relative_tolerance = 1.0e-8
+
+print(
+    f"{'case':>12s}  {'|residual|':>12s}  {'relative':>10s}  "
+    f"{'absolute only':>14s}  {'mixed':>8s}"
+)
+for case in scale_cases:
+    residual = case["b"] - case["x"]
+    relative_residual = abs(residual) / abs(case["b"])
+    absolute_only_ok = abs(residual) <= absolute_only_tolerance
+    mixed_ok = abs(residual) <= mixed_limit(
+        mixed_absolute_tolerance,
+        mixed_relative_tolerance,
+        case["b"],
+    )
+    print(
+        f"{case['label']:>12s}  {abs(residual):12.3e}  "
+        f"{relative_residual:10.3e}  {str(absolute_only_ok):>14s}  "
+        f"{str(mixed_ok):>8s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The absolute-only rule accepts the small-scale candidate and rejects the
+large-scale candidate even though both have relative residual $0.1$. The mixed
+criterion rejects both while retaining an absolute floor for cases where
+$b=0$. Its $10^{-15}$ absolute scale and $10^{-8}$ relative requirement are
+tutorial choices, not universal tolerances.
+::::
+
+
+:::: {.cell .markdown}
+## Define a relaxation solver with explicit termination reasons
+
+For $x=b$, use
+
+$$
+x_{k+1}=x_k+\omega(b-x_k).
+$$
+
+The solver records the computed update $x_{k+1}-x_k$, not only the requested
+step $\omega(b-x_k)$. It requires both mixed residual and update criteria. It
+also detects an unchanged iterate, an exact two-cycle, three consecutive
+increases in residual magnitude, non-finite values, and the iteration budget.
+
+These detectors make the controlled cases visible. Their exact comparisons
+and short windows are not proposed as a general production policy.
+::::
+
+```{python}
+#| label: relaxation-solver
+
+def relaxation_solve(
+    b,
+    x0,
+    omega,
+    *,
+    residual_atol=0.0,
+    residual_rtol=1.0e-8,
+    update_atol=0.0,
+    update_rtol=1.0e-8,
+    max_iterations=50,
+):
+    """Solve x=b and return diagnostics for convergence or failure."""
+    x = float(x0)
+    b = float(b)
+    iterates = [x]
+    residual_magnitudes = [abs(b - x)]
+    history = []
+
+    for iteration in range(1, max_iterations + 1):
+        residual_before = b - x
+        requested_update = omega * residual_before
+        candidate = x + requested_update
+        computed_update = candidate - x
+        residual = b - candidate
+
+        residual_threshold = mixed_limit(
+            residual_atol,
+            residual_rtol,
+            b,
+        )
+        update_scale = max(abs(x), abs(candidate))
+        update_threshold = mixed_limit(
+            update_atol,
+            update_rtol,
+            update_scale,
+        )
+        residual_ok = abs(residual) <= residual_threshold
+        update_ok = abs(computed_update) <= update_threshold
+
+        row = {
+            "iteration": iteration,
+            "x": candidate,
+            "residual": residual,
+            "computed_update": computed_update,
+            "requested_update": requested_update,
+            "residual_ok": residual_ok,
+            "update_ok": update_ok,
+        }
+        history.append(row)
+
+        values_are_finite = all(
+            math.isfinite(value)
+            for value in (candidate, residual, computed_update)
+        )
+        if not values_are_finite:
+            reason = "non_finite"
+        elif residual_ok and update_ok:
+            reason = "converged"
+        elif candidate == x:
+            reason = "stagnated"
+        elif len(iterates) >= 2 and candidate == iterates[-2]:
+            reason = "oscillating"
+        else:
+            residual_magnitudes.append(abs(residual))
+            recent = residual_magnitudes[-4:]
+            if len(recent) == 4 and all(
+                later > earlier for earlier, later in zip(recent, recent[1:])
+            ):
+                reason = "diverging"
+            else:
+                reason = None
+
+        x = candidate
+        iterates.append(x)
+        if reason is not None:
+            break
+    else:
+        reason = "max_iterations"
+
+    final = history[-1]
+    return {
+        "method": "relaxation",
+        "reason": reason,
+        "iterations": final["iteration"],
+        "x": final["x"],
+        "residual": final["residual"],
+        "computed_update": final["computed_update"],
+        "parameters": {
+            "b": b,
+            "x0": float(x0),
+            "omega": omega,
+            "residual_atol": residual_atol,
+            "residual_rtol": residual_rtol,
+            "update_atol": update_atol,
+            "update_rtol": update_rtol,
+            "max_iterations": max_iterations,
+        },
+        "history": history,
+    }
+```
+
+
+:::: {.cell .markdown}
+## Prediction: contraction with $\omega=0.5$
+
+Starting from zero with $b=1$, the exact error recurrence is
+$e_{k+1}=(1-\omega)e_k$. Predict the first few iterates and whether the
+residual and update decrease at the same rate. Then inspect the complete run
+and its last five records.
+::::
+
+```{python}
+#| label: relaxation-contraction
+
+contracting_run = relaxation_solve(b=1.0, x0=0.0, omega=0.5)
+
+print(f"reason:     {contracting_run['reason']}")
+print(f"iterations: {contracting_run['iterations']}")
+print(f"x:          {contracting_run['x']:.17g}")
+print(f"residual:   {contracting_run['residual']:.6e}")
+print(f"update:     {contracting_run['computed_update']:.6e}")
+print()
+print(f"{'k':>3s}  {'x_k':>18s}  {'residual':>12s}  {'update':>12s}")
+for row in contracting_run["history"][-5:]:
+    print(
+        f"{row['iteration']:3d}  {row['x']:18.15f}  "
+        f"{row['residual']:12.3e}  {row['computed_update']:12.3e}"
+    )
+```
+
+
+:::: {.cell .markdown}
+## Compare five controlled behaviours
+
+Predict the termination reason for each value of $\omega$ before execution.
+The last case starts at one with $b=2$: its requested step is far smaller than
+binary64 spacing near one. The budget-limited case contracts too slowly to
+satisfy the criteria in its five permitted iterations.
+::::
+
+```{python}
+#| label: relaxation-behaviours
+
+relaxation_cases = [
+    ("contracting", {"b": 1.0, "x0": 0.0, "omega": 0.5}),
+    ("two-cycle", {"b": 1.0, "x0": 0.0, "omega": 2.0}),
+    ("growing", {"b": 1.0, "x0": 0.0, "omega": 3.0}),
+    (
+        "budget limited",
+        {"b": 1.0, "x0": 0.0, "omega": 0.01, "max_iterations": 5},
+    ),
+    ("rounded update", {"b": 2.0, "x0": 1.0, "omega": 1.0e-20}),
+]
+
+relaxation_results = {}
+print(
+    f"{'case':>15s}  {'omega':>9s}  {'k':>3s}  {'x':>12s}  "
+    f"{'residual':>12s}  {'update':>12s}  {'reason':>12s}"
+)
+for label, parameters in relaxation_cases:
+    result = relaxation_solve(**parameters)
+    relaxation_results[label] = result
+    print(
+        f"{label:>15s}  {parameters['omega']:9.1e}  "
+        f"{result['iterations']:3d}  {result['x']:12.4e}  "
+        f"{result['residual']:12.4e}  "
+        f"{result['computed_update']:12.4e}  {result['reason']:>12s}"
+    )
+
+rounded_record = relaxation_results["rounded update"]["history"][-1]
+print()
+print(f"rounded-update residual criterion: {rounded_record['residual_ok']}")
+print(f"rounded-update update criterion:   {rounded_record['update_ok']}")
+```
+
+
+:::: {.cell .markdown}
+The rounded-update case is the critical counterexample. Its computed update is
+zero, so an update-only test would accept it. Its residual is one, so the
+combined policy rejects convergence and reports `stagnated`. The requested
+step remains available in the history as evidence of what finite precision
+discarded.
+::::
+
+
+:::: {.cell .markdown}
+## Exercise: change the relaxation factor
+
+Choose a value of $\omega$ and predict its exact-arithmetic behaviour from
+$|1-\omega|$. Then run it. If the detector reports `max_iterations`, inspect
+the history before deciding whether the sequence is converging too slowly or
+showing a pattern this simple policy does not classify.
+::::
+
+```{python}
+#| label: learner-relaxation
+
+learner_omega = 1.5  # Change this after writing down a prediction.
+learner_run = relaxation_solve(
+    b=1.0,
+    x0=0.0,
+    omega=learner_omega,
+    max_iterations=50,
+)
+
+print(f"omega:      {learner_omega}")
+print(f"|1-omega|:  {abs(1.0 - learner_omega):.3f}")
+print(f"reason:     {learner_run['reason']}")
+print(f"iterations: {learner_run['iterations']}")
+print(f"residual:   {learner_run['residual']:.6e}")
+```
+
+
+:::: {.cell .markdown}
+## Define Newton's method for $\sqrt{2}$
+
+Newton's method provides a second setting in which the true solution is not
+used for stopping. The residual is $x_k^2-2$, the update is the computed change
+in $x$, and both mixed criteria use the relevant current scale. A high-precision
+`Decimal` square root measures forward error only after termination.
+::::
+
+```{python}
+#| label: newton-solver
+
+def newton_sqrt(
+    a,
+    x0,
+    *,
+    residual_atol=0.0,
+    residual_rtol=1.0e-14,
+    update_atol=0.0,
+    update_rtol=1.0e-14,
+    max_iterations=30,
+):
+    """Approximate sqrt(a) and return an explicit termination record."""
+    if a <= 0.0 or x0 <= 0.0:
+        raise ValueError("This activity requires positive a and x0.")
+
+    x = float(x0)
+    history = []
+    for iteration in range(1, max_iterations + 1):
+        candidate = 0.5 * (x + a / x)
+        computed_update = candidate - x
+        residual = candidate * candidate - a
+        residual_ok = abs(residual) <= mixed_limit(
+            residual_atol,
+            residual_rtol,
+            a,
+        )
+        update_ok = abs(computed_update) <= mixed_limit(
+            update_atol,
+            update_rtol,
+            max(abs(x), abs(candidate)),
+        )
+        history.append(
+            {
+                "iteration": iteration,
+                "x": candidate,
+                "residual": residual,
+                "computed_update": computed_update,
+                "residual_ok": residual_ok,
+                "update_ok": update_ok,
+            }
+        )
+
+        if not all(
+            math.isfinite(value)
+            for value in (candidate, residual, computed_update)
+        ):
+            reason = "non_finite"
+        elif residual_ok and update_ok:
+            reason = "converged"
+        elif candidate == x:
+            reason = "stagnated"
+        else:
+            reason = None
+
+        x = candidate
+        if reason is not None:
+            break
+    else:
+        reason = "max_iterations"
+
+    final = history[-1]
+    return {
+        "method": "newton_sqrt",
+        "reason": reason,
+        "iterations": final["iteration"],
+        "x": final["x"],
+        "residual": final["residual"],
+        "computed_update": final["computed_update"],
+        "parameters": {
+            "a": a,
+            "x0": x0,
+            "residual_atol": residual_atol,
+            "residual_rtol": residual_rtol,
+            "update_atol": update_atol,
+            "update_rtol": update_rtol,
+            "max_iterations": max_iterations,
+        },
+        "history": history,
+    }
+
+
+with localcontext() as context:
+    context.prec = 100
+    sqrt_two_reference = Decimal(2).sqrt()
+
+
+def relative_forward_error(candidate, reference):
+    candidate_decimal = Decimal.from_float(candidate)
+    return abs(candidate_decimal - reference) / abs(reference)
+```
+
+
+:::: {.cell .markdown}
+## Prediction: practical versus unattainable tolerances
+
+Run the same method from the same initial value with relative tolerances
+$10^{-14}$ and $10^{-16}$. Predict whether the stricter request improves the
+binary64 answer, merely takes more iterations, or changes the termination
+reason. Both runs use zero absolute tolerance because the positive root and
+residual scale are safely away from zero in this controlled problem.
+::::
+
+```{python}
+#| label: newton-practical-strict
+
+newton_runs = {}
+for label, tolerance in [("practical", 1.0e-14), ("strict", 1.0e-16)]:
+    run = newton_sqrt(
+        2.0,
+        1.0,
+        residual_rtol=tolerance,
+        update_rtol=tolerance,
+    )
+    newton_runs[label] = run
+
+print(
+    f"{'request':>10s}  {'rtol':>9s}  {'k':>3s}  {'relative residual':>18s}  "
+    f"{'forward error':>14s}  {'reason':>10s}"
+)
+for label, run in newton_runs.items():
+    relative_residual = abs(run["residual"]) / 2.0
+    forward_error = relative_forward_error(run["x"], sqrt_two_reference)
+    print(
+        f"{label:>10s}  {run['parameters']['residual_rtol']:9.1e}  "
+        f"{run['iterations']:3d}  {relative_residual:18.6e}  "
+        f"{forward_error:14.6E}  {run['reason']:>10s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The two runs return the same binary64 value. At $10^{-14}$, both criteria hold.
+At $10^{-16}$, the next update is zero while the relative residual remains
+approximately $2.22\times10^{-16}$, beyond the requested threshold. The honest
+result is `stagnated`, not a stronger convergence claim.
+
+For this positive root,
+
+$$
+x-\sqrt{2}=\frac{x^2-2}{x+\sqrt{2}},
+$$
+
+which independently explains why the residual tracks forward error near the
+solution. Other equations require their own relationship.
+::::
+
+
+:::: {.cell .markdown}
+## Sweep tolerances and identify the accuracy floor
+
+A tolerance study changes only the residual and update requests. Predict where
+the iteration count or forward error stops improving. Do not interpret this as
+a mesh-refinement or model-validation study; those require independent changes
+and are introduced in Module 7.
+::::
+
+```{python}
+#| label: newton-tolerance-study
+
+tolerances = [
+    1.0e-2,
+    1.0e-4,
+    1.0e-8,
+    1.0e-12,
+    1.0e-14,
+    1.0e-16,
+    1.0e-20,
+]
+tolerance_study = []
+
+print(
+    f"{'rtol':>9s}  {'k':>3s}  {'relative residual':>18s}  "
+    f"{'forward error':>14s}  {'reason':>10s}"
+)
+for tolerance in tolerances:
+    run = newton_sqrt(
+        2.0,
+        1.0,
+        residual_rtol=tolerance,
+        update_rtol=tolerance,
+    )
+    record = {
+        "rtol": tolerance,
+        "iterations": run["iterations"],
+        "relative_residual": abs(run["residual"]) / 2.0,
+        "relative_forward_error": relative_forward_error(
+            run["x"],
+            sqrt_two_reference,
+        ),
+        "reason": run["reason"],
+    }
+    tolerance_study.append(record)
+    print(
+        f"{record['rtol']:9.1e}  {record['iterations']:3d}  "
+        f"{record['relative_residual']:18.6e}  "
+        f"{record['relative_forward_error']:14.6E}  "
+        f"{record['reason']:>10s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+Forward error plateaus near $8.87\times10^{-17}$. Tolerances through
+$10^{-14}$ can be satisfied under this contract; stricter requests produce the
+same approximation and an explicit stagnation reason. Iteration count alone
+would conceal that distinction.
+::::
+
+
+:::: {.cell .markdown}
+## Build a compact evidence record
+
+A reproducible convergence claim needs more than the final number. The record
+below retains the method, arithmetic environment, inputs, criteria, iteration
+count, termination reason, final residual and update, and an independent error
+measure available in this teaching problem. A production format may also need
+software versions, norm definitions, preconditioners, and selected history.
+::::
+
+```{python}
+#| label: convergence-evidence-record
+
+practical_run = newton_runs["practical"]
+evidence_record = {
+    "problem": "positive root of x**2 - 2 = 0",
+    "method": practical_run["method"],
+    "arithmetic": "Python float (binary64)",
+    "initial_value": practical_run["parameters"]["x0"],
+    "residual_scale": practical_run["parameters"]["a"],
+    "residual_atol": practical_run["parameters"]["residual_atol"],
+    "residual_rtol": practical_run["parameters"]["residual_rtol"],
+    "update_atol": practical_run["parameters"]["update_atol"],
+    "update_rtol": practical_run["parameters"]["update_rtol"],
+    "iterations": practical_run["iterations"],
+    "termination_reason": practical_run["reason"],
+    "final_x": practical_run["x"],
+    "final_residual": practical_run["residual"],
+    "final_computed_update": practical_run["computed_update"],
+    "relative_forward_error_against_decimal_reference": str(
+        relative_forward_error(practical_run["x"], sqrt_two_reference)
+    ),
+}
+
+for key, value in evidence_record.items():
+    print(f"{key}: {value}")
+```
+
+
+:::: {.cell .markdown}
+## What the experiments establish
+
+The relaxation experiment verifies its classifications against a known scalar
+error recurrence and exposes a stored update that rounds to zero. The Newton
+experiment uses a 100-digit decimal reference and an algebraic
+residual-to-error identity to interpret a tolerance plateau. Every run is
+deterministic and records an explicit reason.
+
+The evidence is deliberately bounded. The cycle detector recognizes only an
+exact two-cycle, the divergence detector uses a short monotone-growth window,
+and the scalar norms avoid component scaling. The experiments do not validate
+a physical model, uncertain input data, a discretization, or a general-purpose
+nonlinear solver. They establish habits and a reporting contract to carry into
+larger calculations.
+::::
+
+
+:::: {.cell .markdown}
+## Reflection questions
+
+1. Which quantity in each experiment is the desired error, and which
+   quantities are actually used to stop?
+2. Why does update-only stopping fail for the rounded-update relaxation case?
+3. What application information should determine a nonzero absolute tolerance?
+4. Why is `stagnated` more informative than `converged=False` for the strict
+   Newton run?
+5. Which independent experiment would you add before trusting the result of a
+   discretized scientific simulation?
+::::
+
+
+:::: {.cell .markdown}
+## Suggested answers
+
+1. Forward error is desired; residual and update are observable stopping
+   proxies. The known solution is used only to assess the teaching examples.
+2. The requested step rounds away, making the computed update zero while the
+   residual remains one.
+3. A physical resolution, noise floor, measurement accuracy, or other
+   meaningful near-zero scale in the quantity's units.
+4. It states that finite precision prevented further movement before the
+   requested residual criterion held, which suggests different remedies and
+   prevents a false success claim.
+5. For example, refine the mesh or time step and compare against an analytic
+   solution, manufactured solution, invariant, benchmark, or independent
+   method. Module 7 develops that validation argument.
+::::
+
+
+:::: {.cell .markdown}
+## Takeaways
+
+- Residual, update, and forward error are not synonyms.
+- Mixed thresholds need named absolute and relative scales.
+- Require enough independent evidence to reject false convergence.
+- Return a specific reason for convergence and every diagnosed failure.
+- Tightening a tolerance can reveal an accuracy floor rather than improve the
+  answer.
+- Preserve the termination contract and final diagnostics with the result.
+::::

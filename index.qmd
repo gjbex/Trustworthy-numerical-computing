@@ -60,6 +60,11 @@ The
 [failure-mode laboratory](notebooks/05-failure-mode-lab.qmd)
 applies that diagnosis to cancellation, summation order, overflow, underflow,
 scaling, and log-domain reformulations.
+The
+[convergence and stopping diagnostics](notebooks/06-convergence-and-stopping.qmd)
+activity separates forward error, residual, and update size; classifies
+convergence and failure; and uses a tolerance study to find an attainable
+binary64 accuracy floor.
 
 
 ## Suggested schedule

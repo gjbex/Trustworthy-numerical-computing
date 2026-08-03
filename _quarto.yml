@@ -59,6 +59,8 @@ website:
             href: notebooks/04-sensitivity-stability-residuals.qmd
           - text: "5. Failure-Mode Laboratory"
             href: notebooks/05-failure-mode-lab.qmd
+          - text: "6. Convergence And Stopping Diagnostics"
+            href: notebooks/06-convergence-and-stopping.qmd
       - text: "Optional advanced topics"
         href: learning-modules/optional-advanced-topics.md
 

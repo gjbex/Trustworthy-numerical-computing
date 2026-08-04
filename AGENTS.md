@@ -402,6 +402,15 @@ The complete build must produce:
 - `_site/notebooks/08-environment-reproducibility.ipynb`;
 - `_site/notebooks/09-reliability-statement.html`;
 - `_site/notebooks/09-reliability-statement.ipynb`;
+- `_site/hands-on/README.html`;
+- `_site/hands-on/10-sensor-inversion/README.html`;
+- `_site/hands-on/10-sensor-inversion/starter/capstone.py`;
+- `_site/hands-on/10-sensor-inversion/starter/test_capstone.py`;
+- `_site/hands-on/10-sensor-inversion/starter/evidence-record.md`;
+- `_site/hands-on/10-sensor-inversion/solution/README.html`;
+- `_site/hands-on/10-sensor-inversion/solution/capstone.py`;
+- `_site/hands-on/10-sensor-inversion/solution/test_capstone.py`;
+- `_site/hands-on/10-sensor-inversion/solution/evidence-record.md`;
 - `_site/slides/trustworthy-numerical-computing.html`.
 
 Keep build logic in `scripts/build_training_site.sh`; the workflow should call

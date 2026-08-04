@@ -5,6 +5,12 @@ project:
     - index.qmd
     - learning-modules/*.md
     - notebooks/*.qmd
+    - hands-on/README.md
+    - hands-on/10-sensor-inversion/README.md
+    - hands-on/10-sensor-inversion/solution/README.md
+  resources:
+    - hands-on/10-sensor-inversion/starter/
+    - hands-on/10-sensor-inversion/solution/
 
 website:
   title: "Trustworthy Numerical Computing"
@@ -15,6 +21,8 @@ website:
         href: index.qmd
       - text: "Learning modules"
         href: learning-modules/index.md
+      - text: "Hands-on"
+        href: hands-on/README.md
       - text: "Slides"
         href: slides/trustworthy-numerical-computing.html
   sidebar:
@@ -67,6 +75,12 @@ website:
             href: notebooks/08-environment-reproducibility.qmd
           - text: "9. Writing A Numerical Reliability Statement"
             href: notebooks/09-reliability-statement.qmd
+      - section: "Hands-on"
+        contents:
+          - text: "Exercise overview"
+            href: hands-on/README.md
+          - text: "10. Sensor-Inversion Capstone"
+            href: hands-on/10-sensor-inversion/README.md
       - text: "Optional advanced topics"
         href: learning-modules/optional-advanced-topics.md
 

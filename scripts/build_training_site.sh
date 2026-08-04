@@ -54,6 +54,15 @@ for entry_point in \
     "$site_output_dir/notebooks/08-environment-reproducibility.ipynb" \
     "$site_output_dir/notebooks/09-reliability-statement.html" \
     "$site_output_dir/notebooks/09-reliability-statement.ipynb" \
+    "$site_output_dir/hands-on/README.html" \
+    "$site_output_dir/hands-on/10-sensor-inversion/README.html" \
+    "$site_output_dir/hands-on/10-sensor-inversion/starter/capstone.py" \
+    "$site_output_dir/hands-on/10-sensor-inversion/starter/test_capstone.py" \
+    "$site_output_dir/hands-on/10-sensor-inversion/starter/evidence-record.md" \
+    "$site_output_dir/hands-on/10-sensor-inversion/solution/README.html" \
+    "$site_output_dir/hands-on/10-sensor-inversion/solution/capstone.py" \
+    "$site_output_dir/hands-on/10-sensor-inversion/solution/test_capstone.py" \
+    "$site_output_dir/hands-on/10-sensor-inversion/solution/evidence-record.md" \
     "$site_output_dir/slides/trustworthy-numerical-computing.html"; do
     if [[ ! -f "$entry_point" ]]; then
         echo "Expected publication entry point not found: $entry_point" >&2

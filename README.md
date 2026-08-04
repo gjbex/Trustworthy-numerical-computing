@@ -34,6 +34,7 @@ strategies without tying the material to one programming language.
 
 - [Course landing page](index.qmd)
 - [Learning modules](learning-modules/index.md)
+- [Hands-on exercises](hands-on/README.md)
 - [Slide sources](slides-source/trustworthy-numerical-computing.qmd)
 
 After running `scripts/build_training_site.sh`, preview the assembled landing
@@ -50,10 +51,11 @@ Quarto is installed separately from the conda environment; see
 
 ## Current status
 
-The overall learning path and publication layout are in place. Modules 1
-through 9 include detailed reading and executable self-paced activities; the
-remaining modules and slide files provide the structure for developing later
-reading, experiments, and exercises.
+The complete ten-module core learning path is in place. Modules 1 through 9
+include detailed reading and executable self-paced activities. Module 10
+integrates the complete workflow in a guided sensor-inversion capstone with a
+starter, verification checks, reference solution, evidence record, and
+instructor notes.
 
 
 ## Contributing

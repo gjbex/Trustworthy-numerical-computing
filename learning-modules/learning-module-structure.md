@@ -80,9 +80,14 @@ distinct.
 
 ### Module 10: Capstone Investigation
 
-Participants apply the full workflow to a suspicious result, improve the
-calculation, assemble validation evidence, and write a concise reliability
-report.
+Participants investigate a two-component sensor calculation whose nominal
+threshold decision changes between binary32 and binary64. They establish an
+exact-decimal nominal reference, distinguish response residual from
+concentration error, diagnose an ill-conditioned component split with
+controlled sensor-separation cases, propagate deterministic reading bounds,
+and improve arithmetic and decision logic separately. The capstone ends with a
+validated `indeterminate` component decision, a tightly bounded total, and a
+qualified reliability statement.
 
 
 ## Suggested delivery

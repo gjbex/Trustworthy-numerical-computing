@@ -42,8 +42,10 @@ Each module contributes to the same investigation workflow:
 
 ## Status
 
-The curriculum structure, module boundaries, and slide mapping are established.
-Modules 1 through 9 contain detailed reading material and executable Quarto
-activities that generate self-paced Jupyter notebooks. Detailed explanations,
-computational experiments, and exercises for later modules will be developed
-within this structure.
+The complete ten-module core curriculum and matching slide sequence are in
+place. Modules 1 through 9 contain detailed reading material and executable
+Quarto activities that generate self-paced Jupyter notebooks. Module 10
+provides a guided
+[sensor-inversion capstone](../hands-on/10-sensor-inversion/README.md) with
+starter code, verification checks, a reference solution, an evidence record,
+and instructor notes.

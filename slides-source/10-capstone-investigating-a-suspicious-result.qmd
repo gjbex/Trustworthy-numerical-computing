@@ -1,41 +1,446 @@
 # Module 10: Capstone Investigation
 
-## The Task
+## Module Arc
 
-- Reproduce a suspicious numerical result
-- Establish a meaningful reference
-- Diagnose the dominant cause
-- Improve the computation
-- Validate and communicate the result
+- State the decision before changing the code
+- Reproduce the precision-dependent result
+- Distinguish residual, forward error, and sensitivity
+- Improve arithmetic and decision logic separately
+- Validate with complementary evidence
+- Report what remains indeterminate
 
 ::: notes
-Give participants the case, inputs, and evidence template. Do not reveal the
-intended diagnosis in the visible material.
+This is the terminal integration activity. Use checkpoints so participants do
+not jump directly from the suspicious output to “use more precision.”
 :::
 
-## Investigation Stages
+## The Stable Total And The Unstable Split
 
-1. Characterize
-2. Reference
-3. Diagnose
-4. Improve
-5. Validate
-6. Report
+Two compounds, two nearly indistinguishable sensor responses:
+
+$$
+y_1=c_A+c_B,
+\qquad
+y_2=c_A+(1+\delta)c_B.
+$$
+
+- $c_A,c_B$ in $\mathrm{mg/L}$
+- $y_1,y_2$ in normalized response units
+- $\delta$ measures sensor separation
 
 ::: notes
-Use checkpoints to prevent teams from immediately rewriting the implementation
-without first measuring the problem.
+State that the linear response model is assumed. The computation cannot by
+itself validate the calibration physically.
 :::
 
-## Completion Criteria
+## The Declared Case
 
-- The required accuracy is explicit
-- The diagnosis is supported by evidence
-- The improvement addresses the diagnosed cause
-- At least two complementary checks support the result
-- Remaining limitations are stated
+| Item | Value |
+|---|---:|
+| $y_1$ | $1.0000000$ response units |
+| $y_2$ | $1.0000004$ response units |
+| $\delta$ | $10^{-6}$ |
+| Bound on each reading | $\pm5\times10^{-8}$ |
+| Decision | $c_A>0.61\ \mathrm{mg/L}$ |
+| Required accuracy | $0.01\ \mathrm{mg/L}$ |
 
 ::: notes
-Bitwise agreement is not required unless the case specifically justifies it.
-Reward well-supported limits as much as successful fixes.
+The reading bounds are deterministic, not probabilistic. Keep their
+interpretation visible throughout the exercise.
+:::
+
+## Prediction: What Could Reverse The Decision?
+
+Consider:
+
+1. an implementation defect;
+2. inadequate arithmetic precision;
+3. sensitivity of the inverse problem;
+4. admissible variation in the readings;
+5. an invalid physical response model.
+
+What evidence would distinguish them?
+
+::: notes
+Have groups record at least two competing hypotheses and one discriminating
+check before running anything.
+:::
+
+## Start The Capstone
+
+```{.bash}
+cd hands-on/10-sensor-inversion/starter
+python3 capstone.py
+```
+
+Record:
+
+- concentrations and decision;
+- residual quantity and units;
+- stored precision;
+- required accuracy and its units.
+
+::: notes
+Do not reveal the reference result yet. Ask learners to identify which numbers
+can legitimately be compared.
+:::
+
+## The Suspicious Baseline
+
+```text
+c_A: 0.625000000 mg/L
+c_B: 0.375000000 mg/L
+decision: yes
+residual infinity norm: 2.500e-08 response units
+```
+
+- Positive concentrations
+- Total equals $1\ \mathrm{mg/L}$
+- Small response residual
+- Plausible decision
+
+Is the result accurate enough?
+
+::: notes
+The answer is not established. The residual and required forward accuracy have
+different quantities and units.
+:::
+
+## Checkpoint 1: Do Not Rewrite Yet
+
+Write down:
+
+1. the exact scientific claim;
+2. the reference you need;
+3. the error metric you will use;
+4. one controlled variation;
+5. one conclusion-changing limitation.
+
+::: notes
+Use this checkpoint to reinforce the investigation workflow from Module 1.
+:::
+
+## Residual Is Not Forward Error
+
+Response residual:
+
+$$
+\lVert A\widehat{c}-y\rVert_\infty
+\quad\text{in response units}
+$$
+
+Required component error:
+
+$$
+|\widehat{c}_A-c_{A,\mathrm{ref}}|
+\quad\text{in }\mathrm{mg/L}
+$$
+
+A bare comparison with `0.01` has no meaning.
+
+::: notes
+Ask what additional relationship would make the residual informative about
+forward error. The answer involves scaling and conditioning.
+:::
+
+## Establish A Nominal Reference
+
+$$
+c_B=\frac{y_2-y_1}{\delta},
+\qquad
+c_A=y_1-c_B.
+$$
+
+For the declared decimal inputs:
+
+$$
+(c_A,c_B)=(0.6,0.4)\ \mathrm{mg/L}.
+$$
+
+What does this reference establish?
+
+::: notes
+It establishes the nominal algebraic solution. It does not remove reading
+bounds or validate the sensor model.
+:::
+
+## Precision Changes The Nominal Decision
+
+| Arithmetic | $c_A$ (mg/L) | Decision |
+|---|---:|---|
+| Binary32 | $0.625$ | yes |
+| Binary64 | $0.5999999999885$ | no |
+| Exact-decimal reference | $0.6$ | no |
+
+- Binary32 error: $0.025\ \mathrm{mg/L}$
+- Required accuracy: $0.01\ \mathrm{mg/L}$
+- Binary64 error: $1.15\times10^{-11}\ \mathrm{mg/L}$
+
+::: notes
+Binary64 solves the declared nominal system adequately. Pause before allowing
+participants to call the scientific decision resolved.
+:::
+
+## Why Is The Split Sensitive?
+
+$$
+A=
+\begin{bmatrix}
+1&1\\
+1&1+\delta
+\end{bmatrix}
+$$
+
+- $\delta=0$: identical rows, no unique split
+- Small $\delta$: solvable but sensitive
+- At $\delta=10^{-6}$:
+
+$$
+\kappa_2(A)\approx4.00\times10^6
+$$
+
+::: notes
+The condition number is a worst-case sensitivity bound, not an exact error
+forecast. Its scale is sufficient to motivate controlled experiments.
+:::
+
+## Avoid A Diagnostic Cancellation
+
+For $A^\mathsf{T}A$:
+
+$$
+\operatorname{trace}=4+2\delta+\delta^2,
+\qquad
+\det=\delta^2.
+$$
+
+Compute $\lambda_{\max}$ directly, then use
+
+$$
+\kappa_2(A)=\frac{\lambda_{\max}}{|\delta|}.
+$$
+
+Do not form the small eigenvalue by subtracting near-equal values.
+
+::: notes
+This small derivation prevents the diagnostic itself from reproducing the
+cancellation problem being investigated.
+:::
+
+## Controlled Variation: Separate The Sensors
+
+Keep $(c_A,c_B)=(0.6,0.4)\ \mathrm{mg/L}$ known.
+
+| $\delta$ | $\kappa_2(A)$ | Binary32 $c_A$ error |
+|---:|---:|---:|
+| $10^{-1}$ | $4.21\times10^1$ | $5.01\times10^{-7}$ |
+| $10^{-2}$ | $4.02\times10^2$ | $4.79\times10^{-6}$ |
+| $10^{-4}$ | $4.00\times10^4$ | $4.77\times10^{-4}$ |
+| $10^{-6}$ | $4.00\times10^6$ | $2.50\times10^{-2}$ |
+
+::: notes
+This control changes sensitivity while preserving the known solution and code
+path. It is more discriminating than comparing two near-identical solvers.
+:::
+
+## A Revealing Edge Case
+
+At $\delta=10^{-8}$ in binary32:
+
+```text
+sensor separation is zero after binary32 storage
+```
+
+- Both response coefficients store as one
+- The components are not distinguishable on this path
+- Explicit failure is better than a plausible estimate
+
+::: notes
+Connect to Module 2 exceptional states and Module 6 failure reporting. The code
+does not hide the loss of distinguishability.
+:::
+
+## Checkpoint 2: Which Cause Is Dominant?
+
+Evidence so far:
+
+- Binary32 fails the nominal accuracy requirement
+- Binary64 agrees with the nominal reference
+- Error grows as sensor separation shrinks
+- The well-separated control succeeds
+
+What remains untested before the scientific decision?
+
+::: notes
+The declared reading bounds remain. Encourage learners to distinguish nominal
+arithmetic adequacy from robustness over admissible inputs.
+:::
+
+## Propagate The Reading Bounds
+
+Each reading varies independently by
+$\pm5\times10^{-8}$ response units.
+
+- Fixed nonzero $\delta$
+- Linear mapping from readings to concentrations
+- Rectangular input range
+- Extrema occur at the four corners
+
+What range should the decision cover?
+
+::: notes
+This is deterministic interval propagation, not Monte Carlo sampling and not a
+confidence interval.
+:::
+
+## The Stable Total And Unstable Split
+
+| Quantity | Deterministic range (mg/L) |
+|---|---:|
+| $c_A$ | $[0.49999995,0.70000005]$ |
+| $c_B$ | $[0.30,0.50]$ |
+| $c_A+c_B$ | $[0.99999995,1.00000005]$ |
+
+- Component interval crosses $0.61\ \mathrm{mg/L}$
+- Total remains tightly bounded by $y_1$
+
+::: notes
+Ask which quantity the measurements support. Reporting the total preserves
+useful information but does not answer the component threshold question.
+:::
+
+## The Supported Decision
+
+For the strict threshold:
+
+- `yes`: every admissible $c_A>0.61\ \mathrm{mg/L}$
+- `no`: every admissible $c_A\le0.61\ \mathrm{mg/L}$
+- `indeterminate`: the interval crosses the threshold
+
+This case is **indeterminate**.
+
+::: notes
+Treat this as a successful outcome. The computation now reports the limit of
+the evidence instead of forcing a Boolean answer.
+:::
+
+## Improve One Factor At A Time
+
+| Change | Improvement | Remaining limitation |
+|---|---|---|
+| Retain binary64 | Nominal arithmetic passes | Input sensitivity |
+| Use interval decision | Prevents overclaim | Range remains wide |
+| Report total separately | Preserves robust result | Split unresolved |
+
+Higher precision cannot create missing measurement information.
+
+::: notes
+Ask groups to describe each change without claiming it fixes the next layer.
+:::
+
+## Complementary Validation Portfolio
+
+1. Exact-decimal nominal reference
+2. Binary64 forward-error comparison
+3. Well-separated synthetic control
+4. Condition-number trend
+5. Four-corner input envelope
+6. Total-concentration invariant
+
+Which checks share the same model assumption?
+
+::: notes
+All computational checks share the linear sensor model. This is the explicit
+boundary between solution verification and physical model validation.
+:::
+
+## Run The Completion Checks
+
+```{.bash}
+cd hands-on/10-sensor-inversion/starter
+python3 capstone.py --report
+python3 -m unittest -v
+```
+
+- Tests check implementation and evidence structure
+- Inspect quantities, units, scope, and limitations
+- Passing tests are not scientific approval
+
+::: notes
+The starter tests initially fail at TODOs. At completion they should match the
+same checks that pass for the separate reference solution.
+:::
+
+## Reliability Statement: Result And Evidence
+
+> Under the declared linear sensor model, binary64 gives
+> $c_A=0.600\ \mathrm{mg/L}$ and agrees with the exact-decimal nominal
+> reference to $1.15\times10^{-11}\ \mathrm{mg/L}$.
+
+But:
+
+- $\kappa_2(A)\approx4.00\times10^6$
+- $c_A\in[0.50,0.70]\ \mathrm{mg/L}$ over the input bounds
+
+::: notes
+The next slide finishes the decision and limitations without overcrowding this
+one.
+:::
+
+## Reliability Statement: Decision And Limits
+
+> The component interval crosses $0.61\ \mathrm{mg/L}$, so the supported
+> decision is indeterminate. The total remains in
+> $[0.99999995,1.00000005]\ \mathrm{mg/L}$.
+
+Not established:
+
+- physical validity of the linear calibration;
+- probability for the reading bounds;
+- behaviour on untested precision or hardware paths.
+
+::: notes
+Compare participant statements by claim and evidence, not by exact wording.
+:::
+
+## What Would Resolve The Question?
+
+- A sensor with more distinct response coefficients
+- A third independently informative measurement
+- Tighter justified reading bounds
+- Physical calibration and validation over the intended regime
+
+Regularization adds an assumption; it does not recover absent information.
+
+::: notes
+This provides a natural bridge to advanced linear algebra, interval methods,
+and model validation without inserting them into the core exercise.
+:::
+
+## Capstone Completion Criteria
+
+- Suspicious result reproduced and quantified
+- Reference scope stated correctly
+- Conditioning diagnosis supported by a control
+- Arithmetic and input sensitivity separated
+- Two or more complementary checks recorded
+- Decision covers the complete declared range
+- Qualified reliability statement completed
+
+::: notes
+Reward an evidence-backed limitation as highly as a successful numerical fix.
+:::
+
+## Module 10 Takeaways
+
+- Start from the scientific claim and accuracy requirement
+- Treat residuals as diagnostics, not automatic error bounds
+- Change one explanatory factor at a time
+- Separate arithmetic adequacy from problem identifiability
+- Preserve robust quantities and explicit failure states
+- Make the conclusion no stronger than the evidence
+
+::: notes
+Close the core course by returning to the opening theme: correct execution is
+only the start of numerical trust.
 :::

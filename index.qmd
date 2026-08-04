@@ -80,13 +80,20 @@ The
 activity converts reference, refinement, input-range, and environment evidence
 into a concise claim with supported digits, a decision margin, and explicit
 limitations.
+The final
+[sensor-inversion capstone](hands-on/10-sensor-inversion/README.md)
+then asks participants to reproduce a precision-dependent threshold decision,
+diagnose an ill-conditioned component split, propagate deterministic sensor
+bounds, improve the calculation and decision contract, and write a qualified
+reliability statement.
 
 
 ## Suggested schedule
 
 The modules are designed so that the core material can be delivered as a
-one-day course or split over two half-days. The exact timing will be refined
-when the capstone is complete.
+one-day course or split over two half-days. Allow about 75 minutes for the
+complete capstone investigation; selected stages can be assigned as follow-up
+work in a shorter delivery.
 
 | Course block | Modules |
 |---|---|

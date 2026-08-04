@@ -363,6 +363,7 @@ Before accepting a reported convergence claim, ask:
    detector in a production solver?
 
 
+::: {.callout-note collapse="true"}
 ## Suggested answers
 
 1. A residual has units and a problem-dependent relationship to forward error.
@@ -376,6 +377,7 @@ Before accepting a reported convergence claim, ask:
 4. Test representative convergent, slowly convergent, noisy, and cycling
    histories; justify window lengths and thresholds; account for approximate
    rather than exact cycles; and document possible false positives.
+:::
 
 
 ## Takeaways

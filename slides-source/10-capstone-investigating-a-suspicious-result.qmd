@@ -40,7 +40,7 @@ itself validate the calibration physically.
 | $y_1$ | $1.0000000$ response units |
 | $y_2$ | $1.0000004$ response units |
 | $\delta$ | $10^{-6}$ |
-| Bound on each reading | $\pm5\times10^{-8}$ |
+| Bound on each reading | $\pm5\times10^{-8}$ response units |
 | Decision | $c_A>0.61\ \mathrm{mg/L}$ |
 | Required accuracy | $0.01\ \mathrm{mg/L}$ |
 
@@ -293,7 +293,7 @@ This is deterministic interval propagation, not Monte Carlo sampling and not a
 confidence interval.
 :::
 
-## The Stable Total And Unstable Split
+## The Stable Total And The Unstable Split
 
 | Quantity | Deterministic range (mg/L) |
 |---|---:|
@@ -375,12 +375,14 @@ same checks that pass for the separate reference solution.
 
 > Under the declared linear sensor model, binary64 gives
 > $c_A=0.600\ \mathrm{mg/L}$ and agrees with the exact-decimal nominal
-> reference to $1.15\times10^{-11}\ \mathrm{mg/L}$.
+> reference to $1.15\times10^{-11}\ \mathrm{mg/L}$, below the predeclared
+> $0.01\ \mathrm{mg/L}$ accuracy requirement.
 
-But:
-
+- Binary32 $c_A$ error: $0.025\ \mathrm{mg/L}$, which exceeds the requirement
+- Nominal decision changes from `no` in binary64 to `yes` in binary32
 - $\kappa_2(A)\approx4.00\times10^6$
-- $c_A\in[0.50,0.70]\ \mathrm{mg/L}$ over the input bounds
+
+The input-bound consequence follows on the next slide.
 
 ::: notes
 The next slide finishes the decision and limitations without overcrowding this
@@ -392,6 +394,8 @@ one.
 > The component interval crosses $0.61\ \mathrm{mg/L}$, so the supported
 > decision is indeterminate. The total remains in
 > $[0.99999995,1.00000005]\ \mathrm{mg/L}$.
+
+$c_A\in[0.50,0.70]\ \mathrm{mg/L}$ over the deterministic reading bounds.
 
 Not established:
 

@@ -10,6 +10,14 @@ if ! command -v quarto >/dev/null 2>&1; then
     exit 127
 fi
 
+echo "Validating Module 10 capstone materials..."
+python hands-on/10-sensor-inversion/starter/capstone.py >/dev/null
+(
+    cd hands-on/10-sensor-inversion/solution
+    python capstone.py --report >/dev/null
+    python -m unittest -v
+)
+
 site_output_dir="$repo_root/_site"
 if [[ "$site_output_dir" != "$repo_root/_site" ]]; then
     echo "Refusing to clean unexpected output directory: $site_output_dir" >&2

@@ -26,16 +26,17 @@
 
 ## Reproduction
 
-| Precision | $c_A$ (mg/L) | $c_B$ (mg/L) | Residual (response units) | Nominal decision |
-|---|---:|---:|---:|---|
-| Binary32 | $0.625$ | $0.375$ | $2.50\times10^{-8}$ | yes |
-| Binary64 | $0.5999999999885$ | $0.4000000000115$ | $0$ | no |
-| Exact-decimal nominal reference | $0.6$ | $0.4$ | not applicable | no |
+| Precision | $c_A$ (mg/L) | $c_B$ (mg/L) | $c_A$ error (mg/L) | Residual (response units) | Meets $0.01$ mg/L? | Nominal decision |
+|---|---:|---:|---:|---:|---|---|
+| Binary32 | $0.625$ | $0.375$ | $0.025$ | $2.50\times10^{-8}$ | no | yes |
+| Binary64 | $0.5999999999885$ | $0.4000000000115$ | $1.15\times10^{-11}$ | $0$ | yes | no |
+| Exact-decimal nominal reference | $0.6$ | $0.4$ | not applicable | not applicable | not applicable | no |
 
-Against the exact-decimal nominal reference, the binary64 forward error in the
-component infinity norm is approximately
-$1.15\times10^{-11}\ \mathrm{mg/L}$. It passes the declared arithmetic accuracy
-requirement for the stored nominal inputs. Binary32 does not.
+Against the exact-decimal nominal reference, the binary64 forward error in
+$c_A$ is approximately $1.15\times10^{-11}\ \mathrm{mg/L}$, below the declared
+$0.01\ \mathrm{mg/L}$ arithmetic requirement for the nominal inputs. The
+binary32 error in $c_A$ is $0.025\ \mathrm{mg/L}$, exceeds the requirement, and
+reverses the nominal threshold decision.
 
 
 ## Conditioning and controlled variation
@@ -98,14 +99,27 @@ sensor signatures and bounded readings do not contain.
    rectangular input range and preserves the invariant $c_A+c_B=y_1$.
 
 
+## Environment and provenance
+
+The structured `python3 capstone.py --report` output captures the source
+revision and whether the worktree is dirty, along with the Python
+implementation and version, operating system and release, machine architecture,
+and floating-point radix and mantissa width. These values are generated at run
+time rather than copied into this reference record, where they would quickly
+become stale.
+
+
 ## Reliability statement
 
 Under the declared linear two-sensor model, the binary64 nominal estimate is
 $c_A=0.600\ \mathrm{mg/L}$ and agrees with the exact-decimal nominal reference
-to $1.15\times10^{-11}\ \mathrm{mg/L}$. However, the matrix 2-norm condition
-number is approximately $4.00\times10^6$, and the deterministic sensor-reading
-bounds imply $c_A\in[0.50,0.70]\ \mathrm{mg/L}$, which crosses the strict
-$0.61\ \mathrm{mg/L}$ threshold; the supported decision is therefore
+to $1.15\times10^{-11}\ \mathrm{mg/L}$, below the predeclared
+$0.01\ \mathrm{mg/L}$ accuracy requirement. The emulated binary32 error in
+$c_A$ is $0.025\ \mathrm{mg/L}$, exceeds that requirement, and changes the
+nominal decision from `no` in binary64 to `yes`. However, the matrix 2-norm
+condition number is approximately $4.00\times10^6$, and the deterministic
+sensor-reading bounds imply $c_A\in[0.50,0.70]\ \mathrm{mg/L}$, which crosses
+the strict $0.61\ \mathrm{mg/L}$ threshold; the supported decision is therefore
 indeterminate. The total concentration remains in
 $[0.99999995,1.00000005]\ \mathrm{mg/L}$. This evidence does not validate the
 linear sensor model, assign a probability to the input bounds, or establish

@@ -39,15 +39,18 @@ Pause teams before implementation changes and ask them to record:
 4. evidence that would discriminate between those explanations.
 
 After the nominal reference, ask whether binary64 has solved the scientific
-problem or only the stored algebraic problem. Reveal the deterministic reading
-bounds only if participants have overlooked them.
+problem or only the stored algebraic problem. Return attention to the declared
+deterministic reading bounds if participants have overlooked them.
 
 
 ## Expected evidence
 
 - Binary32: $(c_A,c_B)=(0.625,0.375)\ \mathrm{mg/L}$, nominal decision `yes`,
-  response residual about $2.5\times10^{-8}$.
-- Binary64: approximately $(0.6,0.4)\ \mathrm{mg/L}$, nominal decision `no`.
+  response residual about $2.5\times10^{-8}$, and $c_A$ error
+  $0.025\ \mathrm{mg/L}$, which fails the $0.01\ \mathrm{mg/L}$ requirement.
+- Binary64: approximately $(0.6,0.4)\ \mathrm{mg/L}$, nominal decision `no`,
+  and $c_A$ error about $1.15\times10^{-11}\ \mathrm{mg/L}$, which passes the
+  requirement.
 - Exact-decimal reference: exactly $(0.6,0.4)\ \mathrm{mg/L}$ for the declared
   decimal inputs.
 - Matrix 2-norm condition number: approximately $4.00\times10^6$.
@@ -94,8 +97,9 @@ python3 capstone.py --report
 python3 -m unittest -v
 ```
 
-The tests independently check the exact synthetic reference, a well-conditioned
-control, the condition-number magnitude, all three interval-classification
-outcomes, the four-corner envelope, the supplied edge case in which binary32
-cannot store the sensor separation, evidence-record structure, and minimum
-reliability-statement qualifications.
+The tests independently check declared-decimal provenance, the exact synthetic
+reference, a well-conditioned control and separation sweep, the condition-number
+magnitude, all three interval-classification outcomes, the four-corner envelope,
+the supplied edge case in which binary32 cannot store the sensor separation,
+accuracy outcomes for both precision paths, provenance fields, configurable
+threshold reporting, and minimum reliability-statement qualifications.

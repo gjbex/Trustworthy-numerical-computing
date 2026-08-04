@@ -126,7 +126,35 @@ Recording these predictions reduces hindsight bias. A useful investigation
 tests competing explanations rather than immediately rewriting the code.
 
 
-## Reproduce the supplied result
+## Complete the capstone before the worked debrief
+
+If you are using this module as an exercise, stop here and complete the
+[sensor-inversion capstone](../hands-on/10-sensor-inversion/README.md). The
+starter provides a runnable suspicious result, focused implementation tasks,
+completion checks, and an evidence-record template. Return to the material
+below after you have recorded your prediction and attempted the investigation.
+
+```bash
+cd hands-on/10-sensor-inversion/starter
+python3 capstone.py
+python3 -m unittest -v
+```
+
+The starter tests intentionally encounter `NotImplementedError` until the
+investigation TODOs are completed. The initial baseline and revealing binary32
+edge case remain runnable.
+
+::: {.callout-warning}
+## Worked solution follows
+
+The remainder of this module reveals the nominal reference, diagnosis,
+controlled results, input envelope, and reliability statement. Complete the
+hands-on investigation first if you want to preserve its prediction-first
+sequence.
+:::
+
+
+## Worked debrief: reproduce the supplied result
 
 The participant starter deliberately stores the readings and response
 coefficient in binary32 and rounds each solving operation to binary32. Run it
@@ -418,7 +446,8 @@ A reviewable record should retain:
 
 * the question, units, threshold, and required accuracy;
 * nominal values and deterministic input bounds;
-* arithmetic variants and runtime information;
+* arithmetic variants, source revision, runtime, operating system,
+  architecture, and floating-point metadata;
 * reference type and construction;
 * residual and forward-error metrics with units;
 * condition estimate and controlled cases;
@@ -436,7 +465,10 @@ A defensible statement is:
 
 > Under the declared linear two-sensor model, the binary64 nominal estimate is
 > $c_A=0.600\ \mathrm{mg/L}$ and agrees with the exact-decimal nominal
-> reference to $1.15\times10^{-11}\ \mathrm{mg/L}$. However, the matrix 2-norm
+> reference to $1.15\times10^{-11}\ \mathrm{mg/L}$, below the predeclared
+> $0.01\ \mathrm{mg/L}$ accuracy requirement. The emulated binary32 error in
+> $c_A$ is $0.025\ \mathrm{mg/L}$, exceeds that requirement, and changes the
+> nominal decision from `no` in binary64 to `yes`. However, the matrix 2-norm
 > condition number is approximately $4.00\times10^6$, and the deterministic
 > sensor-reading bounds imply
 > $c_A\in[0.50,0.70]\ \mathrm{mg/L}$, which crosses the strict
@@ -456,7 +488,7 @@ The statement makes three different outcomes visible:
 None needs to be weakened or exaggerated to make the conclusion useful.
 
 
-## Complete the hands-on capstone
+## Capstone materials and reference
 
 The participant-facing
 [sensor-inversion capstone](../hands-on/10-sensor-inversion/README.md) provides:
@@ -470,17 +502,9 @@ The participant-facing
   additional sensors, and regularization;
 * separate reference material and instructor notes.
 
-Run the baseline and final verification with:
-
-```bash
-cd hands-on/10-sensor-inversion/starter
-python3 capstone.py
-python3 -m unittest -v
-```
-
-The starter tests intentionally encounter `NotImplementedError` until the
-investigation TODOs are completed. The initial baseline and revealing binary32
-edge case remain runnable.
+Use the separate solution only after attempting the starter. Its evidence
+record is a comparison target for claims, metrics, assumptions, and
+limitations rather than prose that must be reproduced word for word.
 
 
 ## Questions for reviewing a capstone investigation

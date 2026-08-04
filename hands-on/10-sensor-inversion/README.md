@@ -95,9 +95,10 @@ case checks already pass.
 
 Implement `solve_binary64` and `decimal_reference`.
 
-- Construct `Decimal` inputs from strings; constructing them directly from
-  binary floats would import the representation error you are trying to
-  examine.
+- Keep declared sensor values as strings (or `Decimal` values) until the
+  reference conversion. Constructing `Decimal` values from binary floats would
+  import the representation error you are trying to examine; the supplied
+  helper rejects that ambiguous provenance.
 - Compare binary32 and binary64 with the decimal reference using absolute error
   in $\mathrm{mg/L}$.
 - State whether each nominal calculation meets the $0.01\ \mathrm{mg/L}$
@@ -194,7 +195,9 @@ Your evidence should include at least two complementary checks, such as:
 Mechanical test success is not scientific approval. Inspect the evidence record
 and write a concise statement containing the claim, nominal result, reference,
 metric, accuracy requirement, conditioning evidence, input envelope, supported
-decision, and limitations.
+decision, and limitations. Retain the source revision, runtime, operating
+system, architecture, and floating-point metadata emitted with the report so
+another person can identify the tested execution context.
 
 
 ## Completion criteria

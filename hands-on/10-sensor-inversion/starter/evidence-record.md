@@ -21,11 +21,11 @@
 
 ## Reproduction
 
-| Precision | $c_A$ (mg/L) | $c_B$ (mg/L) | Residual (response units) | Decision |
-|---|---:|---:|---:|---|
-| Binary32 |  |  |  |  |
-| Binary64 |  |  |  |  |
-| Decimal reference |  |  | not applicable |  |
+| Precision | $c_A$ (mg/L) | $c_B$ (mg/L) | $c_A$ error (mg/L) | Residual (response units) | Meets $0.01$ mg/L? | Decision |
+|---|---:|---:|---:|---:|---|---|
+| Binary32 |  |  |  |  |  |  |
+| Binary64 |  |  |  |  |  |  |
+| Decimal reference |  |  | not applicable | not applicable | not applicable |  |
 
 
 ## Conditioning and controlled variation
@@ -65,6 +65,17 @@
 1. Check, expected result, observation, and outcome:
 2. Check, expected result, observation, and outcome:
 3. Optional additional check:
+
+
+## Environment and provenance
+
+- Source revision:
+- Uncommitted changes present:
+- Command used to generate the structured report:
+- Python implementation and version:
+- Operating system and release:
+- Machine architecture:
+- Floating-point radix and mantissa bits:
 
 
 ## Reliability statement

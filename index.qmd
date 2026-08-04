@@ -70,6 +70,11 @@ The
 activity combines exact cases, method properties, refinement rates, convexity
 bounds, and a separately bounded series while keeping code verification,
 solution verification, and model validation distinct.
+The
+[environment variation and reproducibility](notebooks/08-environment-reproducibility.qmd)
+activity then compares reduction order, partition, and accumulator precision;
+it separates harmless low-order variation from changes that reverse a
+scientific conclusion.
 
 
 ## Suggested schedule

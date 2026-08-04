@@ -63,6 +63,8 @@ website:
             href: notebooks/06-convergence-and-stopping.qmd
           - text: "7. Validation Evidence Portfolio"
             href: notebooks/07-validation-evidence.qmd
+          - text: "8. Environment Variation And Reproducibility"
+            href: notebooks/08-environment-reproducibility.qmd
       - text: "Optional advanced topics"
         href: learning-modules/optional-advanced-topics.md
 

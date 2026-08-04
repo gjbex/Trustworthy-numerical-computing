@@ -2,37 +2,357 @@
 
 ## Module Arc
 
-- Identify sources of arithmetic variation
-- Choose the reproducibility level that matters
-- Treat parallel reductions as numerical algorithms
-- Record enough environment context
+- Define the agreement required for the scientific use
+- Identify how an environment change alters arithmetic
+- Compare harmless low-bit variation with a changed conclusion
+- Treat parallel partitions and precision as algorithm choices
+- Preserve the tested matrix, observations, and limitations
 
 ::: notes
-Keep bitwise reproducibility and scientific reproducibility distinct throughout
-the section.
+Module 7 built a validation portfolio in one environment. Ask what must survive
+before another compiler, machine, or thread count can support the same claim.
 :::
 
-## Why Results Change
+## Reproducibility Is A Claim
 
-- Compiler transformations and fused operations
-- Math libraries and hardware instructions
-- Vectorization and aggressive optimization
-- Thread or process reduction order
-- Accelerators and mixed precision
+Name all three:
+
+1. **Allowed change:** compiler, library, hardware, order, precision, seed
+2. **Required agreement:** bits, tolerance, distribution, conclusion
+3. **Intended use:** debugging, restart, estimate, scientific decision
 
 ::: notes
-Use evidence from a controlled change rather than implying that every platform
-difference is a defect.
+Terminology varies between fields. Keep the discussion operational: what
+changed, what must agree, and why that agreement is sufficient.
 :::
 
-## Which Guarantee Is Needed?
+## Different Claims Need Different Evidence
 
-1. Bitwise-identical output
-2. Numerical agreement within a justified tolerance
-3. Statistical equivalence
-4. The same scientific conclusion
+| Level | Required evidence |
+|---|---|
+| Bitwise identity | Exact serialized comparison |
+| Numerical agreement | Justified metric and tolerance |
+| Statistical equivalence | Replicates, uncertainty, effect size |
+| Same conclusion | Stable decision margin |
 
 ::: notes
-Ask participants which level their own workflow requires and what each stronger
-level would cost.
+Repeatability also requires enough recorded state to rerun. These agreement
+levels are not a ranking: a checkpoint and a Monte Carlo estimate need different
+contracts.
+:::
+
+## Choose The Weakest Sufficient Contract
+
+- Exact restart may require identical state
+- Deterministic solvers may allow bounded low-order variation
+- Ensembles usually require distributional agreement
+- Threshold decisions require a stable margin
+
+Do not weaken a scientifically necessary contract after it fails.
+
+::: notes
+Ask learners for one workflow where bitwise identity matters and one where it
+would be expensive but scientifically irrelevant.
+:::
+
+## Why Arithmetic Changes
+
+- Reassociation and fused operations
+- Math-library algorithms
+- Vector width and instruction selection
+- Thread or process reduction trees
+- Storage and accumulator precision
+
+::: notes
+An environment name is not a mechanism. Encourage comparisons that isolate a
+flag, library, partition, or precision choice.
+:::
+
+## Change One Factor At A Time
+
+| Hold fixed | Change | Record |
+|---|---|---|
+| Source and input hash | Reduction order | Bits, error, decision |
+| Algorithm and tolerance | Thread count | Partition and partials |
+| Quantity and units | Precision | Non-finite states and margin |
+| Validation reference | Toolchain | Compiler, flags, libraries |
+
+::: notes
+Several simultaneous changes can reveal a portability problem but cannot
+identify its cause. Reduce the discrepancy to a controlled experiment.
+:::
+
+## A Changed Bit Is Not Automatically A Defect
+
+- First confirm inputs, algorithm, and termination are the same
+- Classify the arithmetic mechanism
+- Apply the predeclared numerical criterion
+- Check whether the scientific conclusion survives
+- Retain the tested environment scope
+
+::: notes
+Also invert the statement: identical bits do not validate a shared defective
+algorithm or model.
+:::
+
+## Case 1: Positive Calibration Corrections
+
+$$
+b_k=\frac1k\ \mathrm{J},\qquad k=1,\ldots,10{,}000
+$$
+
+- Stored-input reference: $9.787606036044382\ \mathrm{J}$
+- Numerical budget: $10^{-10}\ \mathrm{J}$
+- Decision: does the total exceed $9.5\ \mathrm{J}$?
+
+::: notes
+The exact rational sum refers to the stored binary64 inputs. It does not claim
+that physical measurements are exact.
+:::
+
+## Prediction: Reverse The Order
+
+For positive binary64 terms, will reversal change:
+
+1. the hexadecimal output?
+2. the pass/fail result at $10^{-10}\ \mathrm{J}$?
+3. the above-$9.5\ \mathrm{J}$ conclusion?
+
+::: notes
+Pause for three separate predictions. Non-associativity makes a bit change
+possible; the conditioning and decision margin determine whether it matters.
+:::
+
+## Different Bits, Adequate Result
+
+| Order | Total (J) | Absolute error (J) |
+|---|---:|---:|
+| Original | $9.787606036044348$ | $3.40\times10^{-14}$ |
+| Reverse | $9.787606036044386$ | $3.29\times10^{-15}$ |
+| Increasing magnitude | $9.787606036044386$ | $3.29\times10^{-15}$ |
+
+All pass the budget and remain above $9.5\ \mathrm{J}$.
+
+::: notes
+The hexadecimal values differ, so bitwise identity fails. Numerical and
+conclusion reproducibility pass for the tested orders.
+:::
+
+## Do Not Overstate The Pass
+
+Supported:
+
+- Three tested orders satisfy the declared numerical budget
+- The tested conclusion has a large margin
+
+Not established:
+
+- Every compiler, library, processor, or future input behaves likewise
+
+::: notes
+Use the wording “over the tested matrix.” Absence of a failure in three orders
+is not a universal portability theorem.
+:::
+
+## Case 2: Cancellation-Sensitive Energy Ledger
+
+- Source: $+2^{53}\ \mathrm{J}$
+- Sink: $-2^{53}\ \mathrm{J}$
+- 4,096 contributions: $+0.5\ \mathrm{J}$ each
+- Exact stored-input total: $2048\ \mathrm{J}$
+
+Balance is acceptable only when $|E|\le100\ \mathrm{J}$.
+
+::: notes
+The case is synthetic and dimensioned for interpretation. It isolates arithmetic
+and does not validate a physical energy model.
+:::
+
+## Prediction: Where Do The Small Terms Go?
+
+At $2^{53}$, binary64 spacing is $2\ \mathrm{J}$.
+
+Compare:
+
+1. source → small terms → sink
+2. source → sink → small terms
+3. small terms → source → sink
+
+::: notes
+Ask which order lets 0.5 J terms accumulate at a scale where they are visible.
+Do not reveal the result until learners commit to a prediction.
+:::
+
+## One Order Reverses The Conclusion
+
+| Order | Net energy (J) | Classification |
+|---|---:|---|
+| Source, smalls, sink | $0$ | Acceptable—wrong |
+| Source, sink, smalls | $2048$ | Material imbalance |
+| Smalls, source, sink | $2048$ | Material imbalance |
+
+One-percent numerical budget: $|E-2048|\le1\ \mathrm{J}$.
+
+::: notes
+Zero is finite, deterministic, and plausible. The independent reference and
+decision threshold reject it.
+:::
+
+## Sensitivity Predicts Risk
+
+$$
+\kappa_{\mathrm{sum}}=
+\frac{\sum_i|x_i|}{|\sum_i x_i|}
+\approx8.80\times10^{12}
+$$
+
+- Large contributions nearly cancel
+- The desired net is small relative to absolute input mass
+- Order, precision, and input uncertainty need scrutiny
+
+::: notes
+Connect back to Module 4. Sensitivity explains why variation is amplified; it
+does not make a wrong decision acceptable.
+:::
+
+## Parallel Reduction = Numerical Algorithm
+
+1. Partition the global data
+2. Reduce within each partition
+3. Combine partial results in a tree
+
+Thread count, rank count, and scheduling can change both groupings.
+
+::: notes
+One source-level call named sum can represent many arithmetic evaluation trees.
+Ask which execution parameters belong in the result record.
+:::
+
+## Partition Count Changes The Result
+
+| Contiguous chunks | Net energy (J) | Error (J) |
+|---:|---:|---:|
+| 1 | $0$ | $2048$ |
+| 2 | $1024$ | $1024$ |
+| 4 | $1536$ | $512$ |
+| 8 | $1792$ | $256$ |
+| 16 | $1920$ | $128$ |
+
+The selected trend is not guaranteed to continue.
+
+::: notes
+Counts from two onward preserve the qualitative conclusion but fail the 1 J
+numerical tolerance. Conclusion reproducibility is weaker evidence here.
+:::
+
+## Deterministic Does Not Mean Accurate
+
+- Fixed tree: repeatable grouping, possibly repeatable error
+- Pairwise or compensated sum: usually more accurate, not necessarily bitwise
+- Long or exact accumulator: stronger result, additional cost
+- Tolerance check: useful only when tied to the scientific requirement
+
+::: notes
+A reproducible algorithm still needs validation. Mention communication and
+scalability costs without presenting one strategy as universally best.
+:::
+
+## Accumulator Precision Is Part Of The Contract
+
+| Order | Binary64 (J) | Binary32-rounded (J) |
+|---|---:|---:|
+| Source, smalls, sink | $0$ | $0$ |
+| Source, sink, smalls | $2048$ | $2048$ |
+| Smalls, source, sink | $2048$ | $0$ |
+
+Record storage, product, and accumulator precision separately.
+
+::: notes
+The notebook explicitly rounds each serial addition. It isolates precision but
+does not claim to emulate a named CPU or accelerator.
+:::
+
+## Compiler And Library Controls Have Scope
+
+- Strict modes can restrict reassociation or contraction
+- Library versions can change transcendental or reduction algorithms
+- A fixed flag name need not mean the same thing across toolchains
+- Serialization and exceptional values can break bitwise contracts
+
+Verify executable behaviour; do not trust a label alone.
+
+::: notes
+Keep correctness and performance separate. Stronger reproducibility controls can
+cost performance, but speed does not determine the required scientific contract.
+:::
+
+## Seeds Do Not Define Statistical Equivalence
+
+When exact sequences matter, record:
+
+- generator family and algorithm;
+- library version and seed;
+- stream mapping to threads, ranks, or tasks.
+
+When distributions matter, compare replicated statistical evidence.
+
+::: notes
+One matching seeded run is not a distributional validation. Ask for sample size,
+uncertainty interval, practical effect size, and test power.
+:::
+
+## Run The Reproducibility Activity
+
+```{.bash}
+quarto preview notebooks/08-environment-reproducibility.qmd
+```
+
+- Predict three agreement levels separately
+- Change one partition count
+- Inspect result bits, error, and decision margin
+- Build a claim-environment-observation record
+
+::: notes
+Switch to the authoritative tutorial. The complete publication build executes
+it and generates the downloadable Jupyter notebook.
+:::
+
+## Keep The Reproducibility Record With The Result
+
+- Source revision, build recipe, and dirty-state status
+- Input identity, units, range, preprocessing, and fingerprint
+- Algorithm, precision, tolerance, and termination reason
+- Libraries, hardware, threads/ranks, decomposition, and seeds
+- Observed difference, classification, and limitations
+
+::: notes
+Avoid hostnames, credentials, or local paths in public records. A complete
+package dump does not replace identifying the factors relevant to the claim.
+:::
+
+## Interpret The Tested Matrix
+
+| Observation | Report |
+|---|---|
+| Bits differ; tolerance passes | Numerically reproducible, if bits were not required |
+| Tolerance fails; conclusion stays | Conclusion survived; accuracy contract failed |
+| Conclusion changes | Claim is not reproducible over this change |
+| All tested bits match | Bitwise identity over the tested matrix only |
+
+::: notes
+Treat NaN, infinity, and different termination reasons as categorical
+differences, not values to slip through a tolerance comparison.
+:::
+
+## Module 8 Takeaways
+
+- Define allowed changes and required agreement before running
+- Diagnose mechanisms, not vague machine labels
+- Treat reduction trees and precision as algorithm choices
+- Check numerical evidence and the scientific decision separately
+- Report the tested matrix and what remains unverified
+
+::: notes
+Transition to Module 9: reproducibility evidence is only useful when its claim,
+criteria, environment scope, and limitations are communicated clearly.
 :::

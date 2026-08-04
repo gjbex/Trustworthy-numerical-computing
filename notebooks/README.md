@@ -44,3 +44,6 @@ the intended learners can access.
 7. [Validation evidence portfolio](07-validation-evidence.qmd) uses exact
    cases, properties, refinement rates, convexity bounds, and an independently
    bounded series to test distinct claims about one quadrature calculation.
+8. [Environment variation and reproducibility](08-environment-reproducibility.qmd)
+   compares bitwise, tolerance-based, and conclusion-level reproducibility under
+   controlled reduction-order, partition, and accumulator-precision changes.

@@ -59,8 +59,12 @@ orders, convexity bounds, and an independently bounded series.
 
 ### Module 8: Reproducibility Across Computing Environments
 
-Examines which differences are expected when compilers, libraries, hardware,
-optimization settings, or parallel execution order change.
+Defines bitwise, numerical, statistical, and conclusion-level reproducibility
+contracts, then examines which differences are expected when compilers,
+libraries, hardware, precision, optimization settings, or parallel execution
+order change. A companion activity contrasts harmless low-order variation with
+a cancellation-sensitive energy balance whose conclusion depends on reduction
+order, partition, and accumulator precision.
 
 
 ## Part IV: Scientific Judgment

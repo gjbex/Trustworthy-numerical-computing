@@ -1,0 +1,707 @@
+---
+title: "Environment Variation And Reproducibility"
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+---
+
+:::: {.cell .markdown}
+A reproducibility claim should say which changes are allowed and which agreement
+is required. This tutorial compares deterministic reductions under controlled
+order, partition, and precision changes. One case changes low-order bits without
+threatening the result; another reverses the scientific conclusion.
+
+::: {.content-visible when-format="html"}
+This activity accompanies
+[Module 8: Reproducibility Across Computing Environments](../learning-modules/08-reproducibility-across-computing-environments.md).
+
+[Download the executable Jupyter notebook](08-environment-reproducibility.ipynb){.btn .btn-primary download="08-environment-reproducibility.ipynb"}
+:::
+
+::: {.content-visible when-format="ipynb"}
+This activity accompanies
+[Module 8: Reproducibility Across Computing Environments](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/08-reproducibility-across-computing-environments.html).
+:::
+::::
+
+
+:::: {.cell .markdown}
+## Learning goals
+
+After this activity, you should be able to:
+
+- distinguish bitwise identity, numerical agreement, and agreement of a
+  scientific conclusion;
+- compare reduction orders against an exact reference for the stored inputs;
+- explain how a partition changes a reduction tree;
+- isolate the effect of accumulator precision in a controlled emulation;
+- apply a declared tolerance and decision threshold separately;
+- record inputs, environment details, observations, and limitations for a
+  reproducibility claim.
+::::
+
+
+:::: {.cell .markdown}
+## Prerequisites
+
+Complete
+[Module 7: Validating Scientific Computations](../learning-modules/07-validating-scientific-computations.md)
+or the
+[validation evidence portfolio](07-validation-evidence.qmd) first. This
+tutorial assumes that you can interpret absolute error, distinguish a reference
+from a candidate result, and explain why agreement between similar methods is
+limited evidence.
+::::
+
+
+:::: {.cell .markdown}
+## Outline
+
+1. Record a portable environment summary and fingerprint the input data.
+2. Compare legal orders for a positive, well-conditioned reduction.
+3. Test bitwise, numerical, and conclusion-level contracts separately.
+4. Expose an order-sensitive energy balance with a rational reference.
+5. Simulate contiguous parallel partitions and binary32 accumulation.
+6. Change one partition parameter and interpret the result.
+7. Assemble a reproducibility evidence record with explicit limitations.
+::::
+
+
+:::: {.cell .markdown}
+## Establish portable reporting tools
+
+All quantities in the two examples are expressed in joules. Candidate
+calculations use Python `float`, which is binary64 in this course environment.
+`Fraction.from_float` represents each stored binary64 input exactly, so an exact
+rational sum checks the arithmetic without claiming that the original physical
+inputs were exact.
+
+The candidate `serial_sum` is an explicit left-to-right loop rather than the
+runtime's built-in `sum`; that keeps the algorithm under test fixed even if a
+language version changes its library summation strategy.
+
+The environment summary deliberately omits hostnames and local paths. The input
+fingerprint uses each value's hexadecimal binary64 representation in its
+declared order.
+::::
+
+```{python}
+#| label: reproducibility-setup
+
+from fractions import Fraction
+import hashlib
+import json
+import math
+import platform
+import struct
+import sys
+
+
+def exact_stored_sum(values):
+    """Return the exact rational sum of stored binary64 values."""
+    return sum(
+        (Fraction.from_float(value) for value in values),
+        start=Fraction(0, 1),
+    )
+
+
+def serial_sum(values):
+    """Add values left to right with one binary64 accumulator."""
+    total = 0.0
+    for value in values:
+        total += value
+    return total
+
+
+def absolute_error(candidate, exact_reference):
+    """Return candidate error relative to an exact stored-input reference."""
+    return float(abs(Fraction.from_float(candidate) - exact_reference))
+
+
+def input_fingerprint(values):
+    """Hash ordered binary64 inputs without serializing machine-local state."""
+    digest = hashlib.sha256()
+    for value in values:
+        digest.update(value.hex().encode("ascii"))
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+environment_summary = {
+    "python_implementation": platform.python_implementation(),
+    "python_version": platform.python_version(),
+    "system": platform.system(),
+    "machine_family": platform.machine(),
+    "byte_order": sys.byteorder,
+    "float_radix": sys.float_info.radix,
+    "float_mantissa_bits": sys.float_info.mant_dig,
+}
+
+print(json.dumps(environment_summary, indent=2, sort_keys=True))
+```
+
+
+:::: {.cell .markdown}
+## Case 1: predict low-order variation
+
+The first workflow aggregates 10,000 positive calibration corrections
+
+$$
+b_k=\frac{1}{k}\ \mathrm{J},\qquad k=1,\ldots,10{,}000.
+$$
+
+The report rounds the aggregate to the nearest $10^{-9}\ \mathrm{J}$ and
+allocates $10^{-10}\ \mathrm{J}$ to numerical reduction error. The scientific
+classification is whether the total exceeds $9.5\ \mathrm{J}$.
+
+Before running the calculation, predict whether reversing the inputs can change
+the bits, violate the tolerance, or reverse the classification. Every term is
+positive, so the summation condition indicator is one.
+::::
+
+```{python}
+#| label: benign-input-and-reference
+
+calibration_terms = 10_000
+calibration_values = [
+    1.0 / index for index in range(1, calibration_terms + 1)
+]
+calibration_reference_exact = exact_stored_sum(calibration_values)
+calibration_reference = float(calibration_reference_exact)
+calibration_tolerance_j = 1.0e-10
+calibration_threshold_j = 9.5
+
+print(f"input terms:       {calibration_terms}")
+print(f"input SHA-256:     {input_fingerprint(calibration_values)}")
+print(f"reference total:   {calibration_reference:.15f} J")
+print(f"reference bits:    {calibration_reference.hex()}")
+print(f"numerical budget:  {calibration_tolerance_j:.1e} J")
+print(f"decision:          total > {calibration_threshold_j:.1f} J")
+```
+
+
+:::: {.cell .markdown}
+## Compare three orders and an accurate algorithm
+
+The original order adds large terms first. Reverse and increasing-magnitude
+orders add small terms first. `math.fsum` uses a more accurate summation
+algorithm and is checked here against the exact rational reference.
+
+Keep three questions separate:
+
+1. Are the output bits identical to the rounded reference?
+2. Is the absolute error within $10^{-10}\ \mathrm{J}$?
+3. Does the total remain above $9.5\ \mathrm{J}$?
+::::
+
+```{python}
+#| label: benign-order-comparison
+
+calibration_candidates = {
+    "original serial order": serial_sum(calibration_values),
+    "reverse serial order": serial_sum(reversed(calibration_values)),
+    "increasing magnitude": serial_sum(sorted(calibration_values, key=abs)),
+    "accurate summation": math.fsum(calibration_values),
+}
+calibration_records = []
+
+print(
+    f"{'candidate':>23s}  {'total (J)':>18s}  {'absolute error':>14s}  "
+    f"{'same bits':>9s}  {'tolerance':>9s}  {'conclusion':>12s}"
+)
+for name, value in calibration_candidates.items():
+    error = absolute_error(value, calibration_reference_exact)
+    same_bits = value.hex() == calibration_reference.hex()
+    tolerance_pass = math.isfinite(value) and error <= calibration_tolerance_j
+    conclusion = "above 9.5 J" if value > calibration_threshold_j else "not above"
+    calibration_records.append(
+        {
+            "candidate": name,
+            "value_j": value,
+            "value_hex": value.hex(),
+            "absolute_error_j": error,
+            "same_bits_as_reference": same_bits,
+            "tolerance_pass": tolerance_pass,
+            "conclusion": conclusion,
+        }
+    )
+    print(
+        f"{name:>23s}  {value:18.15f}  {error:14.6e}  "
+        f"{str(same_bits):>9s}  {str(tolerance_pass):>9s}  {conclusion:>12s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The serial orders are not bitwise identical. Their largest absolute error is
+about $3.4\times10^{-14}\ \mathrm{J}$, far below the declared
+$10^{-10}\ \mathrm{J}$ numerical budget, and every result remains above the
+decision threshold. Bitwise reproducibility fails while numerical and
+conclusion reproducibility pass for the tested orders.
+
+This is evidence about these inputs, algorithms, and orders in one runtime. It
+does not establish behaviour for every compiler, library, or processor.
+::::
+
+
+:::: {.cell .markdown}
+## Case 2: predict a conclusion-changing reduction
+
+The second input represents an energy ledger:
+
+- one source contributes $+2^{53}\ \mathrm{J}$;
+- one sink contributes $-2^{53}\ \mathrm{J}$;
+- 4,096 smaller sources each contribute $0.5\ \mathrm{J}$.
+
+The exact stored-input total is $2048\ \mathrm{J}$. The balance is scientifically
+acceptable only when $|E|\le100\ \mathrm{J}$; the audit reserves one percent of
+that limit for reduction error, giving
+$|E-E_{\mathrm{ref}}|\le1\ \mathrm{J}$.
+
+At $2^{53}$, adjacent binary64 values are $2\ \mathrm{J}$ apart. Predict the
+result when every $0.5\ \mathrm{J}$ term is added between the large source and
+sink.
+::::
+
+```{python}
+#| label: sensitive-input-and-reference
+
+large_energy_j = float(2**53)
+small_energy_j = 0.5
+small_contributions = 4_096
+
+ledger_values = (
+    [large_energy_j]
+    + [small_energy_j] * small_contributions
+    + [-large_energy_j]
+)
+ledger_reference_exact = exact_stored_sum(ledger_values)
+ledger_reference = float(ledger_reference_exact)
+ledger_tolerance_j = 1.0
+balance_limit_j = 100.0
+condition_indicator = float(
+    sum(abs(Fraction.from_float(value)) for value in ledger_values)
+    / abs(ledger_reference_exact)
+)
+
+print(f"input entries:       {len(ledger_values)}")
+print(f"input SHA-256:       {input_fingerprint(ledger_values)}")
+print(f"exact stored total:  {ledger_reference:.1f} J")
+print(f"binary64 spacing:    {math.ulp(large_energy_j):.1f} J at 2**53")
+print(f"condition indicator: {condition_indicator:.6e}")
+print(f"numerical tolerance: {ledger_tolerance_j:.1f} J")
+print(f"balance limit:       {balance_limit_j:.1f} J")
+```
+
+
+:::: {.cell .markdown}
+## Change only the serial evaluation order
+
+All candidates contain exactly the same binary64 values. Only their order
+changes. The exact rational reference and input fingerprint make that control
+explicit.
+
+Predict which orders let the small terms accumulate before they interact with
+the large source or sink.
+::::
+
+```{python}
+#| label: sensitive-order-comparison
+
+ledger_orders = {
+    "source, smalls, sink": ledger_values,
+    "source, sink, smalls": (
+        [large_energy_j, -large_energy_j]
+        + [small_energy_j] * small_contributions
+    ),
+    "smalls, source, sink": (
+        [small_energy_j] * small_contributions
+        + [large_energy_j, -large_energy_j]
+    ),
+    "reverse listed order": list(reversed(ledger_values)),
+}
+
+
+def balance_classification(value):
+    """Classify a finite net energy against the operational balance limit."""
+    if not math.isfinite(value):
+        return "invalid numerical state"
+    if abs(value) <= balance_limit_j:
+        return "acceptable balance"
+    return "material imbalance"
+
+
+ledger_order_records = []
+print(
+    f"{'order':>23s}  {'net energy (J)':>14s}  {'absolute error':>14s}  "
+    f"{'tolerance':>9s}  {'classification':>20s}"
+)
+for name, values in ledger_orders.items():
+    value = serial_sum(values)
+    error = absolute_error(value, ledger_reference_exact)
+    tolerance_pass = math.isfinite(value) and error <= ledger_tolerance_j
+    classification = balance_classification(value)
+    ledger_order_records.append(
+        {
+            "candidate": name,
+            "value_j": value,
+            "value_hex": value.hex(),
+            "absolute_error_j": error,
+            "tolerance_pass": tolerance_pass,
+            "classification": classification,
+        }
+    )
+    print(
+        f"{name:>23s}  {value:14.1f}  {error:14.1f}  "
+        f"{str(tolerance_pass):>9s}  {classification:>20s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The listed and reverse-listed serial orders return zero because each small
+addition is lost beside a magnitude of $2^{53}$. Zero is finite and plausible,
+but it fails the $1\ \mathrm{J}$ numerical criterion and falsely classifies the
+ledger as balanced. Orders that cancel the large terms first or accumulate the
+small terms first return the exact $2048\ \mathrm{J}$ result in binary64.
+
+The variation is not harmless merely because it can be explained by
+non-associativity. The declared scientific conclusion does not survive.
+::::
+
+
+:::: {.cell .markdown}
+## Simulate contiguous parallel partitions
+
+A simple parallel-like reduction divides the ordered input into contiguous
+chunks, sums each chunk serially, and then sums the partial results. This is not
+a performance model. It isolates how partition count changes the numerical
+evaluation tree.
+
+Predict whether increasing the chunk count must improve the answer
+monotonically. The experiment below begins with modest partition counts; a later
+exercise probes another count.
+::::
+
+```{python}
+#| label: chunked-reduction
+
+def contiguous_chunk_sum(values, chunks):
+    """Sum contiguous chunks, then sum their partial results in order."""
+    if chunks <= 0 or chunks > len(values):
+        raise ValueError("chunks must be between one and the number of values")
+
+    base_size, remainder = divmod(len(values), chunks)
+    partials = []
+    start = 0
+    for chunk_index in range(chunks):
+        chunk_size = base_size + (1 if chunk_index < remainder else 0)
+        stop = start + chunk_size
+        partials.append(serial_sum(values[start:stop]))
+        start = stop
+    return serial_sum(partials), partials
+
+
+chunk_counts = [1, 2, 4, 8, 16]
+chunk_records = []
+print(
+    f"{'chunks':>6s}  {'net energy (J)':>14s}  {'absolute error':>14s}  "
+    f"{'tolerance':>9s}  {'classification':>20s}"
+)
+for chunks in chunk_counts:
+    value, partials = contiguous_chunk_sum(ledger_values, chunks)
+    error = absolute_error(value, ledger_reference_exact)
+    tolerance_pass = error <= ledger_tolerance_j
+    classification = balance_classification(value)
+    chunk_records.append(
+        {
+            "chunks": chunks,
+            "value_j": value,
+            "absolute_error_j": error,
+            "tolerance_pass": tolerance_pass,
+            "classification": classification,
+            "partial_count": len(partials),
+        }
+    )
+    print(
+        f"{chunks:6d}  {value:14.1f}  {error:14.1f}  "
+        f"{str(tolerance_pass):>9s}  {classification:>20s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The results approach the reference over these selected counts, but none passes
+the $1\ \mathrm{J}$ numerical criterion. Counts from two onward preserve the
+scientific classification despite substantial numerical error. This is why a
+conclusion-level pass cannot be reported as numerical agreement.
+
+The selected trend is not a convergence theorem. Other partition counts can
+change where the two large terms occur among the partial sums and need not
+continue the trend.
+::::
+
+
+:::: {.cell .markdown}
+## Exercise: choose another partition count
+
+Select a positive chunk count no larger than the number of ledger entries.
+Before running the cell, predict whether the result will:
+
+1. match $2048\ \mathrm{J}$ bitwise;
+2. pass the $1\ \mathrm{J}$ numerical tolerance;
+3. retain the “material imbalance” classification.
+
+Try a power of two larger than 16, then try 2,048. Explain why the results do
+not form a monotone accuracy sequence.
+::::
+
+```{python}
+#| label: learner-partition
+
+learner_chunks = 32  # Change this after recording a prediction.
+learner_value, learner_partials = contiguous_chunk_sum(
+    ledger_values, learner_chunks
+)
+learner_error = absolute_error(learner_value, ledger_reference_exact)
+
+print(f"chunks:              {learner_chunks}")
+print(f"net energy:          {learner_value:.1f} J")
+print(f"result bits:         {learner_value.hex()}")
+print(f"absolute error:      {learner_error:.1f} J")
+print(f"tolerance pass:      {learner_error <= ledger_tolerance_j}")
+print(f"classification:      {balance_classification(learner_value)}")
+print(f"number of partials:  {len(learner_partials)}")
+```
+
+
+:::: {.cell .markdown}
+## Isolate accumulator precision
+
+The next function rounds every input and every addition to IEEE binary32 using
+the standard-library `struct` format. Because binary64 can represent every
+binary32 operand and exact sum of two binary32 values before the explicit
+rounding, this isolates basic binary32 addition for the finite values used here.
+
+It does not emulate a particular processor, compiler, fused instruction, or
+parallel schedule. Predict which serial orders retain $2048\ \mathrm{J}$ when
+the accumulator is narrowed.
+::::
+
+```{python}
+#| label: precision-comparison
+
+def round_binary32(value):
+    """Round one finite Python float to IEEE binary32 and return binary64."""
+    return struct.unpack(">f", struct.pack(">f", value))[0]
+
+
+def serial_sum_binary32(values):
+    """Round every serial addition to binary32."""
+    total = round_binary32(0.0)
+    for value in values:
+        total = round_binary32(total + round_binary32(value))
+    return total
+
+
+print(
+    f"{'order':>23s}  {'binary64 (J)':>14s}  {'binary32 (J)':>14s}  "
+    f"{'binary32 classification':>25s}"
+)
+precision_records = []
+for name, values in list(ledger_orders.items())[:3]:
+    binary64_value = serial_sum(values)
+    binary32_value = serial_sum_binary32(values)
+    classification = balance_classification(binary32_value)
+    precision_records.append(
+        {
+            "order": name,
+            "binary64_value_j": binary64_value,
+            "binary32_value_j": binary32_value,
+            "binary32_classification": classification,
+        }
+    )
+    print(
+        f"{name:>23s}  {binary64_value:14.1f}  {binary32_value:14.1f}  "
+        f"{classification:>25s}"
+    )
+```
+
+
+:::: {.cell .markdown}
+The small-terms-first order succeeds in binary64 but fails with a
+binary32-rounded accumulator. At the magnitude $2^{53}$, binary32 spacing is so
+large that the accumulated $2048\ \mathrm{J}$ correction disappears when it is
+combined with the large source. “Input precision” alone would not describe this
+calculation; accumulator precision is part of the contract.
+::::
+
+
+:::: {.cell .markdown}
+## Check an accurate candidate against the independent reference
+
+`math.fsum` is designed for more accurate floating-point summation. Treat it as
+a candidate algorithm, not an oracle. The exact rational stored-input sum
+remains the authority in this controlled case.
+::::
+
+```{python}
+#| label: accurate-reduction-check
+
+accurate_value = math.fsum(ledger_values)
+accurate_error = absolute_error(accurate_value, ledger_reference_exact)
+
+print(f"accurate candidate:  {accurate_value:.1f} J")
+print(f"candidate bits:      {accurate_value.hex()}")
+print(f"exact-reference bits:{ledger_reference.hex():>22s}")
+print(f"absolute error:      {accurate_error:.1f} J")
+print(f"tolerance pass:      {accurate_error <= ledger_tolerance_j}")
+print(f"classification:      {balance_classification(accurate_value)}")
+```
+
+
+:::: {.cell .markdown}
+The accurate candidate equals the correctly rounded exact stored-input sum for
+this dataset. That supports using it as a mitigation here. It does not prove
+accuracy for every possible input, remove the ledger's sensitivity to uncertain
+physical contributions, or guarantee bitwise identity across arbitrary library
+implementations.
+::::
+
+
+:::: {.cell .markdown}
+## Assemble a reproducibility evidence record
+
+The record below keeps the claim, input identity, environment, changed factor,
+comparison criteria, observation, and limitation together. In a research
+workflow, the source revision and dirty-state status should be supplied by the
+build or run system rather than guessed inside a portable notebook.
+::::
+
+```{python}
+#| label: reproducibility-evidence-record
+
+reference_classification = balance_classification(ledger_reference)
+reproducibility_record = {
+    "claim": (
+        "the stored energy ledger has a material imbalance and its net energy "
+        "agrees with the exact stored-input sum within 1 J"
+    ),
+    "source": {
+        "activity": "notebooks/08-environment-reproducibility.qmd",
+        "revision": "record from version control at build or run time",
+    },
+    "inputs": {
+        "units": "J",
+        "entry_count": len(ledger_values),
+        "ordered_sha256": input_fingerprint(ledger_values),
+        "valid_range": "finite binary64 values used by this controlled case",
+    },
+    "environment": environment_summary,
+    "reference": {
+        "provenance": "exact Fraction sum of every stored binary64 input",
+        "value_j": ledger_reference,
+        "classification": reference_classification,
+    },
+    "contract": {
+        "numerical_metric": "absolute error in net energy",
+        "numerical_tolerance_j": ledger_tolerance_j,
+        "balance_limit_j": balance_limit_j,
+        "required_conclusion": reference_classification,
+    },
+    "observations": {
+        "serial_orders": ledger_order_records,
+        "chunked_reductions": chunk_records,
+        "precision_comparisons": precision_records,
+        "accurate_candidate_j": accurate_value,
+    },
+    "limitations": [
+        "one synthetic input ledger in one Python runtime was executed",
+        "partition and binary32 changes emulate mechanisms, not named hardware",
+        "no compiler, external math library, accelerator, or stochastic run was compared",
+        "the exact stored-input reference does not validate physical input uncertainty",
+    ],
+}
+
+print(json.dumps(reproducibility_record, indent=2, sort_keys=True))
+```
+
+
+:::: {.cell .markdown}
+## What the experiments establish
+
+The positive calibration case demonstrates that legal order changes can alter
+binary64 output bits while remaining far inside a justified numerical budget
+and preserving the scientific classification. The energy ledger demonstrates
+that another legal order can lose all small contributions, fail a numerical
+criterion, and reverse the conclusion. Contiguous chunking shows that a
+parallel partition is a numerical algorithm choice, while explicit binary32
+rounding shows that accumulator precision can alter an otherwise unchanged
+order.
+
+The evidence is deliberately bounded. No actual compiler, external library,
+thread runtime, GPU, or stochastic generator is compared. The input ledger is a
+synthetic arithmetic case, and its exact stored-input reference does not assess
+measurement uncertainty or physical-model validity. A real portability claim
+needs the same records and checks across the named target environments.
+::::
+
+
+:::: {.cell .markdown}
+## Reflection questions
+
+1. Which reproducibility levels pass for the calibration aggregate, and which
+   one fails?
+2. Why does the zero energy result fail even though it is finite and
+   deterministic?
+3. Why do two chunks preserve the “material imbalance” conclusion while failing
+   the numerical tolerance?
+4. What does the binary32 emulation establish, and what hardware claims does it
+   leave open?
+5. Why is the exact rational reference authoritative only for the stored
+   inputs?
+6. Which additional matrix rows would be required before claiming portability
+   across a CPU compiler and a GPU implementation?
+::::
+
+
+:::: {.cell .markdown}
+## Suggested answers
+
+1. Numerical agreement and the above-threshold conclusion pass for all tested
+   calibration orders. Bitwise identity fails because at least two hexadecimal
+   outputs differ.
+2. The exact stored-input reference is $2048\ \mathrm{J}$, so zero has a
+   $2048\ \mathrm{J}$ absolute error, fails the $1\ \mathrm{J}$ criterion, and
+   crosses the $100\ \mathrm{J}$ balance boundary.
+3. The two-chunk result is $1024\ \mathrm{J}$. It is still above the balance
+   limit but remains $1024\ \mathrm{J}$ away from the reference. Conclusion and
+   numerical contracts are distinct.
+4. It isolates the effect of rounding each serial addition to binary32 for these
+   finite inputs. It does not emulate compiler transformations, accelerator
+   kernels, fused operations, parallel scheduling, or performance.
+5. `Fraction.from_float` exactly represents the binary64 data supplied to the
+   algorithm. It cannot recover unrecorded physical information or turn rounded
+   measurements into exact real quantities.
+6. Run the same source revision, input fingerprint, algorithmic contract, and
+   diagnostics with the named compiler/flags and GPU stack. Record libraries,
+   hardware, precision policy, decomposition, results, error, classification,
+   and any non-finite or termination differences.
+::::
+
+
+:::: {.cell .markdown}
+## Takeaways
+
+- Define the required agreement before comparing environments.
+- Test bitwise, numerical, statistical, and conclusion-level claims separately.
+- A deterministic result can be inaccurate; a bitwise difference can be
+  harmless.
+- Reduction order, partition, and accumulator precision belong in the numerical
+  method description.
+- Record source, input fingerprint, environment, changed factor, criteria,
+  observations, and limitations together.
+- Treat this notebook as a controlled mechanism study, not proof of portability
+  across environments that were never run.
+::::

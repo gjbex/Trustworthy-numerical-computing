@@ -398,6 +398,8 @@ The complete build must produce:
 - `_site/notebooks/06-convergence-and-stopping.ipynb`;
 - `_site/notebooks/07-validation-evidence.html`;
 - `_site/notebooks/07-validation-evidence.ipynb`;
+- `_site/notebooks/08-environment-reproducibility.html`;
+- `_site/notebooks/08-environment-reproducibility.ipynb`;
 - `_site/slides/trustworthy-numerical-computing.html`.
 
 Keep build logic in `scripts/build_training_site.sh`; the workflow should call

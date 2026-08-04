@@ -196,17 +196,18 @@ functions.
 
 ## Necessary properties can still pass a wrong method
 
-For the positive function $e^x$ on $[0,1]$, any reasonable positive-weight
-estimate should remain inside the broad bound
+For $f(x)=e^x$ on $[0,1]$, every sampled value lies between $1$ and $e$.
+The three quadrature rules use non-negative weights that sum to one, so each
+estimate must remain inside the broad bound
 
 $$
 1\le Q_n\le e.
 $$
 
 At $n=8$, the trapezoidal, midpoint, and suspicious left-endpoint estimates all
-satisfy that bound. The check remains valuable: a negative result or a value
-above $e$ would be impossible under the stated assumptions. Its success does
-not show that the trapezoidal rule was implemented.
+satisfy that bound. The check remains valuable: any result below $1$, such as
+$0.5$, or above $e$ would be impossible under the stated assumptions. Its
+success does not show that the trapezoidal rule was implemented.
 
 This is why complementary evidence matters. The bound probes plausibility; the
 affine case probes method fidelity; refinement probes the leading error; an
@@ -404,6 +405,7 @@ Before accepting a scientific-computing claim, ask:
 4. Which evidence in this module would help validate a physical model?
 
 
+::: {.callout-note collapse="true"}
 ## Suggested answers
 
 1. Every sampled value is one, so several weighting and sampling schemes return
@@ -417,6 +419,7 @@ Before accepting a scientific-computing claim, ask:
 4. None of the computational checks alone validates a physical model. That
    claim needs suitable experimental or observational data and a declared
    intended-use regime, possibly supplemented by sensitivity analysis.
+:::
 
 
 ## Takeaways

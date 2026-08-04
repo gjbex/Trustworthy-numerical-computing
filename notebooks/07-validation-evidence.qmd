@@ -232,10 +232,12 @@ contract.
 :::: {.cell .markdown}
 ## Test a necessary but insufficient bound
 
-For $f(x)=e^x$ on $[0,1]$, positivity and monotonicity imply
+For $f(x)=e^x$ on $[0,1]$, every sampled value lies between $1$ and $e$.
+Each candidate uses non-negative weights that sum to one, so every estimate
+must satisfy
 
 $$
-1\le \int_0^1 e^x\,\mathrm{d}x\le e.
+1\le Q_n\le e.
 $$
 
 Predict whether this broad property rejects the suspicious candidate. A pass
@@ -268,8 +270,8 @@ for name, value in bound_results.items():
 
 :::: {.cell .markdown}
 All three estimates pass. The property is still useful because it could reject
-a negative value or one larger than $e$. Its success cannot repair the failed
-affine-exactness evidence.
+any value outside $[1,e]$, including $0.5$ or a value larger than $e$. Its
+success cannot repair the failed affine-exactness evidence.
 ::::
 
 

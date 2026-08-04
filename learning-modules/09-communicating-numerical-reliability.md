@@ -59,7 +59,8 @@ Participants practice a short structure:
 5. Identify the limitations that could change the conclusion.
 
 
-## Connection to the capstone
+## Connection to the next module
 
-Module 10 requires participants to apply this structure after diagnosing and
-improving a suspicious computation.
+[Module 10: Capstone—Investigating A Suspicious Result](10-capstone-investigating-a-suspicious-result.md)
+requires participants to apply this structure after diagnosing and improving a
+suspicious computation.

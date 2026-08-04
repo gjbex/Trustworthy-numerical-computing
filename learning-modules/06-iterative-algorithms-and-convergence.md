@@ -395,6 +395,7 @@ Before accepting a reported convergence claim, ask:
 
 Convergence evidence establishes how an iterative calculation terminated. It
 does not by itself show that the equations, discretization, implementation, or
-inputs answer the scientific question correctly. Module 7 combines this record
-with independent references, invariants, cross-method comparisons, and
-refinement evidence to build a stronger validation argument.
+inputs answer the scientific question correctly.
+[Module 7: Validating Scientific Computations](07-validating-scientific-computations.md)
+combines this record with independent references, invariants, cross-method
+comparisons, and refinement evidence to build a stronger validation argument.

@@ -438,6 +438,8 @@ Before accepting a scientific-computing claim, ask:
 ## Connection to the next module
 
 The evidence in this module was produced in one arithmetic and software
-environment. Module 8 asks whether the supported conclusions survive changes
-in compilers, libraries, hardware, optimization, parallel reduction order, and
-precision, and what reproducibility level the scientific claim actually needs.
+environment.
+[Module 8: Reproducibility Across Computing Environments](08-reproducibility-across-computing-environments.md)
+asks whether the supported conclusions survive changes in compilers, libraries,
+hardware, optimization, parallel reduction order, and precision, and what
+reproducibility level the scientific claim actually needs.

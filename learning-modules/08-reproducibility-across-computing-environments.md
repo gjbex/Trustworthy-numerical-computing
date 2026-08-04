@@ -67,5 +67,6 @@ are harmless and what evidence supports that decision.
 
 ## Connection to the next module
 
-Reproducibility evidence is useful only when it is reported clearly. Module 9
+Reproducibility evidence is useful only when it is reported clearly.
+[Module 9: Communicating Numerical Reliability](09-communicating-numerical-reliability.md)
 turns an investigation into a defensible scientific statement.

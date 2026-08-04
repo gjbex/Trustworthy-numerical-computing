@@ -70,3 +70,12 @@ validation evidence, observed error, assumptions, and remaining limitations.
 A successful capstone does not require a bitwise-identical result. It requires a
 well-supported conclusion about which variation is acceptable, which is not,
 and why.
+
+
+## Connection beyond the core modules
+
+This capstone completes the ten-module core sequence. The
+[optional advanced topics](optional-advanced-topics.md) extend the same
+investigation workflow to mixed precision, interval arithmetic, numerical
+linear algebra, stochastic algorithms, and accelerator or distributed
+computing.

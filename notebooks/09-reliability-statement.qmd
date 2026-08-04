@@ -1,0 +1,677 @@
+---
+title: "Writing A Numerical Reliability Statement"
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+---
+
+:::: {.cell .markdown}
+A numerical result becomes useful to another scientist only when the claim,
+evidence, decision margin, assumptions, and limitations are visible together.
+This tutorial turns a controlled heating-energy calculation into a concise
+reliability statement while preserving a fuller machine-readable record.
+
+::: {.content-visible when-format="html"}
+This activity accompanies
+[Module 9: Communicating Numerical Reliability](../learning-modules/09-communicating-numerical-reliability.md).
+
+[Download the executable Jupyter notebook](09-reliability-statement.ipynb){.btn .btn-primary download="09-reliability-statement.ipynb"}
+:::
+
+::: {.content-visible when-format="ipynb"}
+This activity accompanies
+[Module 9: Communicating Numerical Reliability](https://gjbex.github.io/Trustworthy-numerical-computing/learning-modules/09-communicating-numerical-reliability.html).
+:::
+::::
+
+
+:::: {.cell .markdown}
+## Learning goals
+
+After this activity, you should be able to:
+
+- state a numerical claim with its quantity, units, model, input range, and
+  decision threshold;
+- summarize reference error and refinement evidence under a declared budget;
+- distinguish a numerical bracket from a deterministic input envelope;
+- report low-order environment variation at the agreement level actually
+  tested;
+- select useful display precision without discarding full evidence precision;
+- identify overclaiming, vague verdicts, and uninterpreted data dumps;
+- assemble and revise a claim-evidence-variability-limitation record.
+::::
+
+
+:::: {.cell .markdown}
+## Prerequisites
+
+Complete
+[Module 8: Reproducibility Across Computing Environments](../learning-modules/08-reproducibility-across-computing-environments.md)
+or the
+[environment variation and reproducibility](08-environment-reproducibility.qmd)
+activity first. This tutorial assumes that you can interpret absolute error,
+observed order, numerical bounds, and bitwise versus tolerance-based agreement.
+::::
+
+
+:::: {.cell .markdown}
+## Outline
+
+1. State the model, inputs, numerical requirement, and decision threshold.
+2. Construct a checked analytic reference and refinement record.
+3. Combine quadrature bounds with a deterministic input range.
+4. Compare low-order reduction variation with the declared contract.
+5. Choose presentation digits while retaining complete numerical values.
+6. Diagnose weak reporting patterns.
+7. Build and revise a qualified reliability statement.
+::::
+
+
+:::: {.cell .markdown}
+## Establish the numerical and reporting tools
+
+Power is measured in kilowatts, time in hours, and accumulated energy in
+kilowatt-hours. The candidate calculations use binary64. `Decimal` evaluates
+the analytic reference at increased precision; Module 7's bounded series gives
+independent support for the underlying value of $e-1$.
+
+The explicit serial reducer fixes left-to-right addition instead of depending
+on a language runtime's built-in summation strategy.
+::::
+
+```{python}
+#| label: communication-setup
+
+from decimal import Decimal, localcontext
+import json
+import math
+import platform
+import sys
+
+
+D = Decimal
+
+
+def serial_sum(values):
+    """Add values left to right with one binary64 accumulator."""
+    total = 0.0
+    for value in values:
+        total += value
+    return total
+
+
+def decimal_exp_increment(precision):
+    """Evaluate exp(1)-1 at the requested decimal precision."""
+    with localcontext() as context:
+        context.prec = precision
+        return +(D(1).exp() - D(1))
+
+
+def decimal_error(candidate, reference):
+    """Return binary64 candidate error relative to a Decimal reference."""
+    return abs(D.from_float(candidate) - reference)
+
+
+def composite_trapezoid(function, lower, upper, panels, reducer=serial_sum):
+    """Integrate with a composite trapezoidal rule and named reducer."""
+    if panels <= 0:
+        raise ValueError("panels must be positive")
+    width = (upper - lower) / panels
+    interior_values = [
+        function(lower + index * width) for index in range(1, panels)
+    ]
+    interior = reducer(interior_values)
+    return width * (
+        0.5 * function(lower) + interior + 0.5 * function(upper)
+    )
+
+
+def composite_midpoint(function, lower, upper, panels):
+    """Integrate with the composite midpoint rule."""
+    if panels <= 0:
+        raise ValueError("panels must be positive")
+    width = (upper - lower) / panels
+    values = [
+        function(lower + (index + 0.5) * width) for index in range(panels)
+    ]
+    return width * serial_sum(values)
+
+
+environment_summary = {
+    "python_implementation": platform.python_implementation(),
+    "python_version": platform.python_version(),
+    "system": platform.system(),
+    "machine_family": platform.machine(),
+    "float_mantissa_bits": sys.float_info.mant_dig,
+}
+
+print(json.dumps(environment_summary, indent=2, sort_keys=True))
+```
+
+
+:::: {.cell .markdown}
+## State the claim and requirements first
+
+The teaching model is
+
+$$
+P(t)=P_0\exp(t/\tau),\qquad 0\le t\le\tau,
+$$
+
+with nominal $P_0=12.0\ \mathrm{kW}$, admissible range
+$[11.9,12.1]\ \mathrm{kW}$, and configured $\tau=1.00\ \mathrm{h}$ treated as
+exact. The accumulated energy is
+
+$$
+E=P_0\tau\int_0^1e^x\,\mathrm{d}x.
+$$
+
+The decision requires $E>20.0\ \mathrm{kWh}$. The predeclared numerical error
+budget is $0.01\ \mathrm{kWh}$. The input interval is deterministic; it has no
+probability or confidence interpretation.
+::::
+
+```{python}
+#| label: reporting-case-and-reference
+
+nominal_power_kw = 12.0
+power_range_kw = (11.9, 12.1)
+duration_h = 1.0
+decision_threshold_kwh = 20.0
+numerical_budget_kwh = 0.01
+candidate_panels = 64
+
+reference_integral_80 = decimal_exp_increment(80)
+reference_integral_100 = decimal_exp_increment(100)
+reference_change = (
+    abs(reference_integral_80 - reference_integral_100)
+    / abs(reference_integral_100)
+)
+reference_energy = D(str(nominal_power_kw)) * D(str(duration_h)) * reference_integral_100
+
+print(f"quantity:              accumulated energy")
+print(f"units:                 kWh")
+print(f"nominal power:         {nominal_power_kw:.1f} kW")
+print(
+    f"admissible power:      [{power_range_kw[0]:.1f}, "
+    f"{power_range_kw[1]:.1f}] kW"
+)
+print(f"configured duration:   {duration_h:.2f} h")
+print(f"decision threshold:    {decision_threshold_kwh:.1f} kWh")
+print(f"numerical budget:      {numerical_budget_kwh:.2f} kWh")
+print(f"analytic reference:    {reference_energy:.18f} kWh")
+print(f"80/100 relative change:{reference_change:>13.3E}")
+```
+
+
+:::: {.cell .markdown}
+## Summarize refinement evidence
+
+The composite trapezoidal rule is predicted to converge at second order for the
+smooth model integrand. Compute several refinements against the analytic model
+reference before selecting the 64-panel result for reporting.
+
+The exact decimal reference concerns the mathematical model. It does not show
+that the exponential law represents a physical heating system.
+::::
+
+```{python}
+#| label: energy-refinement
+
+refinement_panels = [8, 16, 32, 64]
+refinement_records = []
+previous_error = None
+
+print(
+    f"{'panels':>6s}  {'energy (kWh)':>19s}  {'absolute error':>16s}  "
+    f"{'observed order':>14s}"
+)
+for panels in refinement_panels:
+    integral = composite_trapezoid(math.exp, 0.0, 1.0, panels)
+    energy = nominal_power_kw * duration_h * integral
+    error = decimal_error(energy, reference_energy)
+    observed_order = (
+        None
+        if previous_error is None
+        else math.log2(float(previous_error / error))
+    )
+    refinement_records.append(
+        {
+            "panels": panels,
+            "energy_kwh": energy,
+            "absolute_error_kwh": float(error),
+            "observed_order": observed_order,
+        }
+    )
+    order_text = "-" if observed_order is None else f"{observed_order:.4f}"
+    print(
+        f"{panels:6d}  {energy:19.15f}  {error:16.6E}  "
+        f"{order_text:>14s}"
+    )
+    previous_error = error
+
+candidate_record = refinement_records[-1]
+candidate_energy = candidate_record["energy_kwh"]
+candidate_error = candidate_record["absolute_error_kwh"]
+print(f"\n64-panel tolerance pass: {candidate_error <= numerical_budget_kwh}")
+```
+
+
+:::: {.cell .markdown}
+## Separate the numerical bracket from the input envelope
+
+Convexity gives a midpoint lower bound and trapezoidal upper bound for the model
+integral. At nominal power, their width describes numerical approximation—not
+input uncertainty.
+
+Because power and the integral are positive, the lowest admissible power times
+the midpoint bound and the highest admissible power times the trapezoidal bound
+form a deterministic envelope. Predict whether its lower endpoint remains above
+the decision threshold.
+::::
+
+```{python}
+#| label: bounds-and-input-envelope
+
+midpoint_integral = composite_midpoint(
+    math.exp, 0.0, 1.0, candidate_panels
+)
+trapezoid_integral = composite_trapezoid(
+    math.exp, 0.0, 1.0, candidate_panels
+)
+nominal_lower_kwh = nominal_power_kw * duration_h * midpoint_integral
+nominal_upper_kwh = nominal_power_kw * duration_h * trapezoid_integral
+numerical_bracket_width_kwh = nominal_upper_kwh - nominal_lower_kwh
+
+envelope_lower_kwh = power_range_kw[0] * duration_h * midpoint_integral
+envelope_upper_kwh = power_range_kw[1] * duration_h * trapezoid_integral
+conservative_margin_kwh = envelope_lower_kwh - decision_threshold_kwh
+
+print(
+    f"nominal numerical bracket: "
+    f"[{nominal_lower_kwh:.15f}, {nominal_upper_kwh:.15f}] kWh"
+)
+print(f"numerical bracket width:   {numerical_bracket_width_kwh:.6e} kWh")
+print(
+    f"deterministic envelope:    "
+    f"[{envelope_lower_kwh:.15f}, {envelope_upper_kwh:.15f}] kWh"
+)
+print(f"conservative margin:       {conservative_margin_kwh:.6f} kWh")
+print(f"threshold decision robust: {envelope_lower_kwh > decision_threshold_kwh}")
+```
+
+
+:::: {.cell .markdown}
+The nominal numerical bracket is only about
+$6.29\times10^{-4}\ \mathrm{kWh}$ wide. The combined envelope is approximately
+$[20.4473,20.7916]\ \mathrm{kWh}$, and its lower endpoint is about
+$0.45\ \mathrm{kWh}$ above the requirement.
+
+This is a deterministic envelope for the declared power range and quadrature
+bounds. Calling it a 95% confidence interval would invent a probability model
+that the evidence does not contain. It also excludes model discrepancy and any
+uncertainty in $\tau$.
+::::
+
+
+:::: {.cell .markdown}
+## Report environment variation at the tested level
+
+Change only the reduction of the 63 interior trapezoidal samples: explicit
+forward order, explicit reverse order, or `math.fsum`. Predict which
+reproducibility levels can be supported by this one-runtime comparison.
+::::
+
+```{python}
+#| label: reporting-order-variation
+
+def reverse_serial_sum(values):
+    """Add values right to left with one binary64 accumulator."""
+    return serial_sum(reversed(values))
+
+
+reduction_methods = {
+    "forward serial": serial_sum,
+    "reverse serial": reverse_serial_sum,
+    "accurate summation": math.fsum,
+}
+environment_records = []
+
+print(
+    f"{'reduction':>20s}  {'energy (kWh)':>19s}  {'binary64 representation':>23s}  "
+    f"{'budget pass':>11s}  {'decision':>10s}"
+)
+for name, reducer in reduction_methods.items():
+    integral = composite_trapezoid(
+        math.exp, 0.0, 1.0, candidate_panels, reducer=reducer
+    )
+    energy = nominal_power_kw * duration_h * integral
+    error = float(decimal_error(energy, reference_energy))
+    budget_pass = error <= numerical_budget_kwh
+    decision = "above" if energy > decision_threshold_kwh else "not above"
+    environment_records.append(
+        {
+            "reduction": name,
+            "energy_kwh": energy,
+            "energy_hex": energy.hex(),
+            "absolute_error_kwh": error,
+            "budget_pass": budget_pass,
+            "decision": decision,
+        }
+    )
+    print(
+        f"{name:>20s}  {energy:19.15f}  {energy.hex():>23s}  "
+        f"{str(budget_pass):>11s}  {decision:>10s}"
+    )
+
+environment_values = [record["energy_kwh"] for record in environment_records]
+environment_spread_kwh = max(environment_values) - min(environment_values)
+same_bits = len({record["energy_hex"] for record in environment_records}) == 1
+
+print(f"\nbitwise identical: {same_bits}")
+print(f"tested spread:      {environment_spread_kwh:.6e} kWh")
+```
+
+
+:::: {.cell .markdown}
+Bitwise identity fails, but every tested reduction passes the numerical budget
+and preserves the threshold decision. Report numerical and conclusion
+reproducibility over these three reductions in this runtime. No second compiler,
+library, CPU, or accelerator was executed, so the evidence does not establish
+cross-platform reproducibility.
+::::
+
+
+:::: {.cell .markdown}
+## Choose presentation digits without discarding evidence
+
+Full binary64 and high-precision values remain in the evidence record. The
+decision-facing presentation uses two decimal places for the result and
+envelope, enough to expose the input-range scale and conservative margin without
+displaying unsupported low-order digits.
+
+There is no universal significant-digit rule. The choice below is specific to
+this input range, numerical budget, and threshold.
+::::
+
+```{python}
+#| label: presentation-values
+
+presentation = {
+    "nominal_energy_kwh": f"{candidate_energy:.2f}",
+    "envelope_kwh": (
+        f"[{envelope_lower_kwh:.2f}, {envelope_upper_kwh:.2f}]"
+    ),
+    "threshold_kwh": f"{decision_threshold_kwh:.1f}",
+    "conservative_margin_kwh": f"{conservative_margin_kwh:.2f}",
+    "numerical_error_kwh": f"{candidate_error:.2e}",
+    "numerical_budget_kwh": f"{numerical_budget_kwh:.2f}",
+    "environment_spread_kwh": f"{environment_spread_kwh:.2e}",
+}
+
+print("decision-facing presentation")
+for key, value in presentation.items():
+    print(f"  {key}: {value}")
+
+print("\nfull candidate retained in evidence record")
+print(f"  candidate_energy_kwh: {candidate_energy:.17g}")
+print(f"  candidate_hex:        {candidate_energy.hex()}")
+```
+
+
+:::: {.cell .markdown}
+## Diagnose weak statements before writing the final one
+
+The three statements below fail differently. Read each one and predict which
+information is missing or overstated before revealing the diagnosis.
+::::
+
+```{python}
+#| label: weak-statement-diagnosis
+
+weak_statements = [
+    {
+        "pattern": "overclaim",
+        "statement": (
+            "The system delivers exactly 20.619801442201130 kWh and safely "
+            "meets the requirement."
+        ),
+        "diagnosis": (
+            "treats the model, input, and stored digits as exact; omits scope"
+        ),
+    },
+    {
+        "pattern": "verdict flag",
+        "statement": "The result was validated and is reproducible.",
+        "diagnosis": (
+            "does not name the claim, evidence, agreement level, or tested matrix"
+        ),
+    },
+    {
+        "pattern": "data dump",
+        "statement": (
+            "n=8: 20.6462231; n=16: 20.6260935; n=32: 20.6210599; "
+            "n=64: 20.6198014."
+        ),
+        "diagnosis": (
+            "lists outputs without the reference, metric, requirement, or conclusion"
+        ),
+    },
+]
+
+for item in weak_statements:
+    print(item["pattern"])
+    print(f"  statement: {item['statement']}")
+    print(f"  diagnosis: {item['diagnosis']}")
+```
+
+
+:::: {.cell .markdown}
+## Assemble the evidence record before compressing it
+
+The structured record is the authoritative source for the compact statement.
+It keeps unrounded values, provenance, criteria, observations, and limitations
+together. A generated sentence cannot decide whether a scientific assumption is
+justified; human review remains necessary.
+::::
+
+```{python}
+#| label: communication-evidence-record
+
+evidence_record = {
+    "claim": {
+        "quantity": "accumulated energy over one configured characteristic time",
+        "units": "kWh",
+        "model": "P(t) = P0 * exp(t / tau)",
+        "intended_use": "decide whether energy exceeds 20.0 kWh",
+    },
+    "inputs": {
+        "nominal_power_kw": nominal_power_kw,
+        "admissible_power_range_kw": list(power_range_kw),
+        "duration_h": duration_h,
+        "duration_treatment": "configured value treated as exact in this case",
+    },
+    "result": {
+        "method": "64-panel composite trapezoidal rule",
+        "nominal_energy_kwh": candidate_energy,
+        "deterministic_envelope_kwh": [
+            envelope_lower_kwh,
+            envelope_upper_kwh,
+        ],
+        "conservative_margin_kwh": conservative_margin_kwh,
+    },
+    "numerical_evidence": {
+        "reference": "100-digit Decimal evaluation of 12 * (exp(1) - 1)",
+        "absolute_error_kwh": candidate_error,
+        "numerical_budget_kwh": numerical_budget_kwh,
+        "final_observed_order": refinement_records[-1]["observed_order"],
+        "midpoint_trapezoid_bracket_width_kwh": numerical_bracket_width_kwh,
+    },
+    "reproducibility_evidence": {
+        "tested_change": "three interior-reduction algorithms in one runtime",
+        "bitwise_identical": same_bits,
+        "spread_kwh": environment_spread_kwh,
+        "all_numerical_budgets_pass": all(
+            record["budget_pass"] for record in environment_records
+        ),
+        "all_decisions_agree": len(
+            {record["decision"] for record in environment_records}
+        ) == 1,
+        "environment": environment_summary,
+    },
+    "presentation": presentation,
+    "limitations": [
+        "the exponential power model was not compared with observations",
+        "the power range is deterministic and has no probability interpretation",
+        "uncertainty in the configured duration was not included",
+        "only one runtime and no distinct hardware platform was tested",
+    ],
+}
+
+print(json.dumps(evidence_record, indent=2, sort_keys=True))
+```
+
+
+:::: {.cell .markdown}
+## Write the qualified reliability statement
+
+The statement below is compact enough for a report but traceable to the
+structured record. It makes a useful threshold decision while preserving the
+conditional model claim and untested scope.
+::::
+
+```{python}
+#| label: qualified-reliability-statement
+
+qualified_statement = (
+    "Under the exponential power model with tau = 1.00 h and "
+    "P0 in [11.9, 12.1] kW, accumulated energy is "
+    f"{presentation['envelope_kwh']} kWh; the nominal result is "
+    f"{presentation['nominal_energy_kwh']} kWh, and the lower bound remains "
+    f"{presentation['conservative_margin_kwh']} kWh above the "
+    f"{presentation['threshold_kwh']} kWh requirement. "
+    "The 64-panel trapezoidal result differs from the analytic model "
+    f"reference by {presentation['numerical_error_kwh']} kWh, below the "
+    f"{presentation['numerical_budget_kwh']} kWh budget; refinement is "
+    "second order, and the tested reduction algorithms preserve the decision. "
+    "This supports the threshold decision for the declared input range in "
+    "the tested runtime; it does not validate the exponential model, assign "
+    "a probability to the input range, include duration uncertainty, or "
+    "establish portability to untested platforms."
+)
+
+print(qualified_statement)
+```
+
+
+:::: {.cell .markdown}
+## Exercise: revise the statement for another audience
+
+Edit `learner_statement` for one audience:
+
+- a two-sentence paper result;
+- a code-review summary focused on the numerical contract;
+- an operations note focused on the threshold margin.
+
+Retain the units, conditional model, input scope, numerical evidence, decision
+margin, and at least one conclusion-changing limitation. The mechanical audit
+below checks only whether some required concepts are mentioned; it cannot judge
+scientific adequacy or prose quality.
+::::
+
+```{python}
+#| label: learner-statement
+
+learner_statement = qualified_statement  # Replace after choosing an audience.
+
+surface_checks = {
+    "units named": "kWh" in learner_statement,
+    "input range named": "[11.9, 12.1]" in learner_statement,
+    "decision threshold named": "20.0" in learner_statement,
+    "numerical evidence named": "analytic" in learner_statement,
+    "conditional model named": "exponential power model" in learner_statement,
+    "limitation named": "does not" in learner_statement,
+}
+
+print(learner_statement)
+print("\nmechanical surface checks")
+for check, passed in surface_checks.items():
+    print(f"  {check}: {passed}")
+print("\nA passing surface check is not scientific approval.")
+```
+
+
+:::: {.cell .markdown}
+## What the activity establishes
+
+The analytic reference, second-order refinement, midpoint–trapezoidal bracket,
+and $0.01\ \mathrm{kWh}$ numerical budget support the adequacy of the 64-panel
+calculation for this model. The deterministic input envelope remains above the
+decision threshold. Three reduction algorithms differ in low-order bits but
+preserve the numerical pass and conclusion in the tested runtime. The structured
+record supports a concise statement without discarding unrounded evidence.
+
+The evidence does not validate the exponential model against a physical system,
+turn the power range into a probability distribution, include uncertainty in
+$\tau$, or establish behaviour on another compiler or hardware platform. The
+surface audit for learner prose checks presence of terms, not truth or reporting
+quality.
+::::
+
+
+:::: {.cell .markdown}
+## Reflection questions
+
+1. Which displayed digits belong in the decision-facing statement, and which
+   should remain only in the evidence record?
+2. Why can the deterministic envelope be combined with the quadrature bounds
+   without becoming a confidence interval?
+3. Which sentence makes the physical claim conditional on the model?
+4. What evidence supports numerical reproducibility, and what would be needed
+   for a cross-platform claim?
+5. Why does the mechanical statement audit not establish scientific adequacy?
+6. Which limitation would matter most before applying the threshold decision to
+   a real heating system?
+::::
+
+
+:::: {.cell .markdown}
+## Suggested answers
+
+1. Report the nominal value and deterministic envelope to two decimal places,
+   together with the one-decimal threshold and two-decimal margin. Preserve the
+   full binary64 values, hexadecimal representations, and Decimal reference in
+   the evidence artifact.
+2. Positivity and the midpoint/trapezoidal bounds make the extrema monotone in
+   the declared power range. The resulting envelope is deterministic because no
+   probability model or coverage statement is introduced.
+3. “Under the exponential power model” limits the conclusion to the assumed
+   mathematical relationship rather than claiming observed physical delivery.
+4. Three reduction algorithms in one runtime pass the numerical budget and
+   preserve the decision. A cross-platform claim needs named compilers,
+   libraries, hardware, precision policies, and the same recorded comparisons.
+5. It searches for phrases but cannot verify references, calculations,
+   assumptions, completeness, or whether the language overstates the evidence.
+6. Model validation is the largest open issue: observations over the intended
+   operating range are needed before treating the exponential law as a physical
+   description. Duration and input measurement uncertainty may also matter.
+::::
+
+
+:::: {.cell .markdown}
+## Takeaways
+
+- Lead with the quantity, units, model scope, input range, and intended
+  decision.
+- Keep numerical error, deterministic ranges, probabilistic uncertainty, model
+  discrepancy, and environment variation distinct.
+- Report the reference, metric, tolerance rationale, observed error, and margin
+  together.
+- Round for communication while retaining complete precision in the evidence
+  artifact.
+- A concise reliability statement points to evidence and limitations; it does
+  not replace them.
+- Automated prose checks can support completeness but cannot approve a
+  scientific claim.
+::::

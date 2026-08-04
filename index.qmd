@@ -75,13 +75,18 @@ The
 activity then compares reduction order, partition, and accumulator precision;
 it separates harmless low-order variation from changes that reverse a
 scientific conclusion.
+The
+[numerical reliability statement](notebooks/09-reliability-statement.qmd)
+activity converts reference, refinement, input-range, and environment evidence
+into a concise claim with supported digits, a decision margin, and explicit
+limitations.
 
 
 ## Suggested schedule
 
 The modules are designed so that the core material can be delivered as a
 one-day course or split over two half-days. The exact timing will be refined
-when the computational experiments and capstone are complete.
+when the capstone is complete.
 
 | Course block | Modules |
 |---|---|

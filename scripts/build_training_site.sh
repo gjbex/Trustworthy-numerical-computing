@@ -52,6 +52,8 @@ for entry_point in \
     "$site_output_dir/notebooks/07-validation-evidence.ipynb" \
     "$site_output_dir/notebooks/08-environment-reproducibility.html" \
     "$site_output_dir/notebooks/08-environment-reproducibility.ipynb" \
+    "$site_output_dir/notebooks/09-reliability-statement.html" \
+    "$site_output_dir/notebooks/09-reliability-statement.ipynb" \
     "$site_output_dir/slides/trustworthy-numerical-computing.html"; do
     if [[ ! -f "$entry_point" ]]; then
         echo "Expected publication entry point not found: $entry_point" >&2

@@ -2,36 +2,422 @@
 
 ## Module Arc
 
-- State the computational claim
-- Separate sources of uncertainty
-- Summarize validation and convergence evidence
-- Report limitations and expected variability
+- Lead with the quantity, units, and intended decision
+- Keep error, uncertainty, variability, and model limits distinct
+- Match displayed digits to the supported scale
+- Compress evidence without replacing it
+- Write a qualified claim that remains useful
 
 ::: notes
-Use examples of overconfident and appropriately qualified result statements.
-Avoid making the reliable statement unreadably defensive.
+Module 8 produced a reproducibility record. Open by asking what another
+scientist needs before using its conclusion.
 :::
 
-## What A Reader Needs
+## A Report Is A Compact Argument
 
-- Quantity, units, and relevant scale
-- Algorithm and important numerical settings
-- Error measure and tolerance rationale
-- Convergence and validation evidence
-- Environment sensitivity and known limitations
+Connect:
+
+1. **Claim** — what is being asserted?
+2. **Evidence** — what can challenge it?
+3. **Margin** — how close is the requirement?
+4. **Scope** — where does the conclusion apply?
+5. **Limitation** — what could still change it?
 
 ::: notes
-Connect every item to a decision a reviewer or future maintainer must make.
+Avoid both verdict flags and unreadable diagnostic dumps. The statement should
+index stronger evidence that remains available elsewhere.
 :::
 
-## Reliability Statement
+## Start With The Decision-Facing Quantity
 
-1. State the claim
-2. Name the strongest evidence
-3. Quantify observed error or variability
-4. State important assumptions
-5. Identify limitations that could change the conclusion
+- Quantity and units
+- Input range and operating regime
+- Assumed model
+- Decision or downstream use
+- Accuracy scale that could change the decision
+
+“Eight iterations” is evidence—not the scientific claim.
 
 ::: notes
-Participants will use this exact structure in the capstone report.
+Ask learners to rewrite “the solver converged” as a claim about a physical or
+scientific quantity.
+:::
+
+## Four Layers, Four Questions
+
+| Layer | Question |
+|---|---|
+| Result | What quantity was obtained? |
+| Numerical evidence | Why is the computation adequate? |
+| Interpretation | What decision follows? |
+| Limitation | What remains unestablished? |
+
+::: notes
+Separating these layers avoids the vague conclusion “the result is correct.”
+:::
+
+## Reporting Case: Heating Energy
+
+$$
+P(t)=P_0\exp(t/\tau),\qquad 0\le t\le\tau
+$$
+
+$$
+E=P_0\tau\int_0^1e^x\,\mathrm{d}x
+$$
+
+- $P_0$ in kilowatts
+- $\tau=1.00\ \mathrm{h}$
+- $E$ in kilowatt-hours
+
+::: notes
+The exponential law is an assumed teaching model. Keep the final physical claim
+conditional because no observations validate it here.
+:::
+
+## Declare Inputs And Requirements
+
+| Item | Value |
+|---|---:|
+| Nominal power | $12.0\ \mathrm{kW}$ |
+| Admissible power | $[11.9,12.1]\ \mathrm{kW}$ |
+| Decision threshold | $20.0\ \mathrm{kWh}$ |
+| Numerical budget | $0.01\ \mathrm{kWh}$ |
+| Candidate | 64-panel trapezoidal rule |
+
+::: notes
+The power range is deterministic, not a probability interval. The duration is
+treated as exact for this controlled case.
+:::
+
+## Prediction: What Must The Report Prove?
+
+Before calculating, identify evidence for:
+
+1. numerical adequacy at 64 panels;
+2. robustness over the power range;
+3. harmless tested environment variation;
+4. physical validity of the exponential model.
+
+Which item cannot be established here?
+
+::: notes
+The fourth item needs observational model validation. Keep it visible as a
+limitation rather than implying the computation tested it.
+:::
+
+## Quantify Numerical Error
+
+Analytic model reference:
+
+$$
+E_{\mathrm{ref}}=20.6193819415085428\ldots\ \mathrm{kWh}
+$$
+
+64-panel result:
+
+$$
+E_{T,64}=20.619801442201130\ \mathrm{kWh}
+$$
+
+Absolute error: $4.20\times10^{-4}\ \mathrm{kWh}$
+
+::: notes
+The observed error is about 24 times smaller than the 0.01 kWh budget. Name the
+metric and reference rather than saying only “small.”
+:::
+
+## Refinement Supports The Method Claim
+
+| Panels | Error (kWh) | Observed order |
+|---:|---:|---:|
+| 8 | $2.68\times10^{-2}$ | — |
+| 16 | $6.71\times10^{-3}$ | $2.00$ |
+| 32 | $1.68\times10^{-3}$ | $2.00$ |
+| 64 | $4.20\times10^{-4}$ | $2.00$ |
+
+::: notes
+Compress the table to its diagnostic result: the expected second-order trend is
+observed on the tested refinements.
+:::
+
+## Error Is Not A Generic Uncertainty
+
+Keep separate:
+
+- Floating-point and discretization error
+- Iteration error and stopping evidence
+- Input range or measurement uncertainty
+- Model discrepancy
+- Stochastic and environment variability
+
+Shared units do not justify adding them.
+
+::: notes
+A deterministic range is not a confidence interval. A residual is not a
+probability distribution. Combining sources requires a stated model.
+:::
+
+## Numerical Bounds At Nominal Input
+
+Convexity gives
+
+$$
+20.619172191802360
+\le E \le
+20.619801442201130\ \mathrm{kWh}.
+$$
+
+Bracket width:
+
+$$
+6.29\times10^{-4}\ \mathrm{kWh}
+$$
+
+::: notes
+Midpoint supplies the lower bound and trapezoidal the upper. This is a numerical
+bracket for the model calculation.
+:::
+
+## Propagate The Declared Input Range
+
+Monotonicity gives the deterministic envelope
+
+$$
+20.4473\le E\le20.7916\ \mathrm{kWh}.
+$$
+
+- Lower endpoint exceeds $20.0\ \mathrm{kWh}$
+- Conservative margin is about $0.45\ \mathrm{kWh}$
+- No probability coverage is implied
+
+::: notes
+The envelope combines the power range with numerical quadrature bounds. It does
+not include model discrepancy or uncertainty in tau.
+:::
+
+## Prediction: Which Digits Belong In The Headline?
+
+Candidate output:
+
+```text
+20.619801442201130 kWh
+```
+
+Input-range envelope width:
+
+```text
+about 0.34 kWh
+```
+
+What should a decision-facing report display?
+
+::: notes
+Pause before the next slide. Distinguish full evidence precision from useful
+presentation precision.
+:::
+
+## Report The Supported Scale
+
+- Nominal result: $20.62\ \mathrm{kWh}$
+- Deterministic envelope: $[20.45,20.79]\ \mathrm{kWh}$
+- Threshold: $20.0\ \mathrm{kWh}$
+- Conservative margin: $0.45\ \mathrm{kWh}$
+
+Preserve full values in the evidence artifact.
+
+::: notes
+There is no universal significant-digit recipe. The display choice follows the
+input range, numerical budget, and decision margin.
+:::
+
+## A Complete Tolerance Sentence
+
+Include:
+
+1. quantity and units;
+2. reference;
+3. metric;
+4. threshold and rationale;
+5. observation and outcome.
+
+::: notes
+Read the example aloud: “Against the analytic model reference, absolute error is
+4.20e-4 kWh, below the predeclared 0.01 kWh budget.”
+:::
+
+## Compress Evidence, Retain Scope
+
+| Claim | Compact evidence | Limitation |
+|---|---|---|
+| Numerical method adequate | Error passes; order two | Smooth model case |
+| Input range preserves decision | Envelope above threshold | $P_0$ only |
+| Tested order variation harmless | Low-bit spread; same decision | One runtime |
+| Model represents reality | No observations | Not established |
+
+::: notes
+The compact table points to the full notebook and environment record. It does
+not replace those artifacts.
+:::
+
+## Report Environment Variation At The Tested Level
+
+| Reduction | Energy (kWh) |
+|---|---:|
+| Forward serial | $20.619801442201130$ |
+| Reverse serial | $20.619801442201123$ |
+| Accurate sum | $20.619801442201119$ |
+
+- Bits differ
+- Spread is about $1.1\times10^{-14}\ \mathrm{kWh}$
+- Budget and conclusion pass
+
+::: notes
+Report numerical and conclusion reproducibility for these orders. Do not call
+this cross-platform evidence because no second platform was run.
+:::
+
+## Failed Checks Belong In The Result
+
+- Non-finite output is a categorical failure
+- Different termination reasons need explanation
+- An unevaluated regime is not a passing regime
+- A failed numerical criterion cannot be hidden by an unchanged classification
+
+Do not summarize only successful rows.
+
+::: notes
+Give the example “two GPU runs returned NaN” and ask why silently dropping them
+from an average corrupts the report.
+:::
+
+## Reliability Statement Structure
+
+1. Claim and scope
+2. Rounded result, range, and decision margin
+3. Strongest numerical evidence
+4. Tested variability
+5. Assumptions, failures, and limitations
+
+::: notes
+This exact structure becomes the reporting requirement in the capstone.
+:::
+
+## Weak Pattern: Overclaim
+
+> The system delivers exactly
+> $20.619801442201130\ \mathrm{kWh}$ and safely meets the requirement.
+
+Problems:
+
+- model and inputs treated as exact;
+- unsupported digits;
+- no evidence or tested scope.
+
+::: notes
+Ask which single word is most misleading. “Exactly” is a useful opening, but the
+other omissions matter too.
+:::
+
+## Weak Pattern: Verdict Or Data Dump
+
+> The result was validated and is reproducible.
+
+> n=8: 20.6462; n=16: 20.6261; n=32: 20.6211; n=64: 20.6198.
+
+Neither statement connects evidence to a requirement.
+
+::: notes
+The first hides everything; the second delegates interpretation to the reader.
+Ask learners to name the missing reference, metric, and conclusion.
+:::
+
+## Qualified Statement: Claim And Result
+
+> Under the exponential power model with
+> $P_0\in[11.9,12.1]\ \mathrm{kW}$, accumulated energy is
+> $[20.45,20.79]\ \mathrm{kWh}$; the nominal result is
+> $20.62\ \mathrm{kWh}$.
+
+The lower bound remains $0.45\ \mathrm{kWh}$ above the requirement.
+
+::: notes
+This slide gives the decision-facing claim. The next adds evidence and limits so
+the visible text does not become cramped.
+:::
+
+## Qualified Statement: Evidence And Limits
+
+> Absolute error is $4.20\times10^{-4}\ \mathrm{kWh}$ against the analytic
+> reference, refinement is second order, and tested reduction orders preserve
+> the decision.
+
+Not established:
+
+- physical validity of the exponential model;
+- probability for the input range;
+- duration uncertainty or untested platforms.
+
+::: notes
+The statement remains useful because it makes the threshold decision within an
+explicit scope.
+:::
+
+## Layer The Communication Artifact
+
+1. Headline result and qualification
+2. Compact reliability statement
+3. Evidence table and failed checks
+4. Source, inputs, configuration, environment, complete outputs
+
+Every layer must support the same claim.
+
+::: notes
+Do not bury a conclusion-changing failure only in the machine artifact, and do
+not put a stronger claim in the headline than the evidence table supports.
+:::
+
+## Run The Reporting Activity
+
+```{.bash}
+quarto preview notebooks/09-reliability-statement.qmd
+```
+
+- Build the evidence record
+- Diagnose weak statements
+- Inspect full versus displayed precision
+- Revise the statement for a chosen audience
+
+::: notes
+Switch to the authoritative tutorial. The complete build executes it and
+publishes a downloadable notebook.
+:::
+
+## Exercise: Change The Audience, Not The Evidence
+
+Rewrite for:
+
+- a two-sentence paper result;
+- a numerical code review;
+- an operations threshold decision.
+
+Retain units, scope, evidence, margin, and a consequential limitation.
+
+::: notes
+The notebook's mechanical phrase check is deliberately weak. Emphasize that
+automated completeness checks cannot approve a scientific claim.
+:::
+
+## Module 9 Takeaways
+
+- Lead with the conditional scientific claim
+- Keep error and uncertainty sources distinct
+- Report evidence, tolerance rationale, and margin together
+- Round for communication; retain full evidence precision
+- Make failures and limitations visible
+- Link concise prose to reproducible artifacts
+
+::: notes
+Transition to Module 10: learners must now perform the complete investigation
+and use this structure for their capstone conclusion.
 :::

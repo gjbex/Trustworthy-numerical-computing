@@ -71,8 +71,12 @@ order, partition, and accumulator precision.
 
 ### Module 9: Communicating Numerical Reliability
 
-Shows how to report tolerance choices, convergence evidence, environmental
-variability, and remaining limitations without overstating confidence.
+Shows how to report tolerance choices, convergence evidence, deterministic input
+ranges, environmental variability, supported digits, and remaining limitations
+without overstating confidence. A companion activity turns a structured
+heating-energy evidence record into a concise reliability statement while
+keeping numerical error, input range, and unvalidated model assumptions
+distinct.
 
 ### Module 10: Capstone Investigation
 

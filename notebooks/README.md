@@ -47,3 +47,7 @@ the intended learners can access.
 8. [Environment variation and reproducibility](08-environment-reproducibility.qmd)
    compares bitwise, tolerance-based, and conclusion-level reproducibility under
    controlled reduction-order, partition, and accumulator-precision changes.
+9. [Writing a numerical reliability statement](09-reliability-statement.qmd)
+   separates numerical error from a deterministic input envelope, selects
+   supported display precision, and turns structured evidence into a qualified
+   scientific claim.

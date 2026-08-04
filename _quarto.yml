@@ -65,6 +65,8 @@ website:
             href: notebooks/07-validation-evidence.qmd
           - text: "8. Environment Variation And Reproducibility"
             href: notebooks/08-environment-reproducibility.qmd
+          - text: "9. Writing A Numerical Reliability Statement"
+            href: notebooks/09-reliability-statement.qmd
       - text: "Optional advanced topics"
         href: learning-modules/optional-advanced-topics.md
 

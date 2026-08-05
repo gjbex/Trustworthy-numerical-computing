@@ -17,6 +17,7 @@ This activity accompanies
 [Module 8: Reproducibility Across Computing Environments](../learning-modules/08-reproducibility-across-computing-environments.md).
 
 [Download the executable Jupyter notebook](08-environment-reproducibility.ipynb){.btn .btn-primary download="08-environment-reproducibility.ipynb"}
+[Open in Google Colab](https://colab.research.google.com/github/gjbex/Trustworthy-numerical-computing/blob/generated-notebooks/notebooks/08-environment-reproducibility.ipynb){.btn .btn-outline-primary}
 :::
 
 ::: {.content-visible when-format="ipynb"}

@@ -40,6 +40,12 @@ open it locally. For example:
 jupyter lab 01-opening-experiment.ipynb
 ```
 
+Alternatively, select **Open in Google Colab** on a published activity page to
+run its generated notebook in a hosted Python environment without installing
+the participant environment. Save a copy in Google Drive if you want to retain
+your changes after the session. The Colab copy is independent of the tracked
+Quarto source and does not update the course repository.
+
 The Module 10 capstone uses only Python's standard library, so participants who
 only complete that exercise do not need the conda environment.
 
@@ -137,8 +143,15 @@ Prebuilt binaries and other installation methods are documented in the
 The workflow in `.github/workflows/pages.yml`:
 
 * builds the complete site on pull requests to validate the sources;
+* publishes sanitized generated notebooks to the `generated-notebooks` branch
+  after a successful build of `main`, so Colab can load them from GitHub;
 * uploads `_site/` as a GitHub Pages artifact after changes reach `main`;
 * deploys the artifact through the `github-pages` environment.
+
+The notebook-publication job has repository write permission, while the build
+job remains read-only and the Pages deployment permissions remain isolated in
+the deployment job. Do not edit `generated-notebooks` manually; CI replaces its
+`notebooks/` directory from the authoritative `.qmd` sources.
 
 In the repository settings, configure **Pages → Build and deployment → Source**
 to use **GitHub Actions**. Do not configure branch-based deployment from

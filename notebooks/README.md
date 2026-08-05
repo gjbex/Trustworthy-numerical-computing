@@ -15,10 +15,12 @@ Activities in this directory are tutorial sources:
 - document any dependency in both `requirements-notebooks.txt` and
   `environment.yml`.
 
-Do not edit or commit generated `.ipynb` files. Published HTML and Jupyter
-notebooks are generated during the Quarto build and remain untracked. Add an
-**Open in Colab** link only after the generated notebook is available at a URL
-the intended learners can access.
+Do not edit or commit generated `.ipynb` files on a source branch. Published
+HTML and Jupyter notebooks are generated during the Quarto build and remain
+untracked there. After a successful build on `main`, CI publishes the sanitized
+notebooks to the generated-only `generated-notebooks` branch. The **Open in
+Google Colab** buttons on the published activity pages load those artifacts;
+the tracked `.qmd` files remain the authoritative sources.
 
 
 ## Activities

@@ -17,6 +17,7 @@ This activity accompanies
 [Module 2: Understanding Floating-Point Arithmetic](../learning-modules/02-understanding-floating-point-arithmetic.md).
 
 [Download the executable Jupyter notebook](02-floating-point-landmarks.ipynb){.btn .btn-primary download="02-floating-point-landmarks.ipynb"}
+[Open in Google Colab](https://colab.research.google.com/github/gjbex/Trustworthy-numerical-computing/blob/generated-notebooks/notebooks/02-floating-point-landmarks.ipynb){.btn .btn-outline-primary}
 :::
 
 ::: {.content-visible when-format="ipynb"}

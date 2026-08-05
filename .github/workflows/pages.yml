@@ -42,6 +42,15 @@ jobs:
       - name: Build training site
         run: scripts/build_training_site.sh
 
+      - name: Upload generated notebooks for Colab publication
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: colab-notebooks
+          path: _site/notebooks/*.ipynb
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Upload GitHub Pages artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
@@ -49,10 +58,74 @@ jobs:
           path: _site
           retention-days: 1
 
+  publish-colab-notebooks:
+    name: Publish generated notebooks for Colab
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Download generated notebooks
+        uses: actions/download-artifact@v8
+        with:
+          name: colab-notebooks
+          path: colab-artifact
+
+      - name: Publish generated-only branch
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          colab_branch=generated-notebooks
+          artifact_dir="$PWD/colab-artifact"
+          publish_dir=$(mktemp -d "$RUNNER_TEMP/colab-notebooks.XXXXXX")
+
+          mapfile -t generated_notebooks < <(
+            find "$artifact_dir" -maxdepth 1 -type f -name '*.ipynb' -print |
+              sort
+          )
+          if [[ ${#generated_notebooks[@]} -ne 9 ]]; then
+            echo "Expected 9 generated notebooks, found ${#generated_notebooks[@]}" >&2
+            exit 1
+          fi
+
+          mkdir -p "$publish_dir/notebooks"
+          cp -- "${generated_notebooks[@]}" "$publish_dir/notebooks/"
+
+          if git ls-remote --exit-code --heads origin "$colab_branch" >/dev/null; then
+            git fetch --depth=1 origin "$colab_branch"
+            git switch --force-create "$colab_branch" FETCH_HEAD
+            git rm -r --ignore-unmatch notebooks
+          else
+            git switch --orphan "$colab_branch"
+          fi
+
+          mkdir -p notebooks
+          cp -- "$publish_dir"/notebooks/*.ipynb notebooks/
+          git add notebooks
+
+          if git diff --cached --quiet; then
+            echo "Generated Colab notebooks are already current."
+            exit 0
+          fi
+
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git commit -m "Publish Colab notebooks from $GITHUB_SHA"
+          git push origin "HEAD:$colab_branch"
+
   deploy:
     name: Deploy GitHub Pages
     if: github.event_name != 'pull_request'
-    needs: build
+    needs:
+      - build
+      - publish-colab-notebooks
     runs-on: ubuntu-latest
     permissions:
       pages: write

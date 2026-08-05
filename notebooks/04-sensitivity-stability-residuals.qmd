@@ -17,6 +17,7 @@ This activity accompanies
 [Module 4: Conditioning And Numerical Stability](../learning-modules/04-conditioning-and-numerical-stability.md).
 
 [Download the executable Jupyter notebook](04-sensitivity-stability-residuals.ipynb){.btn .btn-primary download="04-sensitivity-stability-residuals.ipynb"}
+[Open in Google Colab](https://colab.research.google.com/github/gjbex/Trustworthy-numerical-computing/blob/generated-notebooks/notebooks/04-sensitivity-stability-residuals.ipynb){.btn .btn-outline-primary}
 :::
 
 ::: {.content-visible when-format="ipynb"}

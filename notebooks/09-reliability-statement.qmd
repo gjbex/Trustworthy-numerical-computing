@@ -17,6 +17,7 @@ This activity accompanies
 [Module 9: Communicating Numerical Reliability](../learning-modules/09-communicating-numerical-reliability.md).
 
 [Download the executable Jupyter notebook](09-reliability-statement.ipynb){.btn .btn-primary download="09-reliability-statement.ipynb"}
+[Open in Google Colab](https://colab.research.google.com/github/gjbex/Trustworthy-numerical-computing/blob/generated-notebooks/notebooks/09-reliability-statement.ipynb){.btn .btn-outline-primary}
 :::
 
 ::: {.content-visible when-format="ipynb"}

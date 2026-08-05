@@ -142,10 +142,11 @@ You are likely ready if you can:
 
 ### Software and access requirements
 
-The reading material and slides only require a web browser. Hands-on work will
-use short Python programs and Jupyter notebooks that can run locally or in a
-hosted notebook environment. Local work uses the course environment described
-in `SETUP.md`. Participants do not need Quarto; it is used by developers and
+The reading material and slides only require a web browser. Hands-on work uses
+short Python programs and Jupyter notebooks. Each published activity page
+provides both a notebook download and an **Open in Google Colab** button for a
+hosted Python environment. Local work uses the course environment described in
+`SETUP.md`. Participants do not need Quarto; it is used by developers and
 maintainers to build and preview the published material. The numerical concepts
 remain applicable across scientific programming languages.
 

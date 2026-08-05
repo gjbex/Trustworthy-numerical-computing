@@ -16,6 +16,7 @@ This activity accompanies
 [Module 1: When Correct Code Produces Wrong Answers](../learning-modules/01-when-correct-code-produces-wrong-answers.md).
 
 [Download the executable Jupyter notebook](01-opening-experiment.ipynb){.btn .btn-primary download="01-opening-experiment.ipynb"}
+[Open in Google Colab](https://colab.research.google.com/github/gjbex/Trustworthy-numerical-computing/blob/generated-notebooks/notebooks/01-opening-experiment.ipynb){.btn .btn-outline-primary}
 :::
 
 ::: {.content-visible when-format="ipynb"}

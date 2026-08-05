@@ -16,6 +16,7 @@ This activity accompanies
 [Module 5: Common Numerical Failure Modes](../learning-modules/05-common-numerical-failure-modes.md).
 
 [Download the executable Jupyter notebook](05-failure-mode-lab.ipynb){.btn .btn-primary download="05-failure-mode-lab.ipynb"}
+[Open in Google Colab](https://colab.research.google.com/github/gjbex/Trustworthy-numerical-computing/blob/generated-notebooks/notebooks/05-failure-mode-lab.ipynb){.btn .btn-outline-primary}
 :::
 
 ::: {.content-visible when-format="ipynb"}

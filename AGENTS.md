@@ -216,7 +216,8 @@ modules; they do not replace every narrative page.
 - Put participant-facing activity sources in `notebooks/` as executable Quarto
   `.qmd` files.
 - Treat each `.qmd` file as the authoritative source. Do not edit or commit the
-  generated `.ipynb` file.
+  generated `.ipynb` file on a source branch. CI may publish sanitized generated
+  notebooks to the dedicated `generated-notebooks` branch for Colab access.
 - Wrap each logical text unit in an explicit Markdown cell:
 
   ```markdown
@@ -375,7 +376,8 @@ The source repository does not track rendered HTML.
 
 - `scripts/build_training_site.sh` assembles the complete site in `_site/`.
 - `_site/`, `.quarto/`, `_freeze/`, and notebook checkpoints remain ignored.
-- Do not manually edit generated output.
+- Do not manually edit generated output, including the CI-managed
+  `generated-notebooks` branch.
 - Do not add a workflow that commits generated HTML back to `main`.
 - Pull requests build the complete artifact without deploying.
 - Pushes to `main` upload and deploy the artifact through GitHub Pages.
@@ -482,8 +484,10 @@ surfaces with `rg` and verify every reference.
 - Preserve existing user changes and avoid unrelated formatting churn.
 - Use `git mv` for tracked moves and renames.
 - Do not force a package-style `src/` layout onto the training repository.
-- Do not commit `_site/`, generated `.ipynb` files, local Quarto state, notebook
-  checkpoints, caches, or transient experiment output.
+- Do not commit `_site/`, generated `.ipynb` files on source branches, local
+  Quarto state, notebook checkpoints, caches, or transient experiment output.
+  The CI-managed `generated-notebooks` branch is the only generated-notebook
+  publication exception.
 - Keep small input data close to the example that consumes it.
 - Keep large or regenerated scientific data out of Git unless it is an
   intentional teaching asset with documented provenance.

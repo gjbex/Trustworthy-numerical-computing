@@ -41,7 +41,8 @@ After running `scripts/build_training_site.sh`, preview the assembled landing
 page at `_site/index.html`, the learning modules under
 `_site/learning-modules/`, and the slide deck under `_site/slides/`. Quarto
 renders the landing page, reading material, interactive activities, generated
-Jupyter notebooks, and RevealJS slides.
+Jupyter notebooks, and RevealJS slides. Published activity pages provide both a
+notebook download and an **Open in Google Colab** button.
 
 Generated HTML is not committed. GitHub Actions builds the same `_site/`
 artifact for pull-request validation and deploys it after changes reach `main`.

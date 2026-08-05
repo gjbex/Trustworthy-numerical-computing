@@ -27,7 +27,7 @@ strategies without tying the material to one programming language.
    deploys it to GitHub Pages from `main`.
 1. `environment.yml`: portable Python and Jupyter environment for notebooks and
    core exercises.
-1. `SETUP.md`: setup and publication instructions.
+1. `SETUP.md`: participant runtime and maintainer publication instructions.
 
 
 ## Training materials
@@ -45,8 +45,9 @@ Jupyter notebooks, and RevealJS slides.
 
 Generated HTML is not committed. GitHub Actions builds the same `_site/`
 artifact for pull-request validation and deploys it after changes reach `main`.
-Quarto is installed separately from the conda environment; see
-[SETUP.md](SETUP.md) for the supported version and installation guidance.
+Course participants do not need Quarto. Developers and maintainers install it
+separately from the conda environment; see [SETUP.md](SETUP.md) for the
+supported version and the two setup paths.
 
 
 ## Current status

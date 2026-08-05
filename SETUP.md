@@ -1,27 +1,23 @@
 # Environment Setup
 
+Course participants do **not** need Quarto. The published reading material and
+slides run in a web browser, and each published activity page provides a
+downloadable Jupyter notebook. Participants who want to run those notebooks
+locally need only the Python and Jupyter environment described below.
+
+Quarto is a publishing tool for developers and maintainers of the training
+material. It is required only when rendering the tracked `.qmd` sources,
+previewing source changes, or building the complete publication artifact.
+
+
+## Participant setup
+
 The conda environment contains the portable Python and Jupyter runtime used by
-the tutorial notebooks. Quarto is installed separately because its conda-forge
-package is not available consistently across Linux, macOS, and Windows.
-Numerical-library dependencies will be added alongside the activities that
-require them.
+the tutorial notebooks. Numerical-library dependencies will be added alongside
+the activities that require them.
 
 
-## Install Quarto
-
-Install Quarto 1.9.38 using the installer for your operating system from the
-[official Quarto download page](https://quarto.org/docs/download/). Quarto is a
-publishing application rather than a Python dependency, and must be available
-on `PATH`.
-
-Verify the installation:
-
-```bash
-quarto --version
-```
-
-
-## Create the environment
+### Create the environment
 
 From the repository root, create and activate the conda environment:
 
@@ -37,8 +33,39 @@ python --version
 jupyter lab --version
 ```
 
+Download an executable `.ipynb` file from its published activity page, then
+open it locally. For example:
 
-## Build all published material
+```bash
+jupyter lab 01-opening-experiment.ipynb
+```
+
+The Module 10 capstone uses only Python's standard library, so participants who
+only complete that exercise do not need the conda environment.
+
+
+## Developer and maintainer setup
+
+Developers and maintainers need the participant environment above to execute
+the tutorial notebooks during a complete build. They also need Quarto because
+it renders the website, activity pages, generated notebooks, and slides.
+
+
+### Install Quarto
+
+Install Quarto 1.9.38 using the installer for your operating system from the
+[official Quarto download page](https://quarto.org/docs/download/). Quarto is a
+separately installed publishing application rather than a participant Python
+dependency, and must be available on `PATH`.
+
+Verify the installation:
+
+```bash
+quarto --version
+```
+
+
+### Build all published material
 
 Run:
 
@@ -57,7 +84,7 @@ The `_site/` directory is generated and ignored by Git. Remove it at any time;
 the build script recreates it from the tracked sources.
 
 
-## Preview while editing
+### Preview while editing
 
 Preview the landing page and learning modules with:
 
@@ -71,7 +98,7 @@ Preview an interactive activity directly from its authoritative Quarto source:
 quarto preview notebooks/01-opening-experiment.qmd
 ```
 
-After running the complete build, open the generated notebook for an editable
+After running the complete build, inspect a generated notebook in an editable
 Jupyter session with:
 
 ```bash
@@ -88,7 +115,7 @@ slides-source/preview.sh
 ```
 
 
-## Optional workflow validation
+### Optional workflow validation
 
 Course maintainers can install `actionlint` 1.7.12 separately to validate GitHub
 Actions workflows. It is not required by participants and is intentionally not
@@ -105,7 +132,7 @@ Prebuilt binaries and other installation methods are documented in the
 [actionlint repository](https://github.com/rhysd/actionlint).
 
 
-## GitHub Pages
+### GitHub Pages
 
 The workflow in `.github/workflows/pages.yml`:
 

@@ -358,6 +358,11 @@ input sensitivity in this case.
 
 ## Propagate the declared reading bounds
 
+This step applies
+[Module 4's propagation framework](04-conditioning-and-numerical-stability.md#propagation-combines-sensitivity-with-input-information)
+to a deterministic admissible set rather than a standard uncertainty or
+probability distribution.
+
 Each reading may vary independently by
 $\pm5\times10^{-8}$ normalized response units. Because the mapping from
 $(y_1,y_2)$ to $(c_A,c_B)$ is linear for fixed nonzero $\delta$, extrema over

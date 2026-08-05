@@ -41,10 +41,12 @@ After this module, you should be able to:
 
 Module 3 established that a tolerance encodes a requirement rather than a repair
 for a failed test. Module 4 separated input sensitivity, algorithmic behaviour,
-and implementation defects. Modules 5 and 6 produced arithmetic and convergence
-diagnostics. Module 7 connected claims to complementary validation evidence.
-Module 8 defined bitwise, numerical, statistical, and conclusion-level
-reproducibility contracts.
+and implementation defects, then introduced a
+[propagation framework](04-conditioning-and-numerical-stability.md#propagation-combines-sensitivity-with-input-information)
+for declared deterministic bounds and standard uncertainties. Modules 5 and 6
+produced arithmetic and convergence diagnostics. Module 7 connected claims to
+complementary validation evidence. Module 8 defined bitwise, numerical,
+statistical, and conclusion-level reproducibility contracts.
 
 Module 9 does not introduce another way to make a result trustworthy. It teaches
 how to communicate the evidence already produced without blurring those

@@ -27,6 +27,8 @@ After this module, you should be able to:
 * distinguish problem conditioning from algorithmic stability and
   implementation correctness;
 * use controlled perturbations to estimate directional sensitivity;
+* propagate small deterministic input bounds or standard uncertainties through
+  a smooth model, while stating the assumptions behind the result;
 * interpret forward error, backward error, and residuals as different
   questions;
 * explain why a small residual need not imply a small forward error;
@@ -122,6 +124,207 @@ The large change in the nearly dependent system is not caused by binary64
 rounding: the experiment uses high-precision decimal arithmetic and the
 amplification follows directly from the equations. The problem itself has
 little information with which to distinguish $x_1$ from $x_2$.
+
+
+## Propagation combines sensitivity with input information
+
+Conditioning asks how strongly a mathematical model *could* amplify input
+changes. Propagation combines that sensitivity with a declared description of
+which input changes are possible or plausible.
+
+The word **error** needs care here. For a synthetic test with a known exact
+input, the input error can be calculated. For measured data, the unknown true
+value is usually unavailable. What can be propagated is instead a stated input
+bound, standard uncertainty, covariance, probability distribution, or set of
+admissible values. These descriptions are not interchangeable.
+
+Let a scalar result be
+
+$$
+y=f(x_1,x_2,\ldots,x_n).
+$$
+
+For sufficiently small input changes and a differentiable model, first-order
+linearization gives
+
+$$
+\Delta y
+\approx
+\sum_{i=1}^n c_i\Delta x_i,
+\qquad
+c_i=\left.\frac{\partial f}{\partial x_i}\right|_{x_1,\ldots,x_n}.
+$$
+
+The derivatives $c_i$ are **sensitivity coefficients**. Their units convert a
+change in each input into a change in the output. They may be derived
+analytically, computed with automatic differentiation, or estimated with
+carefully scaled and checked numerical perturbations.
+
+For small deterministic bounds $|\Delta x_i|\le b_i$, adding the magnitudes of
+the linearized contributions gives the first-order estimate
+
+$$
+|\Delta y|
+\lesssim
+\sum_{i=1}^n |c_i|b_i.
+$$
+
+This expression explains the familiar arithmetic rules:
+
+| Operation | Small-change first-order estimate |
+|---|---|
+| $y=a\mathbin{+}b$ or $y=a-b$ | $|\Delta y|\lesssim |\Delta a|+|\Delta b|$ |
+| $y=ab$ or $y=a/b$ | $|\Delta y/y|\lesssim |\Delta a/a|+|\Delta b/b|$ |
+| $y=a^p$ | $|\Delta y/y|\lesssim |p|\,|\Delta a/a|$ |
+
+The product, quotient, and power expressions are local approximations, not
+rigorous bounds for arbitrary input ranges. A rigorous deterministic envelope
+requires bounding the nonlinear remainder or evaluating the complete
+admissible input set with a justified method.
+
+
+## Worked example: density from bounded inputs
+
+Suppose mass and volume are known only to lie in the ranges
+
+$$
+m\in[99.8,100.2]\ \mathrm{g},
+\qquad
+V\in[39.7,40.3]\ \mathrm{cm^3},
+$$
+
+and the model is $\rho=m/V$. At the nominal inputs,
+$\rho=2.5\ \mathrm{g\,cm^{-3}}$. Because density increases with $m$ and
+decreases with positive $V$, the exact extrema over this rectangular input set
+occur at opposite corners:
+
+$$
+\frac{99.8}{40.3}
+\le \rho \le
+\frac{100.2}{39.7},
+$$
+
+or
+
+$$
+2.47643
+\le \rho \le
+2.52393\ \mathrm{g\,cm^{-3}}.
+$$
+
+The first-order relative estimate is
+
+$$
+\frac{|\Delta\rho|}{\rho}
+\lesssim
+\frac{0.2}{100.0}+\frac{0.3}{40.0}
+=0.0095,
+$$
+
+which gives $|\Delta\rho|\lesssim0.02375\ \mathrm{g\,cm^{-3}}$. The exact
+deviations are asymmetric: approximately
+$-0.02357$ and $+0.02393\ \mathrm{g\,cm^{-3}}$. The first-order result is a
+useful scale estimate here, but its slight miss at the upper endpoint shows why
+it must not be presented as an exact bound.
+
+
+## Standard uncertainties require covariance
+
+Now make a different statement: suppose $0.2\ \mathrm{g}$ and
+$0.3\ \mathrm{cm^3}$ are **standard uncertainties**, rather than interval
+half-widths. Let $\Sigma_x$ be the input covariance matrix and let the row
+vector $J=[c_1,\ldots,c_n]$ contain the sensitivity coefficients. First-order
+propagation gives
+
+$$
+u_c^2(y)\approx J\Sigma_xJ^\mathsf{T}
+=
+\sum_{i=1}^n\sum_{j=1}^n
+c_i c_j\operatorname{Cov}(X_i,X_j).
+$$
+
+If the inputs are independent, the covariance terms vanish and this reduces to
+
+$$
+u_c(y)\approx
+\sqrt{\sum_{i=1}^n\left(c_i u(x_i)\right)^2}.
+$$
+
+For the density example, treating the stated values as independent standard
+uncertainties gives
+
+$$
+u_c(\rho)
+\approx
+2.5\sqrt{
+\left(\frac{0.2}{100.0}\right)^2+
+\left(\frac{0.3}{40.0}\right)^2}
+=0.0194\ \mathrm{g\,cm^{-3}}.
+$$
+
+This is not the deterministic interval calculated above, nor is it
+automatically a confidence interval. It is an estimated standard uncertainty
+under a different input model. Correlation also matters: because increasing
+mass raises the density while increasing volume lowers it, positive covariance
+between $m$ and $V$ reduces this first-order variance, while negative covariance
+increases it. Omitting a shared calibration effect can therefore make the
+result wrong in either direction.
+
+
+## Relate propagation to conditioning
+
+For nonzero scalar inputs and output, define componentwise relative sensitivity
+coefficients
+
+$$
+\kappa_i=
+\left|\frac{x_i}{y}\frac{\partial f}{\partial x_i}\right|.
+$$
+
+Then the deterministic first-order estimate can be written as
+
+$$
+\left|\frac{\Delta y}{y}\right|
+\lesssim
+\sum_{i=1}^n
+\kappa_i\left|\frac{\Delta x_i}{x_i}\right|.
+$$
+
+This is the connection between conditioning and propagation. The
+$\kappa_i$ describe local amplification by the model; the declared input bounds
+or uncertainties describe how strongly each direction is excited. A large
+condition number is a warning about possible amplification, but it is not by
+itself an output uncertainty.
+
+
+## Know when first-order propagation is inadequate
+
+Linearization is most credible when the model is smooth, the input uncertainty
+is small enough that one local derivative is representative, and the output is
+not near a singularity, branch change, or discontinuity. It should be checked
+when those conditions are doubtful.
+
+For example, let $Y=X^2$ with nominal input $x=0$ and nonzero standard
+uncertainty $u(x)$. The derivative at the nominal input is zero, so first-order
+propagation reports zero output uncertainty. That conclusion is false: plausible
+nonzero values of $X$ produce positive values of $Y$. Higher-order analysis or
+direct propagation is required.
+
+Practical alternatives include:
+
+* evaluate all corners when monotonicity or linearity proves that extrema occur
+  there;
+* use interval or optimization methods when a defensible deterministic bound is
+  required, while checking dependency and overestimation effects;
+* sample a justified joint input distribution and run the model repeatedly to
+  approximate the output distribution;
+* compare direct propagation with the linearized result to assess whether
+  nonlinearity matters.
+
+Monte Carlo propagation is often workable for complicated models, but it does
+not repair an unjustified input distribution, omitted correlation, model
+discrepancy, or insufficient sampling of rare events. It estimates a
+distribution; it does not automatically provide a rigorous worst-case bound.
 
 
 ## Before the companion experiment
@@ -427,10 +630,12 @@ that would have exposed the defect. Do not disguise it with a looser tolerance.
 
 The two-equation experiment demonstrates directional sensitivity in a
 controlled, high-precision setting. It does not compute the full condition
-number for every perturbation direction. The quadratic experiment compares two
-algorithms on one exact coefficient set; it does not constitute a general proof
-of stability. The residual example demonstrates a logical possibility, not the
-output of a production solver.
+number for every perturbation direction. The density example demonstrates
+deterministic and covariance-based propagation for declared input descriptions;
+it does not establish that either description matches a real instrument. The
+quadratic experiment compares two algorithms on one exact coefficient set; it
+does not constitute a general proof of stability. The residual example
+demonstrates a logical possibility, not the output of a production solver.
 
 Together, the examples establish the diagnostic distinctions:
 
@@ -442,15 +647,20 @@ Together, the examples establish the diagnostic distinctions:
   the problem is ill-conditioned.
 
 These conclusions remain separate from modelling error, discretization error,
-and measurement uncertainty, which must be assessed with domain-specific
-evidence.
+and the validity of a measurement-uncertainty model, which must be assessed
+with domain-specific evidence.
 
 
 ## Questions to ask during diagnosis
 
 * Which mathematical input-output map is being conditioned?
 * Which input perturbations and output changes are scientifically meaningful?
+* Are the inputs described by deterministic bounds, standard uncertainties, a
+  joint distribution, or something else?
+* Which inputs share calibration, sampling, or modelling effects and are
+  therefore correlated?
 * Which norm and scaling make the relative changes interpretable?
+* Is first-order linearization adequate over the declared input range?
 * Does sensitivity persist when the perturbation experiment uses higher
   precision?
 * Does an equivalent algorithm reduce both forward and backward error?
@@ -474,6 +684,10 @@ evidence.
    $(1,1)$?
 7. Which remedies can address ill-conditioning, and which cannot recover
    uncertain input information?
+8. Why do a deterministic input interval and a standard uncertainty with the
+   same numerical magnitude lead to different output statements?
+9. Why can omitting covariance invalidate propagated standard uncertainty?
+10. Give one reason why first-order propagation can fail.
 
 ::: {.callout-note collapse="true"}
 ## Suggested answers
@@ -497,6 +711,16 @@ evidence.
    regularization, or a revised accuracy claim can address the consequences.
    More arithmetic precision cannot reduce uncertainty already present in the
    inputs.
+8. A deterministic interval describes an admissible set and supports a range or
+   bound. A standard uncertainty describes dispersion under a probabilistic
+   model. Their propagation rules and interpretations are different.
+9. Covariance records input changes that occur together. The cross terms can
+   either increase or decrease output variance, depending on the signs of the
+   sensitivities and correlations.
+10. The model may be strongly nonlinear over the input range, cross a
+    discontinuity or singularity, have a zero first derivative despite a
+    nonzero higher-order effect, or receive input changes too large for a local
+    approximation.
 :::
 
 
@@ -510,6 +734,12 @@ evidence.
   satisfied.
 * A small backward error or residual does not guarantee a small forward error
   when the problem is ill-conditioned.
+* Propagation combines model sensitivity with a declared input description;
+  deterministic bounds, standard uncertainties, and probability distributions
+  support different claims.
+* First-order propagation is local. Check it against direct propagation when
+  nonlinearity, correlation, singular behaviour, or decision thresholds may
+  matter.
 * Diagnose with controlled perturbations, algorithm comparisons, scaled
   diagnostics, and implementation tests, then choose a remedy that targets the
   identified cause.

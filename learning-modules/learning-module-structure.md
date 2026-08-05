@@ -30,7 +30,9 @@ precise language for comparing results.
 ### Module 4: Conditioning And Numerical Stability
 
 Separates sensitivity inherent in the mathematical problem from error
-introduced by the selected algorithm and its implementation.
+introduced by the selected algorithm and its implementation. It then combines
+local sensitivity with deterministic input bounds or covariance-based standard
+uncertainties, including the limits of first-order propagation.
 
 ### Module 5: Common Numerical Failure Modes
 

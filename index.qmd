@@ -21,6 +21,8 @@ When you complete this training you will be able to
 * choose meaningful error measures and numerical tolerances;
 * distinguish an ill-conditioned problem from an unstable algorithm or an
   implementation defect;
+* propagate declared input bounds or standard uncertainties through a smooth
+  model and recognize when first-order propagation is inadequate;
 * recognize common failure modes such as cancellation, overflow, underflow,
   and accumulated rounding error;
 * define defensible convergence and stopping criteria;

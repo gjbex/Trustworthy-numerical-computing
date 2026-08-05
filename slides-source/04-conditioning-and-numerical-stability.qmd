@@ -4,6 +4,7 @@
 
 - Separate the problem, algorithm, and implementation
 - Measure input-to-output sensitivity
+- Propagate declared input bounds or uncertainties
 - Compare forward and backward error
 - Interpret residuals using conditioning
 - Match the remedy to the diagnosed cause
@@ -64,6 +65,64 @@ With a $10^{-16}$ right-hand-side perturbation:
 Ask for predictions before running
 `notebooks/04-sensitivity-stability-residuals.qmd`. The amplification follows
 from $\eta/\delta$ and persists in high precision.
+:::
+
+## From Sensitivity To Propagation
+
+For $y=f(x_1,\ldots,x_n)$ and small input changes:
+
+$$
+\Delta y\approx\sum_i c_i\Delta x_i,
+\qquad c_i=\frac{\partial f}{\partial x_i}
+$$
+
+- $c_i$ converts input units to output units
+- Bounded changes: $|\Delta y|\lesssim\sum_i|c_i|b_i$
+- Standard uncertainty: $u_c^2(y)\approx J\Sigma_xJ^\mathsf{T}$
+
+::: notes
+Conditioning supplies the sensitivity; propagation combines it with a declared
+input description. Do not call a measurement uncertainty a known error. The
+true input is usually unavailable.
+:::
+
+## Same Magnitudes, Different Claims
+
+For $\rho=m/V$, $m=100.0\ \mathrm{g}$ and
+$V=40.0\ \mathrm{cm^3}$:
+
+| Input interpretation | Propagated result |
+|---|---:|
+| Bounds $0.2\ \mathrm{g}$, $0.3\ \mathrm{cm^3}$ | $[2.47643,2.52393]\ \mathrm{g\,cm^{-3}}$ |
+| Independent standard uncertainties | $u_c(\rho)\approx0.0194\ \mathrm{g\,cm^{-3}}$ |
+
+- A deterministic range is not a confidence interval
+- Covariance can raise or lower propagated variance
+
+::: notes
+The first row uses monotonicity and exact corner evaluation. The second uses a
+first-order covariance model. The identical input magnitudes do not make these
+equivalent statements.
+:::
+
+## First Order Can Fail
+
+For $Y=X^2$ at nominal $x=0$:
+
+$$
+\left.\frac{dY}{dX}\right|_{x=0}=0
+$$
+
+- Linearization predicts zero output uncertainty
+- Nonzero plausible inputs still produce positive outputs
+- Check with corners, bounds, optimization, or sampled propagation
+- Monte Carlo needs a justified joint input distribution
+
+::: notes
+First-order propagation is local, not universal. It is suspect near
+singularities, discontinuities, branch changes, thresholds, or over wide input
+ranges. Monte Carlo estimates a distribution; it is not a rigorous worst-case
+bound and cannot fix missing correlations or model discrepancy.
 :::
 
 ## Formal Forward Error

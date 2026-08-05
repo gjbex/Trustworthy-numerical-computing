@@ -33,7 +33,8 @@ domain-specific follow-up.
 Each module contributes to the same investigation workflow:
 
 1. State what result is expected and what accuracy is meaningful.
-2. Characterize the problem and its sensitivity to inputs.
+2. Characterize the problem, its sensitivity to inputs, and the propagation of
+   declared input bounds or uncertainties.
 3. Identify arithmetic and algorithmic failure modes.
 4. Establish independent validation evidence.
 5. Check whether conclusions survive relevant environment changes.

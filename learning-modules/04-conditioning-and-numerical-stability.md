@@ -389,9 +389,11 @@ distribution; it does not automatically provide a rigorous worst-case bound.
 ## Before the companion experiment
 
 The [sensitivity, stability, and residuals](../notebooks/04-sensitivity-stability-residuals.qmd)
-notebook reproduces the two-equation perturbation in high precision, compares
-two quadratic-root algorithms, and constructs a candidate solution with a tiny
-residual but a large forward error.
+notebook reproduces the two-equation perturbation in high precision. Its live
+Jupyter version provides logarithmic controls for $\delta$ and $\eta$, while
+the published static page retains the reviewed fixed-scale figure. The notebook
+also compares two quadratic-root algorithms and constructs a candidate solution
+with a tiny residual but a large forward error.
 
 Before running it, predict:
 

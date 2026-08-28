@@ -105,7 +105,10 @@ The coordinate panels share a common linear scale. The overlap on the right is
 real at this resolution, not a plotting failure. The lower arrows do not share
 a scale: use the labels to compare solution changes of 1e-16 and 1e-4. This
 connects the geometry of nearly dependent equations to the observed
-amplification without visually exaggerating the tiny line separation.
+amplification without visually exaggerating the tiny line separation. If time
+allows, use the live delta and eta controls in
+`notebooks/04-sensitivity-stability-residuals.qmd` to ask which parameter
+changes the angle and which changes only the perturbed right-hand side.
 :::
 
 ## From Sensitivity To Propagation

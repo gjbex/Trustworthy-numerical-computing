@@ -46,6 +46,11 @@ the participant environment. Save a copy in Google Drive if you want to retain
 your changes after the session. The Colab copy is independent of the tracked
 Quarto source and does not update the course repository.
 
+The Module 4 activity contains an `ipywidgets` illustration with live controls
+for $\delta$ and $\eta$. It works in the downloaded notebook and in Colab when
+connected to a live Python kernel. The published course page is static and
+therefore shows a reviewed non-interactive fallback instead.
+
 The Module 10 capstone uses only Python's standard library, so participants who
 only complete that exercise do not need the conda environment.
 

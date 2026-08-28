@@ -3,10 +3,10 @@
 ## Module Arc
 
 - A finite set represents a wide numeric range
+- Formats trade significand precision against exponent range
 - Spacing changes with magnitude
 - Each operation may round
-- Exceptional values carry information
-- Evaluation order can change the result
+- Exceptional values and evaluation order matter
 
 ::: notes
 Connect immediately to the two variance results from Module 1. The purpose is
@@ -30,8 +30,26 @@ course environment uses binary64 with 53 bits of significand precision, but
 the reasoning applies to other floating-point formats.
 :::
 
+## Same Width, Different Trade-Off
+
+| Format | Significand | Exponent | Gap above 1 |
+|---|---:|---:|---:|
+| binary16 | 11 bits | 5 bits | $2^{-10}$ |
+| bfloat16 | 8 bits | 8 bits | $2^{-7}$ |
+| binary32 | 24 bits | 8 bits | $2^{-23}$ |
+| binary64 | 53 bits | 11 bits | $2^{-52}$ |
+
+Which formats retain `1.001`? Which retain $10^{-20}$?
+
+::: notes
+Collect predictions before answering. Binary16 distinguishes 1.001 from 1 but
+underflows 1e-20 to zero. Bfloat16 rounds 1.001 to 1 but retains 1e-20 as a
+normal value. Emphasize the precision-range trade-off, not field memorization.
+:::
+
 ## Predict Before Running
 
+- Do binary16 and bfloat16 make the same rounding choices?
 - Is spacing constant near $10^{-6}$, $1$, and $10^{16}$?
 - For $x=2^{53}$, does `x + 1.0` change `x`?
 - Is `NaN == NaN`?

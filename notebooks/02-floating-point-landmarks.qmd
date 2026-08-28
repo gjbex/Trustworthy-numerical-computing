@@ -33,6 +33,8 @@ This activity accompanies
 After this experiment, you should be able to:
 
 - inspect the floating-point format used by a Python environment;
+- compare the precision-and-range trade-offs of binary16, bfloat16, binary32,
+  and binary64;
 - observe how representable spacing changes with magnitude;
 - predict when an increment will be rounded away;
 - classify normal, subnormal, infinite, zero, and `NaN` values;
@@ -57,12 +59,13 @@ IEEE 754 encoding.
 ## Outline
 
 1. Confirm the floating-point format.
-2. Inspect a decimal value that is not exactly representable.
-3. Map spacing at several magnitudes.
-4. Observe when an increment has no effect.
-5. Classify values at the edges of the format.
-6. Compare evaluation orders.
-7. Explain the variance discrepancy.
+2. Compare common binary formats with two revealing values.
+3. Inspect a decimal value that is not exactly representable.
+4. Map spacing at several magnitudes.
+5. Observe when an increment has no effect.
+6. Classify values at the edges of the format.
+7. Compare evaluation orders.
+8. Explain the variance discrepancy.
 ::::
 
 
@@ -79,6 +82,7 @@ claims to another format.
 #| label: format-information
 
 import math
+import struct
 import sys
 
 
@@ -98,6 +102,144 @@ print(f"epsilon near one:      {sys.float_info.epsilon:.6e}")
 The significand precision describes how much binary detail a normal value can
 retain. The exponent range allows magnitudes from approximately $10^{-308}$ to
 $10^{308}$, but it does not make every number in that interval representable.
+::::
+
+
+:::: {.cell .markdown}
+## Compare common binary formats
+
+Binary16 and bfloat16 both use 16 storage bits but allocate them differently.
+Binary16 has 11 bits of significand precision and 5 exponent bits; bfloat16 has
+8 bits of significand precision and 8 exponent bits. Binary32 and binary64 have
+24 and 53 bits of significand precision, respectively.
+
+The helpers below emulate a declared conversion path without requiring a
+third-party numerical library. Python's `struct` module performs binary16 and
+binary32 conversions. The bfloat16 helper first converts the finite input to
+binary32 and then rounds that bit pattern to bfloat16 using round-to-nearest,
+ties-to-even. It is a format-conversion experiment, not an emulator for a
+particular CPU, GPU, compiler, or arithmetic kernel.
+::::
+
+```{python}
+#| label: reduced-format-helpers
+
+def round_binary16(value):
+    """Round a finite value to binary16, then return it as binary64."""
+    return struct.unpack(">e", struct.pack(">e", value))[0]
+
+
+def round_binary32(value):
+    """Round a finite value to binary32, then return it as binary64."""
+    return struct.unpack(">f", struct.pack(">f", value))[0]
+
+
+def round_bfloat16_from_binary32(value):
+    """Round a finite binary32 conversion to bfloat16, returning binary64."""
+    if not math.isfinite(value):
+        raise ValueError("This teaching helper expects a finite value.")
+    binary32_bits = struct.unpack(">I", struct.pack(">f", value))[0]
+    rounding_bias = 0x7FFF + ((binary32_bits >> 16) & 1)
+    bfloat16_bits = (binary32_bits + rounding_bias) & 0xFFFF0000
+    return struct.unpack(">f", struct.pack(">I", bfloat16_bits))[0]
+
+
+format_rounders = {
+    "binary16": round_binary16,
+    "bfloat16": round_bfloat16_from_binary32,
+    "binary32": round_binary32,
+    "binary64": float,
+}
+```
+
+
+:::: {.cell .markdown}
+Before running the next cell, make two predictions:
+
+1. Which formats distinguish `1.001` from `1.0`?
+2. Which formats retain $10^{-20}$ as a nonzero value?
+
+These probes separate local precision near one from exponent range.
+::::
+
+```{python}
+#| label: reduced-format-probes
+
+format_probes = {
+    "1.001": 1.001,
+    "1e-20": 1.0e-20,
+}
+format_probe_records = []
+
+print(f"{'input':>8s}  {'format':>9s}  {'stored value':>24s}")
+for input_label, input_value in format_probes.items():
+    for format_name, round_value in format_rounders.items():
+        stored_value = round_value(input_value)
+        format_probe_records.append(
+            {
+                "input": input_label,
+                "format": format_name,
+                "stored_value": stored_value,
+            }
+        )
+        print(f"{input_label:>8s}  {format_name:>9s}  {stored_value:24.17g}")
+```
+
+
+:::: {.cell .markdown}
+Binary16 changes `1.001` to its nearby value `1.0009765625`, while bfloat16
+rounds it to `1`. Bfloat16 has coarser spacing near one because it retains fewer
+significand bits. Conversely, binary16 rounds $10^{-20}$ to zero, while
+bfloat16 retains a normal value because its wider exponent field provides
+approximately the normal range of binary32.
+
+The result is a trade-off, not a quality ranking. Whether either approximation
+is adequate depends on the required accuracy and on the complete computation.
+::::
+
+
+:::: {.cell .markdown}
+## Predict the first lost unit increment
+
+If a binary format has $p$ bits of significand precision, all consecutive
+integers through $2^p$ are representable. At $2^p$, the upward spacing is two,
+so the halfway sum $2^p+1$ can round back to $2^p$. Some larger integers remain
+representable, but not every integer does. Predict the threshold for each
+format before running the check.
+::::
+
+```{python}
+#| label: integer-thresholds-by-format
+
+significand_bits = {
+    "binary16": 11,
+    "bfloat16": 8,
+    "binary32": 24,
+    "binary64": 53,
+}
+integer_threshold_records = []
+
+print(f"{'format':>9s}  {'2**p':>18s}  {'2**p + 1 changes?':>18s}")
+for format_name, precision_bits in significand_bits.items():
+    threshold = float(2**precision_bits)
+    rounded_sum = format_rounders[format_name](threshold + 1.0)
+    changed = rounded_sum != threshold
+    integer_threshold_records.append(
+        {
+            "format": format_name,
+            "significand_bits": precision_bits,
+            "threshold": threshold,
+            "adding_one_changes_value": changed,
+        }
+    )
+    print(f"{format_name:>9s}  {threshold:18.0f}  {str(changed):>18s}")
+```
+
+
+:::: {.cell .markdown}
+The same finite-set model predicts every row; only the format parameters
+change. This is why a result record should name the format instead of saying
+only “floating point,” “single precision,” or “16 bit.”
 ::::
 
 
@@ -394,8 +536,10 @@ language or floating-point format.
 #| label: evidence-record
 
 evidence = {
-    "format": "IEEE 754 binary64",
+    "primary_arithmetic_format": "IEEE 754 binary64",
     "rounding_assumption": "round to nearest, ties to even",
+    "format_probe_records": format_probe_records,
+    "integer_threshold_records": integer_threshold_records,
     "spacing_at_2**53": math.ulp(float(2**53)),
     "lost_increment": float(2**53) + 1.0 == float(2**53),
     "addition_is_associative_for_test": left_grouped == right_grouped,
@@ -421,6 +565,8 @@ evidence
   at exact powers of two.
 - Repeat the spacing and grouping experiments with another language or numeric
   type, and document the format before comparing results.
+- Treat the bfloat16 helper as evidence about the declared conversion path, not
+  as evidence about untested mixed-precision arithmetic or named hardware.
 
 ::: {.content-visible when-format="html"}
 Next:

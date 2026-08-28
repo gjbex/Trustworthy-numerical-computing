@@ -49,7 +49,8 @@ two plausible variance calculations lead to opposite scientific decisions.
 The follow-up
 [floating-point landmarks](notebooks/02-floating-point-landmarks.qmd)
 activity explains that discrepancy by examining representable spacing,
-rounding, special values, and evaluation order.
+rounding, special values, evaluation order, and the different precision-range
+trade-offs of binary16, bfloat16, binary32, and binary64.
 The
 [comparison criteria across scales](notebooks/03-comparison-criteria.qmd)
 activity turns observed discrepancies into reviewable decisions using
@@ -76,7 +77,8 @@ The
 [environment variation and reproducibility](notebooks/08-environment-reproducibility.qmd)
 activity then compares reduction order, partition, and accumulator precision;
 it separates harmless low-order variation from changes that reverse a
-scientific conclusion.
+scientific conclusion and records a complete input-operation-accumulator-output
+precision policy.
 The
 [numerical reliability statement](notebooks/09-reliability-statement.qmd)
 activity converts reference, refinement, input-range, and environment evidence
@@ -118,16 +120,30 @@ Participants should already be able to read and modify small programs in at
 least one scientific-computing language. This course does not teach programming
 from scratch.
 
-You should be comfortable with:
+### Required
+
+You should be comfortable with the following programming and mathematical
+foundations:
 
 * variables, expressions, functions, loops, and arrays;
-* basic algebra and scientific notation;
+* rearranging simple algebraic expressions and substituting values into a
+  formula;
+* fractions, ratios, percentages, powers, square roots, and scientific
+  notation;
+* interpreting a function, an equation, a table, and a simple plot;
+* comparing scales and orders of magnitude;
 * running a short program or notebook and inspecting its output;
-* interpreting tables and simple plots;
-* the idea that measurements and models have limited precision.
+* the ideas of a mean, variation in measurements, and limited measurement or
+  model precision.
 
-Prior knowledge of IEEE 754, numerical analysis, parallel programming, or a
-specific implementation language is not required.
+### Helpful, but not required
+
+Prior exposure to derivatives, vectors and matrices, norms, standard deviation,
+or covariance will make some later examples more familiar. The course
+introduces the meaning and use of these ideas where they are needed; it does not
+assume a prior course in calculus, linear algebra, statistics, IEEE 754,
+numerical analysis, or parallel programming. No specific implementation
+language is required.
 
 
 ### Quick self-assessment
@@ -135,7 +151,9 @@ specific implementation language is not required.
 You are likely ready if you can:
 
 * implement or recognize a loop that sums a collection of numbers;
+* evaluate a formula for stated inputs and compare the scales of its terms;
 * compare the output of two implementations;
+* interpret the trend and scale shown in a simple table or plot;
 * explain why a calculated result should not report more meaningful digits than
   its inputs support;
 * run the same calculation with a changed input or resolution;

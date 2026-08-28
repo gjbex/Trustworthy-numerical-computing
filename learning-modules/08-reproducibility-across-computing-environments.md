@@ -27,6 +27,8 @@ After this module, you should be able to:
   statistical equivalence, and conclusion reproducibility;
 * identify compiler, library, hardware, precision, and parallel-execution
   choices that can change floating-point evaluation;
+* distinguish input storage, elementary-operation, accumulator, and output
+  formats in a mixed-precision execution policy;
 * predict when a reduction-order change is likely to be harmless or
   consequential;
 * define a reproducibility contract with a justified comparison criterion;
@@ -264,6 +266,27 @@ library kernels can use different formats. Mixed-precision hardware may store
 values in one format, multiply in another, and accumulate in a third. Some
 processors retain wider intermediates; others round them earlier.
 
+Likewise, “the processor supports 16-bit floating point” is not a complete
+numerical claim. Binary16 and bfloat16 have different range and spacing, as
+Module 2 showed. Hardware or a library may support a format only for storage and
+conversion, for a specialized dot product or matrix operation, or for a wider
+set of arithmetic operations. Even a supported multiplication may feed a wider
+accumulator rather than round each partial sum to the input format.
+
+Record the complete arithmetic path:
+
+| Component | Question to answer |
+|---|---|
+| Input and storage | Which format receives each input conversion and stores intermediate arrays? |
+| Elementary operations | In which format are products, sums, fused operations, and library kernels defined? |
+| Accumulation | Which format holds partial sums, dot products, and reduction nodes, and when are they rounded? |
+| Output conversion | Which format is returned or written, and which conversion and rounding rule is applied? |
+
+The datatype visible in source code may be only one part of this path. A value
+can also be held in a wider language container after it has already been rounded
+to a narrower arithmetic format. Report the arithmetic value and the container
+separately when that distinction matters.
+
 In the companion activity, a small standard-library emulator rounds every
 addition to binary32. It is not a performance or hardware model. It isolates the
 effect of a narrower accumulator under controlled orders:
@@ -277,6 +300,12 @@ effect of a narrower accumulator under controlled orders:
 The third order preserves the small total in binary64 but loses it when the
 accumulator is rounded to binary32. Record the precision of each important
 operation rather than only the input datatype.
+
+Reduced precision can lower storage and data-movement costs and can provide
+higher arithmetic throughput on suitable hardware. It may also require
+conversions, scaling, wider accumulation, refinement, or rejected computations
+to meet an accuracy requirement. Treat performance and numerical adequacy as
+separate measured claims; neither follows from a format name.
 
 
 ## Compiler and library controls have limits
@@ -429,6 +458,8 @@ Before accepting a cross-environment result, ask:
 5. What must accompany a seed when exact stochastic sequences matter?
 6. Which reproducibility level should be required for a checkpoint restart, and
    which might be appropriate for a Monte Carlo estimate?
+7. Why is “bfloat16 inputs” insufficient to reproduce a mixed-precision matrix
+   calculation?
 
 
 ::: {.callout-note collapse="true"}
@@ -453,6 +484,9 @@ Before accepting a cross-environment result, ask:
    continue. A Monte Carlo estimate normally needs a statistical-equivalence
    contract tied to uncertainty and practical effect size rather than an
    identical random sequence.
+7. It does not state the operation and accumulator formats, when partial results
+   round, whether operations are fused, or the output conversion. Different
+   policies can use the same stored inputs yet produce different results.
 :::
 
 
@@ -463,6 +497,8 @@ Before accepting a cross-environment result, ask:
   consistently wrong.
 * Parallel partitions, reduction trees, and accumulator precision are numerical
   algorithm choices.
+* A format name does not define a mixed-precision execution policy; record
+  input, operation, accumulator, and output formats separately.
 * Compare finite diagnostics, numerical error, and the scientific decision—not
   only serialized output bits.
 * Change one environment factor at a time and include both ordinary and

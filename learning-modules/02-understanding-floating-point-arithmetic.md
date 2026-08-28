@@ -19,6 +19,8 @@ matter.
 After this module, you should be able to:
 
 * explain sign, significand, exponent, and finite precision conceptually;
+* compare how common binary16, bfloat16, binary32, and binary64 formats trade
+  significand precision against exponent range;
 * use the spacing between representable values to predict when information can
   be lost;
 * explain why rounding occurs during a sequence of operations, not only when a
@@ -70,6 +72,53 @@ selects the scale, and a fraction field records the significant binary digits.
 The exact bit layout is useful for some systems work, but it is not necessary
 for the reasoning in this course.
 
+
+## The same model supports different format trade-offs
+
+Scientific software does not always use binary64. Binary32 is common when
+memory capacity, data movement, or arithmetic throughput matter, provided that
+the resulting accuracy is adequate. Accelerators and some CPUs also support
+16-bit formats. The phrase “16-bit floating point” is incomplete because two
+important formats allocate those bits differently.
+
+The table compares properties relevant to numerical reasoning. Significand
+precision includes the implicit leading bit of a normal value; it is therefore
+one greater than the stored fraction-field width.
+
+| Format | Significand precision | Exponent bits | Gap above 1 | Positive normal range |
+|---|---:|---:|---:|---:|
+| binary16 | 11 bits | 5 | $2^{-10}\approx9.77\times10^{-4}$ | approximately $6.10\times10^{-5}$ to $6.55\times10^4$ |
+| bfloat16 | 8 bits | 8 | $2^{-7}=7.8125\times10^{-3}$ | approximately $1.18\times10^{-38}$ to $3.39\times10^{38}$ |
+| binary32 | 24 bits | 8 | $2^{-23}\approx1.19\times10^{-7}$ | approximately $1.18\times10^{-38}$ to $3.40\times10^{38}$ |
+| binary64 | 53 bits | 11 | $2^{-52}\approx2.22\times10^{-16}$ | approximately $2.23\times10^{-308}$ to $1.80\times10^{308}$ |
+
+Binary16, binary32, and binary64 are IEEE 754 binary interchange formats.
+Bfloat16 is a different 16-bit layout, not another name for binary16. It keeps
+the exponent width of binary32, and therefore approximately its normal range,
+but retains only eight bits of significand precision. Binary16 retains more
+detail near one but has a much smaller exponent range.
+
+Two probes expose the trade-off:
+
+* Near one, binary16 can distinguish `1.001` from `1`, whereas bfloat16 rounds
+  `1.001` to `1` under round-to-nearest, ties-to-even.
+* The value $10^{-20}$ is far below even the binary16 subnormal range and rounds
+  to zero there. It lies within the normal range of bfloat16, binary32, and
+  binary64.
+
+Likewise, every consecutive integer is representable through $2^p$, where $p$
+is the significand precision. At that threshold, adding one can already round
+back to the original value: $2^8$ for bfloat16, $2^{11}$ for binary16,
+$2^{24}$ for binary32, and $2^{53}$ for binary64. Some larger integers remain
+representable, but not every integer does.
+
+These observations do not rank one format as universally best. A narrower
+format can reduce storage, data movement, and sometimes runtime or energy use,
+but it also changes rounding, overflow, underflow, and the attainable accuracy.
+Those consequences must be tested against the scientific requirement. Module 8
+will additionally distinguish the format used to store a value from the
+formats used for products and accumulations.
+
 The model immediately has an important consequence: only finitely many values
 are representable. The decimal fraction $0.1$, for example, has no finite
 binary expansion. Converting it to binary64 selects a nearby representable
@@ -94,9 +143,11 @@ Before running it, record your predictions:
 
 1. Is the distance to the next representable number the same near $10^{-6}$,
    $1$, and $10^{16}$?
-2. For $x=2^{53}$, will `x + 1.0` differ from `x`?
-3. Will `(a + b) + c` always equal `a + (b + c)`?
-4. Is `NaN` equal to itself?
+2. Will binary16 and bfloat16 make the same choices for both `1.001` and
+   $10^{-20}$?
+3. For $x=2^{53}$, will `x + 1.0` differ from `x`?
+4. Will `(a + b) + c` always equal `a + (b + c)`?
+5. Is `NaN` equal to itself?
 
 Preview the authoritative Quarto source from the repository root with:
 
@@ -274,10 +325,13 @@ us a coherent explanation rather than a collection of surprising outputs.
 
 The model used here has deliberate limits:
 
-* The numerical values shown assume IEEE 754 binary64 and the default rounding
-  mode used by the published Python environment.
+* Except for the explicitly labelled format comparison, the numerical values
+  shown assume IEEE 754 binary64 and the default rounding mode used by the
+  published Python environment.
 * Other types may have a different base, precision, range, or special-value
   policy.
+* The notebook's bfloat16 helper models a declared conversion path; it does not
+  establish the arithmetic or performance of untested hardware or libraries.
 * Languages, libraries, and compilers can differ in how they report exceptional
   states and in whether they combine particular operations.
 * Knowing why two results differ does not determine whether the difference is
@@ -290,6 +344,8 @@ discrepancy; it does not supply a validation threshold.
 ## Questions to ask about a floating-point computation
 
 * Which floating-point format or numeric type is being used?
+* Does its allocation of significand and exponent bits provide enough local
+  precision and range for the relevant values?
 * Are the input values exactly representable, or are they rounded during
   conversion?
 * What is the local spacing at the magnitudes of important inputs and
@@ -314,6 +370,8 @@ discrepancy; it does not supply a validation threshold.
 5. How does local spacing explain the failure of the shortcut variance formula?
 6. Why should `sys.float_info.epsilon` not be copied directly into every
    numerical comparison?
+7. Why can bfloat16 represent $10^{-20}$ as a normal value while binary16
+   rounds it to zero, even though both formats use 16 bits?
 
 ::: {.callout-note collapse="true"}
 ## Suggested answers
@@ -334,6 +392,10 @@ discrepancy; it does not supply a validation threshold.
 6. Machine epsilon describes spacing near one for a particular format. A
    defensible comparison must also account for the scale of the values and the
    accuracy required by the scientific question.
+7. Bfloat16 devotes eight bits to the exponent, giving it approximately the
+   normal range of binary32. Binary16 uses only five exponent bits and spends
+   more of its 16-bit budget on significand precision. Equal storage width does
+   not imply equal range or spacing.
 :::
 
 
@@ -341,6 +403,8 @@ discrepancy; it does not supply a validation threshold.
 
 * Floating-point values form a finite, nonuniformly spaced approximation to the
   real numbers; precision and range are distinct.
+* Binary16 and bfloat16 demonstrate that the same storage width can encode very
+  different precision-and-range trade-offs; the format must be named.
 * Conversion and arithmetic round locally, so small contributions can disappear
   and evaluation order can change a result.
 * Subnormal numbers, signed zero, infinity, and `NaN` are meaningful observable

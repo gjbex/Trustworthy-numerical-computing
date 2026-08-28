@@ -57,6 +57,8 @@ or its norm for a vector problem. It directly describes the quality of the
 answer, but $x^*$ is usually unknown. An algorithm therefore cannot normally
 use the true forward error as its stopping test. A known solution may be used
 in a constructed experiment or test suite, not silently assumed in production.
+The [vectors, norms, and scaling reference](reference-vectors-norms-and-scaling.md)
+introduces the norm notation used for vector problems.
 
 ### Residual
 

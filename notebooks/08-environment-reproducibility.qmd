@@ -37,6 +37,8 @@ After this activity, you should be able to:
 - compare reduction orders against an exact reference for the stored inputs;
 - explain how a partition changes a reduction tree;
 - isolate the effect of accumulator precision in a controlled emulation;
+- distinguish input, operation, accumulator, and output formats in a precision
+  policy;
 - apply a declared tolerance and decision threshold separately;
 - record inputs, environment details, observations, and limitations for a
   reproducibility claim.
@@ -63,7 +65,8 @@ limited evidence.
 2. Compare legal orders for a positive, well-conditioned reduction.
 3. Test bitwise, numerical, and conclusion-level contracts separately.
 4. Expose an order-sensitive energy balance with a rational reference.
-5. Simulate contiguous parallel partitions and binary32 accumulation.
+5. Simulate contiguous parallel partitions and declare a binary32 accumulation
+   policy.
 6. Change one partition parameter and interpret the result.
 7. Assemble a reproducibility evidence record with explicit limitations.
 ::::
@@ -478,6 +481,45 @@ print(f"number of partials:  {len(learner_partials)}")
 
 
 :::: {.cell .markdown}
+## Record the complete precision policy
+
+A format name does not specify a complete mixed-precision computation.
+Reproducible evidence should distinguish input conversion and storage,
+elementary operations, accumulation, and output conversion. This matters for
+binary16 and bfloat16 kernels in particular: a system can accept a 16-bit
+format while using a wider product or accumulator, or support only selected
+operations and conversions.
+
+The following record describes the controlled emulator used next. The returned
+Python object is a binary64 container, but its arithmetic value has been
+explicitly rounded to binary32. Container width must not be mistaken for the
+precision of the computation.
+::::
+
+```{python}
+#| label: emulated-precision-policy
+
+precision_policy_record = {
+    "source_data": "finite binary64 values in the Python input list",
+    "input_conversion": "each term rounded to binary32 before addition",
+    "elementary_operation": (
+        "sum of two binary32 operands formed exactly in binary64, then rounded"
+    ),
+    "accumulator": "binary32 after every serial addition",
+    "output_conversion": (
+        "binary32 arithmetic value returned in a Python binary64 container"
+    ),
+    "rounding": "round to nearest, ties to even",
+    "not_claimed": (
+        "no named processor, accelerator, compiler, fused kernel, or performance"
+    ),
+}
+
+print(json.dumps(precision_policy_record, indent=2, sort_keys=True))
+```
+
+
+:::: {.cell .markdown}
 ## Isolate accumulator precision
 
 The next function rounds every input and every addition to IEEE binary32 using
@@ -600,6 +642,7 @@ reproducibility_record = {
         "valid_range": "finite binary64 values used by this controlled case",
     },
     "environment": environment_summary,
+    "emulated_precision_policy": precision_policy_record,
     "reference": {
         "provenance": "exact Fraction sum of every stored binary64 input",
         "value_j": ledger_reference,
@@ -660,9 +703,10 @@ needs the same records and checks across the named target environments.
    the numerical tolerance?
 4. What does the binary32 emulation establish, and what hardware claims does it
    leave open?
-5. Why is the exact rational reference authoritative only for the stored
+5. Why would “bfloat16 inputs” still be an incomplete precision policy?
+6. Why is the exact rational reference authoritative only for the stored
    inputs?
-6. Which additional matrix rows would be required before claiming portability
+7. Which additional matrix rows would be required before claiming portability
    across a CPU compiler and a GPU implementation?
 ::::
 
@@ -682,10 +726,14 @@ needs the same records and checks across the named target environments.
 4. It isolates the effect of rounding each serial addition to binary32 for these
    finite inputs. It does not emulate compiler transformations, accelerator
    kernels, fused operations, parallel scheduling, or performance.
-5. `Fraction.from_float` exactly represents the binary64 data supplied to the
+5. It does not state the operation and accumulator formats, when partial
+   results round, whether operations are fused, or how the output is converted.
+   Different kernels can therefore accept the same stored inputs and implement
+   different computations.
+6. `Fraction.from_float` exactly represents the binary64 data supplied to the
    algorithm. It cannot recover unrecorded physical information or turn rounded
    measurements into exact real quantities.
-6. Run the same source revision, input fingerprint, algorithmic contract, and
+7. Run the same source revision, input fingerprint, algorithmic contract, and
    diagnostics with the named compiler/flags and GPU stack. Record libraries,
    hardware, precision policy, decomposition, results, error, classification,
    and any non-finite or termination differences.
@@ -701,6 +749,8 @@ needs the same records and checks across the named target environments.
   harmless.
 - Reduction order, partition, and accumulator precision belong in the numerical
   method description.
+- A precision record names input, operation, accumulator, and output formats;
+  the datatype of a language container is not enough.
 - Record source, input fingerprint, environment, changed factor, criteria,
   observations, and limitations together.
 - Treat this notebook as a controlled mechanism study, not proof of portability

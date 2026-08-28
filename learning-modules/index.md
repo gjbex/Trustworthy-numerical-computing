@@ -28,6 +28,15 @@ topics](optional-advanced-topics.md) can be used for a longer course or
 domain-specific follow-up.
 
 
+## Reference material
+
+The [Vectors, Norms, And Scaling](reference-vectors-norms-and-scaling.md)
+reference explains the maximum and Euclidean norms, their relationship to
+maximum and root-mean-square error, component scaling, and normwise matrix
+conditioning. It is supporting material rather than an additional step in the
+ten-module prerequisite path.
+
+
 ## Course through-line
 
 Each module contributes to the same investigation workflow:

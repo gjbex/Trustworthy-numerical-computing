@@ -74,8 +74,15 @@ $$
      {\|\Delta b\|/\|b\|}.
 $$
 
-The norm and scaling are part of the definition. This module uses the maximum
-norm, $\|v\|_\infty=\max_i|v_i|$, on dimensionless, nondimensionalized
+A **norm** is a rule that turns a vector into one nonnegative measure of its
+size. The norm and scaling are part of the definition. This module uses the
+**maximum norm**, $\|v\|_\infty=\max_i|v_i|$: take the absolute value of every
+component and select the largest. For example,
+$\|(-3,4,1)\|_\infty=4$. The
+[vectors, norms, and scaling reference](reference-vectors-norms-and-scaling.md)
+compares this choice with other common norms.
+
+Here the maximum norm is applied to dimensionless, nondimensionalized
 quantities. If components have different units or meaningful scales, they must
 be scaled before one relative measure can be interpreted.
 
@@ -93,37 +100,89 @@ the perturbation model, and the norm.
 
 ## A two-equation sensitivity experiment
 
-Consider the dimensionless system
+This experiment instantiates the preceding definition. For each fixed positive
+$\delta$, define a mathematical map $f_\delta:b\mapsto x$ by solving the
+dimensionless system
 
 $$
 \begin{aligned}
-x_1+x_2 &= 2,\\
-x_1+(1+\delta)x_2 &= 2+\delta.
+x_1+x_2 &= b_1,\\
+x_1+(1+\delta)x_2 &= b_2.
 \end{aligned}
 $$
 
-For every nonzero $\delta$, the exact solution is $(x_1,x_2)=(1,1)$. Now add a
-small perturbation $\eta$ only to the second right-hand side. Subtracting the
-equations gives
+The **input** is the right-hand-side vector $b=(b_1,b_2)$; the **output** is the
+exact solution vector $x=(x_1,x_2)$. The parameter $\delta$ selects which map is
+being examined and is held fixed during each perturbation experiment. If
+$\delta$ were itself uncertain, the coefficient data would also have to be
+included in the input, but that is a different conditioning question.
+
+Use the baseline input
 
 $$
-x_2=1+\frac{\eta}{\delta},
+b_\delta=(2,2+\delta),
+$$
+
+for which $f_\delta(b_\delta)=(1,1)$. Now change only the second component of
+the input by $\eta$:
+
+$$
+\Delta b=(0,\eta),
 \qquad
-x_1=1-\frac{\eta}{\delta}.
+\widetilde b_\delta=b_\delta+\Delta b=(2,2+\delta+\eta).
 $$
 
-The input change is the same, but its output effect grows like
-$1/|\delta|$. With $\eta=10^{-16}$, high-precision decimal arithmetic gives:
+Solving the perturbed system exactly gives
 
-| $\delta$ | Relative input change | Relative output change | Observed amplification |
+$$
+\widetilde x_2=1+\frac{\eta}{\delta},
+\qquad
+\widetilde x_1=1-\frac{\eta}{\delta},
+$$
+
+so $\Delta x=(-\eta/\delta,\eta/\delta)$. In the maximum norm used above,
+
+$$
+\frac{\|\Delta b\|_\infty}{\|b_\delta\|_\infty}
+=\frac{|\eta|}{2+\delta},
+\qquad
+\frac{\|\Delta x\|_\infty}{\|x\|_\infty}
+=\frac{|\eta|}{\delta}.
+$$
+
+Substitution into the preceding definition connects the experiment directly to
+the observed directional amplification:
+
+$$
+\kappa_\mathrm{obs}=\frac{2+\delta}{\delta}.
+$$
+
+The same absolute right-hand-side perturbation is used for each map, but its
+effect on the solution grows as $\delta$ decreases. With $\eta=10^{-16}$,
+high-precision decimal arithmetic gives:
+
+| $\delta$ | Relative RHS-input change | Relative solution-output change | Observed amplification |
 |---:|---:|---:|---:|
 | $1$ | approximately $3.33\times10^{-17}$ | $10^{-16}$ | approximately $3$ |
 | $10^{-12}$ | approximately $5.00\times10^{-17}$ | $10^{-4}$ | approximately $2.00\times10^{12}$ |
 
-The large change in the nearly dependent system is not caused by binary64
-rounding: the experiment uses high-precision decimal arithmetic and the
-amplification follows directly from the equations. The problem itself has
-little information with which to distinguish $x_1$ from $x_2$.
+Reducing $\delta$ makes the two left-hand sides nearly identical, so the problem
+has little information with which to distinguish $x_1$ from $x_2$. For each
+table row, however, $\delta$ is fixed and only the declared input $b$ changes.
+The large output change is therefore evidence of sensitivity of the
+mathematical map, not binary64 rounding: the experiment uses high-precision
+decimal arithmetic and the amplification follows directly from the equations.
+It measures one perturbation direction, not the worst-case condition number.
+
+![Geometry and solution displacement for the two-equation sensitivity experiment.](../figures/two-equation-sensitivity.svg){fig-alt="Two coordinate-plane panels share linear axes from zero to two. For delta equal to one, the two equation lines cross at a visible angle. For delta equal to ten to the minus twelve, the lines are visually coincident. Independently magnified arrows below show that the same right-hand-side perturbation produces maximum-norm solution changes of ten to the minus sixteen and ten to the minus four, respectively."}
+
+The upper panels use identical coordinate scales. The near overlap for
+$\delta=10^{-12}$ is therefore the geometric evidence: the two equations
+constrain almost the same direction. Their small angular difference cannot be
+resolved at this scale. The lower displacement arrows are deliberately and
+independently magnified; their labels, rather than their drawn lengths, give the
+quantitative comparison. The same input perturbation produces a solution change
+$10^{12}$ times larger in the nearly dependent system.
 
 
 ## Propagation combines sensitivity with input information
@@ -330,9 +389,11 @@ distribution; it does not automatically provide a rigorous worst-case bound.
 ## Before the companion experiment
 
 The [sensitivity, stability, and residuals](../notebooks/04-sensitivity-stability-residuals.qmd)
-notebook reproduces the two-equation perturbation in high precision, compares
-two quadratic-root algorithms, and constructs a candidate solution with a tiny
-residual but a large forward error.
+notebook reproduces the two-equation perturbation in high precision. Its live
+Jupyter version provides logarithmic controls for $\delta$ and $\eta$, while
+the published static page retains the reviewed fixed-scale figure. The notebook
+also compares two quadratic-root algorithms and constructs a candidate solution
+with a tiny residual but a large forward error.
 
 Before running it, predict:
 

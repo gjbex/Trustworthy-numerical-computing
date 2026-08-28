@@ -3,10 +3,10 @@
 ## Module Arc
 
 - A finite set represents a wide numeric range
+- Formats trade significand precision against exponent range
 - Spacing changes with magnitude
 - Each operation may round
-- Exceptional values carry information
-- Evaluation order can change the result
+- Exceptional values and evaluation order matter
 
 ::: notes
 Connect immediately to the two variance results from Module 1. The purpose is
@@ -30,8 +30,39 @@ course environment uses binary64 with 53 bits of significand precision, but
 the reasoning applies to other floating-point formats.
 :::
 
+## Same Width, Different Trade-Off
+
+| Format | Significand | Exponent | Gap above 1 |
+|---|---:|---:|---:|
+| binary16 | 11 bits | 5 bits | $2^{-10}$ |
+| bfloat16 | 8 bits | 8 bits | $2^{-7}$ |
+| binary32 | 24 bits | 8 bits | $2^{-23}$ |
+| binary64 | 53 bits | 11 bits | $2^{-52}$ |
+
+Which formats retain `1.001`? Which retain $10^{-20}$?
+
+::: notes
+Collect predictions before answering. Binary16 distinguishes 1.001 from 1 but
+underflows 1e-20 to zero. Bfloat16 rounds 1.001 to 1 but retains 1e-20 as a
+normal value. Emphasize the precision-range trade-off, not field memorization.
+:::
+
+## Fields And Little-Endian Memory
+
+<img src="../figures/floating-point-layouts-little-endian.svg" class="r-stretch" alt="Logical sign, exponent, and stored fraction fields for four floating-point formats, followed by their bytes in increasing memory-address order on a little-endian system.">
+
+::: notes
+Read the upper panel as a numeric bit-field diagram, independent of byte order.
+Read the lower panel from low to high memory addresses. Stress that little
+endian reverses the order of bytes by significance; it does not reverse every
+bit. The stored fraction excludes the implicit leading bit of normal values,
+so normal precision p is one larger. Treat field widths as an explanation of
+the preceding trade-off, not a memorization exercise.
+:::
+
 ## Predict Before Running
 
+- Do binary16 and bfloat16 make the same rounding choices?
 - Is spacing constant near $10^{-6}$, $1$, and $10^{16}$?
 - For $x=2^{53}$, does `x + 1.0` change `x`?
 - Is `NaN == NaN`?
@@ -58,6 +89,18 @@ executing each corresponding cell.
 Use `math.nextafter` or `math.ulp` in the live activity. Ask what happens when
 an increment is smaller than the local spacing. Tolerance policy belongs to
 Module 3.
+:::
+
+## See The Spacing Change
+
+<img src="../figures/binary64-spacing.svg" class="r-stretch" alt="A logarithmic staircase plot shows binary64 upward spacing increasing with magnitude, with separately magnified number lines near one and two to the fifty-third.">
+
+::: notes
+Ask why the curve is a staircase rather than a smooth line. Spacing is constant
+within an exponent interval and doubles at a power-of-two boundary. Then compare
+the independently magnified number lines: the drawn tick separation is the same,
+but the numerical gaps are approximately 2.22e-16 and 2. Keep the table on the
+previous slide as the exact-value reference.
 :::
 
 ## Rounding Is Local

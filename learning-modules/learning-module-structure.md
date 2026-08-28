@@ -16,7 +16,9 @@ workflow used throughout the course.
 ### Module 2: Understanding Floating-Point Arithmetic
 
 Builds the finite-precision model needed to reason about rounding, special
-values, overflow, and underflow.
+values, overflow, and underflow. A comparison of binary16, bfloat16, binary32,
+and binary64 makes the trade-off between significand precision and exponent
+range explicit without requiring learners to memorize encodings.
 
 ### Module 3: Measuring And Comparing Numerical Error
 
@@ -66,7 +68,9 @@ contracts, then examines which differences are expected when compilers,
 libraries, hardware, precision, optimization settings, or parallel execution
 order change. A companion activity contrasts harmless low-order variation with
 a cancellation-sensitive energy balance whose conclusion depends on reduction
-order, partition, and accumulator precision.
+order, partition, and accumulator precision. Learners record input, operation,
+accumulator, and output formats separately rather than treating a datatype name
+as a complete mixed-precision execution policy.
 
 
 ## Part IV: Scientific Judgment
@@ -90,6 +94,14 @@ controlled sensor-separation cases, propagate deterministic reading bounds,
 and improve arithmetic and decision logic separately. The capstone ends with a
 validated `indeterminate` component decision, a tightly bounded total, and a
 qualified reliability statement.
+
+
+## Reference material
+
+[Vectors, Norms, And Scaling](reference-vectors-norms-and-scaling.md) is a
+just-in-time reference for the vector summaries introduced in Module 3 and the
+norm notation used from Module 4 onward. It is not an additional prerequisite
+module and does not change the core sequence.
 
 
 ## Suggested delivery

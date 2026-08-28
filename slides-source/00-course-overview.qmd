@@ -50,3 +50,32 @@ that transfers to other languages.
 Explain where breaks or half-day boundaries fit once the delivery duration is
 fixed.
 :::
+
+## Required Prerequisites
+
+- Read and modify a small program in any scientific-computing language
+- Use simple algebra, ratios, powers, roots, and scientific notation
+- Interpret formulas, tables, plots, scales, and orders of magnitude
+- Run a short program or notebook and inspect its output
+- Recognize that measurements and models have limited precision
+
+::: notes
+This is not an introductory programming course. Ask participants who are unsure
+about the mathematical level to use the landing-page self-assessment before the
+hands-on work.
+:::
+
+## Helpful, Not Required
+
+- Derivatives and local rates of change
+- Vectors, matrices, and norms
+- Standard deviation and covariance
+- IEEE 754, numerical analysis, or parallel programming
+
+These ideas are introduced in context when the course needs them.
+
+::: notes
+Do not treat prior calculus, linear algebra, or statistics courses as entry
+requirements. Later modules use selected ideas from them, but define the
+notation and interpretation needed for the investigation.
+:::

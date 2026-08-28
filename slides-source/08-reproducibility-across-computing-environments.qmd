@@ -259,6 +259,24 @@ scalability costs without presenting one strategy as universally best.
 
 ## Accumulator Precision Is Part Of The Contract
 
+“16-bit support” does not identify the arithmetic:
+
+| Stage | Record |
+|---|---|
+| Input and storage | binary16, bfloat16, binary32, ... |
+| Operations | product, sum, fused or library-kernel format |
+| Accumulation | partial-sum format and rounding points |
+| Output | conversion, format, and rounding rule |
+
+::: notes
+Binary16 and bfloat16 use the same storage width but have different range and
+spacing. A processor or library can support storage or conversion without
+offering the same general arithmetic, and a narrow product may feed a wider
+accumulator. Ask learners which four stages a reproducibility record needs.
+:::
+
+## The Tested Accumulator Policy
+
 | Order | Binary64 (J) | Binary32-rounded (J) |
 |---|---:|---:|
 | Source, smalls, sink | $0$ | $0$ |
@@ -269,7 +287,8 @@ Record storage, product, and accumulator precision separately.
 
 ::: notes
 The notebook explicitly rounds each serial addition. It isolates precision but
-does not claim to emulate a named CPU or accelerator.
+does not claim to emulate a named CPU or accelerator. Its Python return object
+is binary64, but the arithmetic value has already been rounded to binary32.
 :::
 
 ## Compiler And Library Controls Have Scope

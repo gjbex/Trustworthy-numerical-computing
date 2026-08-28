@@ -202,6 +202,11 @@ numbers with different meanings and units. A residual becomes evidence about
 forward error only through an argument involving the problem, scaling, and
 conditioning.
 
+Here the infinity norm is the maximum norm: it reports the largest absolute
+component of the residual vector. See the
+[vectors, norms, and scaling reference](reference-vectors-norms-and-scaling.md)
+for the definition and its relation to other common norms.
+
 The small residual shows that the binary32 result nearly satisfies the nominal
 equations. It does not show that those equations determine the component split
 accurately.

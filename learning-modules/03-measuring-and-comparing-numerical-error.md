@@ -280,6 +280,11 @@ errors $e_i=\hat{x}_i-x_i$. Several summaries are useful:
   scientific conclusion, such as a total flux, peak value, event time, or
   threshold crossing.
 
+The [vectors, norms, and scaling reference](reference-vectors-norms-and-scaling.md)
+shows that maximum error is the maximum norm of the error vector and RMS error
+is a scaled Euclidean norm. Prior familiarity with norm terminology is not
+required here.
+
 Suppose nine pressure errors are $0.1\ \mathrm{Pa}$ and one is
 $1.0\ \mathrm{Pa}$. The root-mean-square error is approximately
 $0.33\ \mathrm{Pa}$, while the maximum error is $1.0\ \mathrm{Pa}$. An RMS

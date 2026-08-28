@@ -41,30 +41,74 @@ $$
 
 ::: notes
 The activity uses the maximum norm on dimensionless quantities and 80-digit
-decimal arithmetic to isolate problem sensitivity from binary64 effects.
+decimal arithmetic to isolate problem sensitivity from binary64 effects. Define
+the maximum norm as the largest absolute component; the persistent reference is
+`learning-modules/reference-vectors-norms-and-scaling.md`.
 :::
 
-## Two Nearly Dependent Equations
+## Name The Map Before Measuring It
 
 $$
-x_1+x_2=2
+f_\delta:b\mapsto x,
+\qquad
+\begin{aligned}
+x_1+x_2&=b_1,\\
+x_1+(1+\delta)x_2&=b_2
+\end{aligned}
+$$
+
+- Input: right-hand side $b=(b_1,b_2)$
+- Output: exact solution $x=(x_1,x_2)$
+- Fixed during one perturbation: $\delta$
+
+::: notes
+Connect the generic b-to-x definition on the preceding slide to this specific
+linear-system solve. Delta selects which map is tested. If delta were also
+uncertain, the coefficient data would have to be included in the input, which
+is a different conditioning question.
+:::
+
+## Same Perturbation, Different Sensitivity
+
+$$
+b_\delta=(2,2+\delta),\quad x=(1,1)
 $$
 
 $$
-x_1+(1+\delta)x_2=2+\delta
+\Delta b=(0,\eta)
+\quad\Longrightarrow\quad
+\Delta x=(-\eta/\delta,\eta/\delta)
 $$
 
-With a $10^{-16}$ right-hand-side perturbation:
+With $\eta=10^{-16}$:
 
-| $\delta$ | Relative output change | Amplification |
-|---:|---:|---:|
-| $1$ | $10^{-16}$ | $3$ |
-| $10^{-12}$ | $10^{-4}$ | $2\times10^{12}$ |
+| $\delta$ | Relative RHS input | Relative solution output | Amplification |
+|---:|---:|---:|---:|
+| $1$ | $3.33\times10^{-17}$ | $10^{-16}$ | $3$ |
+| $10^{-12}$ | $5.00\times10^{-17}$ | $10^{-4}$ | $2\times10^{12}$ |
 
 ::: notes
 Ask for predictions before running
 `notebooks/04-sensitivity-stability-residuals.qmd`. The amplification follows
-from $\eta/\delta$ and persists in high precision.
+from the preceding kappa-observed definition: it is $(2+\delta)/\delta$ in the
+maximum norm. Delta is fixed within each row; only the right-hand-side input is
+perturbed. The result persists in high precision and samples one direction,
+not the worst-case condition number.
+:::
+
+## See The Geometry
+
+<img src="../figures/two-equation-sensitivity.svg" class="r-stretch" alt="Two coordinate-plane plots show the Module 4 equations crossing visibly for delta equal to one and appearing coincident for delta equal to ten to the minus twelve. Independently magnified arrows compare the resulting solution displacement under the same input perturbation.">
+
+::: notes
+The coordinate panels share a common linear scale. The overlap on the right is
+real at this resolution, not a plotting failure. The lower arrows do not share
+a scale: use the labels to compare solution changes of 1e-16 and 1e-4. This
+connects the geometry of nearly dependent equations to the observed
+amplification without visually exaggerating the tiny line separation. If time
+allows, use the live delta and eta controls in
+`notebooks/04-sensitivity-stability-residuals.qmd` to ask which parameter
+changes the angle and which changes only the perturbed right-hand side.
 :::
 
 ## From Sensitivity To Propagation

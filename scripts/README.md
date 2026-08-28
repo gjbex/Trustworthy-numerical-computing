@@ -15,3 +15,16 @@ script for pull-request validation and Pages deployment.
 
 `sanitize_generated_notebook.py` removes machine-local kernel paths from the
 generated notebooks before they are published.
+
+
+## Regenerate the binary64-spacing figure
+
+Run the deterministic, standard-library generator from the repository root:
+
+```bash
+python scripts/generate_binary64_spacing_figure.py
+```
+
+It writes the reviewed course asset to `figures/binary64-spacing.svg`. The
+generator validates the highlighted gaps against the Module 2 values before
+writing the SVG.

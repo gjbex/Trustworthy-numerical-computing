@@ -177,6 +177,14 @@ follows:
 | $2^{53}$ | $2$ |
 | $10^{16}$ | $2$ |
 
+![Binary64 upward spacing grows in steps as magnitude increases.](../figures/binary64-spacing.svg){#fig-binary64-spacing}
+
+Both axes in @fig-binary64-spacing are logarithmic because the displayed values
+and gaps span many orders of magnitude. The staircase is intentional: the
+absolute spacing is constant within each normal exponent interval and doubles
+at a power-of-two boundary. The two number lines are magnified independently;
+they compare local structure and do not share one linear scale.
+
 The spacing is not a single fixed decimal resolution. Within each normal binary
 scale interval, the absolute spacing is fixed; when the exponent increases,
 the spacing grows. The relative spacing remains of a similar order throughout

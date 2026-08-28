@@ -78,6 +78,18 @@ an increment is smaller than the local spacing. Tolerance policy belongs to
 Module 3.
 :::
 
+## See The Spacing Change
+
+<img src="../figures/binary64-spacing.svg" class="r-stretch" alt="A logarithmic staircase plot shows binary64 upward spacing increasing with magnitude, with separately magnified number lines near one and two to the fifty-third.">
+
+::: notes
+Ask why the curve is a staircase rather than a smooth line. Spacing is constant
+within an exponent interval and doubles at a power-of-two boundary. Then compare
+the independently magnified number lines: the drawn tick separation is the same,
+but the numerical gaps are approximately 2.22e-16 and 2. Keep the table on the
+previous slide as the exact-value reference.
+:::
+
 ## Rounding Is Local
 
 1. Form the exact result of one operation

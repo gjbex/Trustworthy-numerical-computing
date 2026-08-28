@@ -93,37 +93,79 @@ the perturbation model, and the norm.
 
 ## A two-equation sensitivity experiment
 
-Consider the dimensionless system
+This experiment instantiates the preceding definition. For each fixed positive
+$\delta$, define a mathematical map $f_\delta:b\mapsto x$ by solving the
+dimensionless system
 
 $$
 \begin{aligned}
-x_1+x_2 &= 2,\\
-x_1+(1+\delta)x_2 &= 2+\delta.
+x_1+x_2 &= b_1,\\
+x_1+(1+\delta)x_2 &= b_2.
 \end{aligned}
 $$
 
-For every nonzero $\delta$, the exact solution is $(x_1,x_2)=(1,1)$. Now add a
-small perturbation $\eta$ only to the second right-hand side. Subtracting the
-equations gives
+The **input** is the right-hand-side vector $b=(b_1,b_2)$; the **output** is the
+exact solution vector $x=(x_1,x_2)$. The parameter $\delta$ selects which map is
+being examined and is held fixed during each perturbation experiment. If
+$\delta$ were itself uncertain, the coefficient data would also have to be
+included in the input, but that is a different conditioning question.
+
+Use the baseline input
 
 $$
-x_2=1+\frac{\eta}{\delta},
+b_\delta=(2,2+\delta),
+$$
+
+for which $f_\delta(b_\delta)=(1,1)$. Now change only the second component of
+the input by $\eta$:
+
+$$
+\Delta b=(0,\eta),
 \qquad
-x_1=1-\frac{\eta}{\delta}.
+\widetilde b_\delta=b_\delta+\Delta b=(2,2+\delta+\eta).
 $$
 
-The input change is the same, but its output effect grows like
-$1/|\delta|$. With $\eta=10^{-16}$, high-precision decimal arithmetic gives:
+Solving the perturbed system exactly gives
 
-| $\delta$ | Relative input change | Relative output change | Observed amplification |
+$$
+\widetilde x_2=1+\frac{\eta}{\delta},
+\qquad
+\widetilde x_1=1-\frac{\eta}{\delta},
+$$
+
+so $\Delta x=(-\eta/\delta,\eta/\delta)$. In the maximum norm used above,
+
+$$
+\frac{\|\Delta b\|_\infty}{\|b_\delta\|_\infty}
+=\frac{|\eta|}{2+\delta},
+\qquad
+\frac{\|\Delta x\|_\infty}{\|x\|_\infty}
+=\frac{|\eta|}{\delta}.
+$$
+
+Substitution into the preceding definition connects the experiment directly to
+the observed directional amplification:
+
+$$
+\kappa_\mathrm{obs}=\frac{2+\delta}{\delta}.
+$$
+
+The same absolute right-hand-side perturbation is used for each map, but its
+effect on the solution grows as $\delta$ decreases. With $\eta=10^{-16}$,
+high-precision decimal arithmetic gives:
+
+| $\delta$ | Relative RHS-input change | Relative solution-output change | Observed amplification |
 |---:|---:|---:|---:|
 | $1$ | approximately $3.33\times10^{-17}$ | $10^{-16}$ | approximately $3$ |
 | $10^{-12}$ | approximately $5.00\times10^{-17}$ | $10^{-4}$ | approximately $2.00\times10^{12}$ |
 
-The large change in the nearly dependent system is not caused by binary64
-rounding: the experiment uses high-precision decimal arithmetic and the
-amplification follows directly from the equations. The problem itself has
-little information with which to distinguish $x_1$ from $x_2$.
+Reducing $\delta$ makes the two left-hand sides nearly identical, so the problem
+has little information with which to distinguish $x_1$ from $x_2$. For each
+table row, however, $\delta$ is fixed and only the declared input $b$ changes.
+The large output change is therefore evidence of sensitivity of the
+mathematical map, not binary64 rounding: the experiment uses high-precision
+decimal arithmetic and the amplification follows directly from the equations.
+It measures one perturbation direction, not the worst-case condition number.
 
 
 ## Propagation combines sensitivity with input information

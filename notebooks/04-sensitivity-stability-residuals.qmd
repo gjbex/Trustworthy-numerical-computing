@@ -70,17 +70,31 @@ them.
 :::: {.cell .markdown}
 ## Set up the sensitivity problem
 
-For nonzero $\delta$, consider the dimensionless system
+This is a concrete instance of the condition measure from Module 4. For each
+fixed positive $\delta$, define the map $f_\delta:b\mapsto x$ by the
+dimensionless system
 
 $$
-x_1+x_2=2,
+x_1+x_2=b_1,
 \qquad
-x_1+(1+\delta)x_2=2+\delta.
+x_1+(1+\delta)x_2=b_2.
 $$
 
-Its exact solution is $(1,1)$. The code uses 80-digit decimal arithmetic so
-that the observed amplification is not an accidental binary64 effect. The
-maximum norm is used for both input and output changes.
+The input is the right-hand-side vector $b=(b_1,b_2)$ and the output is the
+exact solution $x=(x_1,x_2)$. The parameter $\delta$ selects the map and is held
+fixed while its input is perturbed. The baseline input
+$b_\delta=(2,2+\delta)$ produces $x=(1,1)$. The experiment adds
+$\Delta b=(0,\eta)$ and observes
+
+$$
+\Delta x=(-\eta/\delta,\eta/\delta).
+$$
+
+With the maximum norm, the relative RHS-input change is
+$|\eta|/(2+\delta)$, the relative solution-output change is
+$|\eta|/\delta$, and their ratio is
+$\kappa_\mathrm{obs}=(2+\delta)/\delta$. The code uses 80-digit decimal
+arithmetic so that this amplification is not an accidental binary64 effect.
 ::::
 
 ```{python}
@@ -100,7 +114,7 @@ def max_norm(values):
 
 
 def solve_two_equation_system(delta, second_rhs_perturbation=D(0)):
-    """Solve the constructed system analytically in Decimal arithmetic."""
+    """Return the solution output for the constructed RHS input."""
     first_rhs = D(2)
     second_rhs = D(2) + delta + second_rhs_perturbation
     x2 = (second_rhs - first_rhs) / delta
@@ -109,7 +123,7 @@ def solve_two_equation_system(delta, second_rhs_perturbation=D(0)):
 
 
 def sensitivity_diagnostics(delta, perturbation):
-    """Return relative changes and observed directional amplification."""
+    """Treat the RHS as input and report its solution-output sensitivity."""
     base_rhs = [D(2), D(2) + delta]
     input_change = [D(0), perturbation]
     base_solution = solve_two_equation_system(delta)
@@ -123,8 +137,11 @@ def sensitivity_diagnostics(delta, perturbation):
     relative_output_change = max_norm(output_change) / max_norm(base_solution)
     observed_amplification = relative_output_change / relative_input_change
     return {
+        "base_rhs": base_rhs,
+        "input_change": input_change,
         "base_solution": base_solution,
         "perturbed_solution": perturbed_solution,
+        "output_change": output_change,
         "relative_input_change": relative_input_change,
         "relative_output_change": relative_output_change,
         "observed_amplification": observed_amplification,
@@ -150,8 +167,8 @@ $\delta=1$ and when $\delta=10^{-12}$.
 conditioning_results = {}
 
 print(
-    f"{'delta':>12s}  {'relative input':>16s}  "
-    f"{'relative output':>16s}  {'amplification':>16s}"
+    f"{'delta':>12s}  {'relative RHS input':>20s}  "
+    f"{'relative solution':>20s}  {'amplification':>16s}"
 )
 for delta_text in ["1", "1e-12"]:
     delta = D(delta_text)
@@ -159,19 +176,22 @@ for delta_text in ["1", "1e-12"]:
     conditioning_results[delta_text] = diagnostics
     print(
         f"{delta:.1E}  "
-        f"{diagnostics['relative_input_change']:16.3E}  "
-        f"{diagnostics['relative_output_change']:16.3E}  "
+        f"{diagnostics['relative_input_change']:20.3E}  "
+        f"{diagnostics['relative_output_change']:20.3E}  "
         f"{diagnostics['observed_amplification']:16.3E}"
     )
-    print(f"  perturbed solution: {diagnostics['perturbed_solution']}")
+    print(f"  baseline RHS input:        {diagnostics['base_rhs']}")
+    print(f"  RHS input change:          {diagnostics['input_change']}")
+    print(f"  perturbed solution output: {diagnostics['perturbed_solution']}")
 ```
 
 
 :::: {.cell .markdown}
-The separated system amplifies this direction by about 3. The nearly dependent
-system amplifies it by about $2\times10^{12}$: a relative input change near
-$5\times10^{-17}$ produces a relative output change of $10^{-4}$. This is
-problem sensitivity observed in high precision.
+The separated map amplifies this RHS direction by about 3. The nearly dependent
+map amplifies it by about $2\times10^{12}$: a relative RHS-input change near
+$5\times10^{-17}$ produces a relative solution-output change of $10^{-4}$.
+For each result, $\delta$ was held fixed while $b$ changed. This is directional
+problem sensitivity observed in high precision, not a full condition number.
 ::::
 
 
@@ -194,11 +214,11 @@ exercise_diagnostics = sensitivity_diagnostics(
 
 print(f"delta:                  {exercise_delta:.1E}")
 print(
-    "relative input change:  "
+    "relative RHS-input change:       "
     f"{exercise_diagnostics['relative_input_change']:.3E}"
 )
 print(
-    "relative output change: "
+    "relative solution-output change: "
     f"{exercise_diagnostics['relative_output_change']:.3E}"
 )
 print(
@@ -468,6 +488,10 @@ becoming an unsupported label.
 evidence = {
     "conditioning_experiment": {
         "arithmetic": "Decimal with 80 digits of precision",
+        "map": "For fixed delta, right-hand side b maps to exact solution x",
+        "input": "right-hand-side vector b",
+        "output": "solution vector x",
+        "fixed_parameter": "delta",
         "norm": "maximum norm on dimensionless quantities",
         "input_perturbation": input_perturbation,
         "observed_amplification_delta_1": (

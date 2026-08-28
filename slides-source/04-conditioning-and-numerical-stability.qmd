@@ -127,7 +127,11 @@ $$
 ::: notes
 Conditioning supplies the sensitivity; propagation combines it with a declared
 input description. Do not call a measurement uncertainty a known error. The
-true input is usually unavailable.
+true input is usually unavailable. Before using the matrix expression, define
+covariance as the expected product of two inputs' deviations from their means.
+The diagonal of $\Sigma_x$ contains variances; its off-diagonal entries record
+which inputs tend to vary together. Independence makes the off-diagonal entries
+zero, not the variances.
 :::
 
 ## Same Magnitudes, Different Claims
@@ -141,12 +145,17 @@ $V=40.0\ \mathrm{cm^3}$:
 | Independent standard uncertainties | $u_c(\rho)\approx0.0194\ \mathrm{g\,cm^{-3}}$ |
 
 - A deterministic range is not a confidence interval
-- Covariance can raise or lower propagated variance
+- Covariance records whether inputs tend to vary together
+- Its cross-term can raise or lower propagated variance
 
 ::: notes
 The first row uses monotonicity and exact corner evaluation. The second uses a
 first-order covariance model. The identical input magnitudes do not make these
-equivalent statements.
+equivalent statements. Covariance has product units; correlation is its
+dimensionless normalization between -1 and 1. Zero covariance does not, in
+general, prove independence. For density, the mass and volume sensitivity
+coefficients have opposite signs, so positive mass-volume covariance reduces
+the propagated variance and negative covariance increases it.
 :::
 
 ## First Order Can Fail

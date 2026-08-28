@@ -47,6 +47,19 @@ underflows 1e-20 to zero. Bfloat16 rounds 1.001 to 1 but retains 1e-20 as a
 normal value. Emphasize the precision-range trade-off, not field memorization.
 :::
 
+## Fields And Little-Endian Memory
+
+<img src="../figures/floating-point-layouts-little-endian.svg" class="r-stretch" alt="Logical sign, exponent, and stored fraction fields for four floating-point formats, followed by their bytes in increasing memory-address order on a little-endian system.">
+
+::: notes
+Read the upper panel as a numeric bit-field diagram, independent of byte order.
+Read the lower panel from low to high memory addresses. Stress that little
+endian reverses the order of bytes by significance; it does not reverse every
+bit. The stored fraction excludes the implicit leading bit of normal values,
+so normal precision p is one larger. Treat field widths as an explanation of
+the preceding trade-off, not a memorization exercise.
+:::
+
 ## Predict Before Running
 
 - Do binary16 and bfloat16 make the same rounding choices?

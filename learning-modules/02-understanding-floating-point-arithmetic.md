@@ -98,6 +98,23 @@ the exponent width of binary32, and therefore approximately its normal range,
 but retains only eight bits of significand precision. Binary16 retains more
 detail near one but has a much smaller exponent range.
 
+![Floating-point fields and their little-endian byte layout.](../figures/floating-point-layouts-little-endian.svg){fig-alt="Panel A shows the endian-independent logical layouts of binary16, bfloat16, binary32, and binary64: one sign bit, then exponent and stored fraction fields of different widths. Panel B groups those fields into bytes from low to high addresses for a little-endian system. It emphasizes that byte order changes but all bits are not simply reversed."}
+
+The upper panel is the logical representation, conventionally written from the
+most-significant bit to the least-significant bit. This field order does not
+depend on endianness. The lower panel shows how the same bits occupy bytes in
+increasing memory-address order on a little-endian system: the least-significant
+byte is stored first. Bits within each byte are still drawn in the conventional
+bit-7-to-bit-0 direction. Little endian therefore changes byte order; it does
+not reverse the complete string of bits.
+
+The blue field contains the **stored fraction**, not the complete significand.
+For a normal value the leading significand bit is implicit, which is why the
+precision $p$ in the table and figure is one greater than the stored fraction
+width. Subnormal values do not have that implicit leading one, and exponent
+patterns at the extremes encode zeros, infinities, and NaNs rather than ordinary
+scaled significands.
+
 Two probes expose the trade-off:
 
 * Near one, binary16 can distinguish `1.001` from `1`, whereas bfloat16 rounds

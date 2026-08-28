@@ -1,0 +1,376 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1060" viewBox="0 0 1200 1060" role="img" aria-labelledby="title description">
+<title id="title">Floating-point fields and little-endian byte order</title>
+<desc id="description">The first panel compares the logical sign, exponent, and stored fraction fields of binary16, bfloat16, binary32, and binary64. The second panel shows the same fields grouped into bytes in increasing memory address order on a little-endian system. Byte order changes, but bits within each byte are shown from bit seven to bit zero.</desc>
+<metadata>Generated deterministically by scripts/generate_floating_point_layout_figure.py. Field widths follow IEEE 754 binary16, binary32, and binary64, and the common bfloat16 layout.</metadata>
+<rect width="1200" height="1060" fill="#FFFFFF"/>
+<style>text { font-family: system-ui, "Segoe UI", Arial, sans-serif; } line, rect { vector-effect: non-scaling-stroke; }</style>
+<text x="48.0" y="43.0" font-size="29" fill="#17324D" text-anchor="start" font-weight="700">Floating-point fields and little-endian byte order</text>
+<text x="48.0" y="73.0" font-size="17" fill="#5F6B76" text-anchor="start" font-weight="400">Field widths determine precision and range; byte order determines storage in memory</text>
+<text x="48.0" y="116.0" font-size="21" fill="#17324D" text-anchor="start" font-weight="700">A  Logical field layout (endian-independent)</text>
+<text x="1140.0" y="116.0" font-size="14" fill="#5F6B76" text-anchor="end" font-weight="400">most-significant bit at left; least-significant bit at right</text>
+<text x="48.0" y="179.0" font-size="20" fill="#17324D" text-anchor="start" font-weight="700">binary16</text>
+<text x="48.0" y="203.0" font-size="14" fill="#5F6B76" text-anchor="start" font-weight="400">p = 11 for normal values</text>
+<rect x="220.0" y="148.0" width="57.5" height="72.0" fill="#CC79A7" stroke="#FFFFFF" stroke-width="2"/>
+<text x="248.8" y="192.0" font-size="18" fill="#FFFFFF" text-anchor="middle" font-weight="600"><tspan x="248.8" dy="0.00em">S</tspan></text>
+<rect x="277.5" y="148.0" width="287.5" height="72.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="2"/>
+<text x="421.2" y="177.0" font-size="16" fill="#17324D" text-anchor="middle" font-weight="600"><tspan x="421.2" dy="0.00em">Exponent</tspan><tspan x="421.2" dy="1.18em">5 bits: 14…10</tspan></text>
+<rect x="565.0" y="148.0" width="575.0" height="72.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="2"/>
+<text x="852.5" y="177.0" font-size="16" fill="#FFFFFF" text-anchor="middle" font-weight="600"><tspan x="852.5" dy="0.00em">Stored fraction</tspan><tspan x="852.5" dy="1.18em">10 bits: 9…0</tspan></text>
+<text x="220.0" y="140.0" font-size="13" fill="#5F6B76" text-anchor="start" font-weight="400">bit 15</text>
+<text x="1140.0" y="140.0" font-size="13" fill="#5F6B76" text-anchor="end" font-weight="400">bit 0</text>
+<text x="48.0" y="271.0" font-size="20" fill="#17324D" text-anchor="start" font-weight="700">bfloat16</text>
+<text x="48.0" y="295.0" font-size="14" fill="#5F6B76" text-anchor="start" font-weight="400">p = 8 for normal values</text>
+<rect x="220.0" y="240.0" width="57.5" height="72.0" fill="#CC79A7" stroke="#FFFFFF" stroke-width="2"/>
+<text x="248.8" y="284.0" font-size="18" fill="#FFFFFF" text-anchor="middle" font-weight="600"><tspan x="248.8" dy="0.00em">S</tspan></text>
+<rect x="277.5" y="240.0" width="460.0" height="72.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="2"/>
+<text x="507.5" y="269.0" font-size="16" fill="#17324D" text-anchor="middle" font-weight="600"><tspan x="507.5" dy="0.00em">Exponent</tspan><tspan x="507.5" dy="1.18em">8 bits: 14…7</tspan></text>
+<rect x="737.5" y="240.0" width="402.5" height="72.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="2"/>
+<text x="938.8" y="269.0" font-size="16" fill="#FFFFFF" text-anchor="middle" font-weight="600"><tspan x="938.8" dy="0.00em">Stored fraction</tspan><tspan x="938.8" dy="1.18em">7 bits: 6…0</tspan></text>
+<text x="220.0" y="232.0" font-size="13" fill="#5F6B76" text-anchor="start" font-weight="400">bit 15</text>
+<text x="1140.0" y="232.0" font-size="13" fill="#5F6B76" text-anchor="end" font-weight="400">bit 0</text>
+<text x="48.0" y="363.0" font-size="20" fill="#17324D" text-anchor="start" font-weight="700">binary32</text>
+<text x="48.0" y="387.0" font-size="14" fill="#5F6B76" text-anchor="start" font-weight="400">p = 24 for normal values</text>
+<rect x="220.0" y="332.0" width="28.8" height="72.0" fill="#CC79A7" stroke="#FFFFFF" stroke-width="2"/>
+<text x="234.4" y="376.0" font-size="18" fill="#FFFFFF" text-anchor="middle" font-weight="600"><tspan x="234.4" dy="0.00em">S</tspan></text>
+<rect x="248.8" y="332.0" width="230.0" height="72.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="2"/>
+<text x="363.8" y="361.0" font-size="16" fill="#17324D" text-anchor="middle" font-weight="600"><tspan x="363.8" dy="0.00em">Exponent</tspan><tspan x="363.8" dy="1.18em">8 bits: 30…23</tspan></text>
+<rect x="478.8" y="332.0" width="661.2" height="72.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="2"/>
+<text x="809.4" y="361.0" font-size="16" fill="#FFFFFF" text-anchor="middle" font-weight="600"><tspan x="809.4" dy="0.00em">Stored fraction</tspan><tspan x="809.4" dy="1.18em">23 bits: 22…0</tspan></text>
+<text x="220.0" y="324.0" font-size="13" fill="#5F6B76" text-anchor="start" font-weight="400">bit 31</text>
+<text x="1140.0" y="324.0" font-size="13" fill="#5F6B76" text-anchor="end" font-weight="400">bit 0</text>
+<text x="48.0" y="455.0" font-size="20" fill="#17324D" text-anchor="start" font-weight="700">binary64</text>
+<text x="48.0" y="479.0" font-size="14" fill="#5F6B76" text-anchor="start" font-weight="400">p = 53 for normal values</text>
+<rect x="220.0" y="424.0" width="14.4" height="72.0" fill="#CC79A7" stroke="#FFFFFF" stroke-width="2"/>
+<text x="227.2" y="468.0" font-size="18" fill="#FFFFFF" text-anchor="middle" font-weight="600"><tspan x="227.2" dy="0.00em">S</tspan></text>
+<rect x="234.4" y="424.0" width="158.1" height="72.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="2"/>
+<text x="313.4" y="453.0" font-size="15" fill="#17324D" text-anchor="middle" font-weight="600"><tspan x="313.4" dy="0.00em">Exponent</tspan><tspan x="313.4" dy="1.18em">11 bits: 62…52</tspan></text>
+<rect x="392.5" y="424.0" width="747.5" height="72.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="2"/>
+<text x="766.2" y="453.0" font-size="16" fill="#FFFFFF" text-anchor="middle" font-weight="600"><tspan x="766.2" dy="0.00em">Stored fraction</tspan><tspan x="766.2" dy="1.18em">52 bits: 51…0</tspan></text>
+<text x="220.0" y="416.0" font-size="13" fill="#5F6B76" text-anchor="start" font-weight="400">bit 63</text>
+<text x="1140.0" y="416.0" font-size="13" fill="#5F6B76" text-anchor="end" font-weight="400">bit 0</text>
+<line x1="48.0" y1="518.0" x2="1152.0" y2="518.0" stroke="#D9E1E8" stroke-width="2.0"/>
+<text x="48.0" y="558.0" font-size="21" fill="#17324D" text-anchor="start" font-weight="700">B  Bytes in memory on a little-endian system</text>
+<text x="1140.0" y="558.0" font-size="14" fill="#5F6B76" text-anchor="end" font-weight="400">lower address at left; higher address at right</text>
+<text x="220.0" y="587.0" font-size="14" fill="#5F6B76" text-anchor="start" font-weight="400">Within each byte, the diagram uses the conventional bit 7 → bit 0 display.</text>
+<text x="48.0" y="645.0" font-size="20" fill="#17324D" text-anchor="start" font-weight="700">binary16</text>
+<text x="48.0" y="668.0" font-size="14" fill="#5F6B76" text-anchor="start" font-weight="400">2 bytes</text>
+<text x="275.0" y="611.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="220.0" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="226.9" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="233.8" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="240.6" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="247.5" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="254.4" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="261.2" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="268.1" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="275.0" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="281.9" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="288.8" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="295.6" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="302.5" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="309.4" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="316.2" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="323.1" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="220.0" y="620.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="275.0" y="677.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +0</text>
+<text x="385.0" y="611.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="330.0" y="620.0" width="13.8" height="36.0" fill="#CC79A7" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="336.9" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">S</text>
+<rect x="343.8" y="620.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="350.6" y="644.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="357.5" y="620.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="364.4" y="644.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="371.2" y="620.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="378.1" y="644.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="385.0" y="620.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="391.9" y="644.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="398.8" y="620.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="405.6" y="644.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="412.5" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="419.4" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="426.2" y="620.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="433.1" y="644.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="330.0" y="620.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="385.0" y="677.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +1</text>
+<text x="48.0" y="735.0" font-size="20" fill="#17324D" text-anchor="start" font-weight="700">bfloat16</text>
+<text x="48.0" y="758.0" font-size="14" fill="#5F6B76" text-anchor="start" font-weight="400">2 bytes</text>
+<text x="275.0" y="701.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="220.0" y="710.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="226.9" y="734.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="233.8" y="710.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="240.6" y="734.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="247.5" y="710.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="254.4" y="734.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="261.2" y="710.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="268.1" y="734.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="275.0" y="710.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="281.9" y="734.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="288.8" y="710.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="295.6" y="734.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="302.5" y="710.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="309.4" y="734.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="316.2" y="710.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="323.1" y="734.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="220.0" y="710.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="275.0" y="767.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +0</text>
+<text x="385.0" y="701.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="330.0" y="710.0" width="13.8" height="36.0" fill="#CC79A7" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="336.9" y="734.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">S</text>
+<rect x="343.8" y="710.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="350.6" y="734.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="357.5" y="710.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="364.4" y="734.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="371.2" y="710.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="378.1" y="734.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="385.0" y="710.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="391.9" y="734.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="398.8" y="710.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="405.6" y="734.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="412.5" y="710.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="419.4" y="734.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="426.2" y="710.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="433.1" y="734.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="330.0" y="710.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="385.0" y="767.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +1</text>
+<text x="48.0" y="825.0" font-size="20" fill="#17324D" text-anchor="start" font-weight="700">binary32</text>
+<text x="48.0" y="848.0" font-size="14" fill="#5F6B76" text-anchor="start" font-weight="400">4 bytes</text>
+<text x="275.0" y="791.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="220.0" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="226.9" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="233.8" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="240.6" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="247.5" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="254.4" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="261.2" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="268.1" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="275.0" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="281.9" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="288.8" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="295.6" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="302.5" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="309.4" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="316.2" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="323.1" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="220.0" y="800.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="275.0" y="857.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +0</text>
+<text x="385.0" y="791.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="330.0" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="336.9" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="343.8" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="350.6" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="357.5" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="364.4" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="371.2" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="378.1" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="385.0" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="391.9" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="398.8" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="405.6" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="412.5" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="419.4" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="426.2" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="433.1" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="330.0" y="800.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="385.0" y="857.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +1</text>
+<text x="495.0" y="791.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="440.0" y="800.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="446.9" y="824.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="453.8" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="460.6" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="467.5" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="474.4" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="481.2" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="488.1" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="495.0" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="501.9" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="508.8" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="515.6" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="522.5" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="529.4" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="536.2" y="800.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="543.1" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="440.0" y="800.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="495.0" y="857.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +2</text>
+<text x="605.0" y="791.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="550.0" y="800.0" width="13.8" height="36.0" fill="#CC79A7" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="556.9" y="824.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">S</text>
+<rect x="563.8" y="800.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="570.6" y="824.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="577.5" y="800.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="584.4" y="824.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="591.2" y="800.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="598.1" y="824.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="605.0" y="800.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="611.9" y="824.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="618.8" y="800.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="625.6" y="824.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="632.5" y="800.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="639.4" y="824.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="646.2" y="800.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="653.1" y="824.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="550.0" y="800.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="605.0" y="857.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +3</text>
+<text x="48.0" y="915.0" font-size="20" fill="#17324D" text-anchor="start" font-weight="700">binary64</text>
+<text x="48.0" y="938.0" font-size="14" fill="#5F6B76" text-anchor="start" font-weight="400">8 bytes</text>
+<text x="275.0" y="881.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="220.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="226.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="233.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="240.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="247.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="254.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="261.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="268.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="275.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="281.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="288.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="295.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="302.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="309.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="316.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="323.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="220.0" y="890.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="275.0" y="947.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +0</text>
+<text x="385.0" y="881.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="330.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="336.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="343.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="350.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="357.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="364.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="371.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="378.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="385.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="391.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="398.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="405.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="412.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="419.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="426.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="433.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="330.0" y="890.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="385.0" y="947.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +1</text>
+<text x="495.0" y="881.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="440.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="446.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="453.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="460.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="467.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="474.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="481.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="488.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="495.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="501.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="508.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="515.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="522.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="529.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="536.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="543.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="440.0" y="890.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="495.0" y="947.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +2</text>
+<text x="605.0" y="881.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="550.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="556.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="563.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="570.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="577.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="584.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="591.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="598.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="605.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="611.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="618.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="625.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="632.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="639.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="646.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="653.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="550.0" y="890.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="605.0" y="947.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +3</text>
+<text x="715.0" y="881.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="660.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="666.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="673.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="680.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="687.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="694.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="701.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="708.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="715.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="721.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="728.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="735.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="742.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="749.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="756.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="763.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="660.0" y="890.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="715.0" y="947.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +4</text>
+<text x="825.0" y="881.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="770.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="776.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="783.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="790.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="797.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="804.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="811.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="818.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="825.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="831.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="838.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="845.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="852.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="859.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="866.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="873.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="770.0" y="890.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="825.0" y="947.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +5</text>
+<text x="935.0" y="881.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="880.0" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="886.9" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="893.8" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="900.6" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="907.5" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="914.4" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="921.2" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="928.1" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="935.0" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="941.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="948.8" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="955.6" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="962.5" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="969.4" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="976.2" y="890.0" width="13.8" height="36.0" fill="#0072B2" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="983.1" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">F</text>
+<rect x="880.0" y="890.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="935.0" y="947.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +6</text>
+<text x="1045.0" y="881.0" font-size="12" fill="#5F6B76" text-anchor="middle" font-weight="400">bits 7…0</text>
+<rect x="990.0" y="890.0" width="13.8" height="36.0" fill="#CC79A7" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="996.9" y="914.0" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="700">S</text>
+<rect x="1003.8" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="1010.6" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="1017.5" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="1024.4" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="1031.2" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="1038.1" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="1045.0" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="1051.9" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="1058.8" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="1065.6" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="1072.5" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="1079.4" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="1086.2" y="890.0" width="13.8" height="36.0" fill="#E69F00" stroke="#FFFFFF" stroke-width="0.8"/>
+<text x="1093.1" y="914.0" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">E</text>
+<rect x="990.0" y="890.0" width="110.0" height="36.0" fill="none" stroke="#17324D" stroke-width="1.4"/>
+<text x="1045.0" y="947.0" font-size="13" fill="#17324D" text-anchor="middle" font-weight="600">byte +7</text>
+<rect x="48.0" y="983.0" width="24" height="24" fill="#CC79A7"/>
+<text x="82.0" y="1002.0" font-size="15" fill="#17324D" text-anchor="start" font-weight="600">S  sign</text>
+<rect x="190.0" y="983.0" width="24" height="24" fill="#E69F00"/>
+<text x="224.0" y="1002.0" font-size="15" fill="#17324D" text-anchor="start" font-weight="600">E  exponent</text>
+<rect x="370.0" y="983.0" width="24" height="24" fill="#0072B2"/>
+<text x="404.0" y="1002.0" font-size="15" fill="#17324D" text-anchor="start" font-weight="600">F  stored fraction</text>
+<text x="1152.0" y="992.0" font-size="14" fill="#5F6B76" text-anchor="end" font-weight="400">For normal values, p = stored fraction bits + 1</text>
+<text x="1152.0" y="1015.0" font-size="14" fill="#5F6B76" text-anchor="end" font-weight="400">The extra leading significand bit is implicit, not stored.</text>
+<text x="48.0" y="1043.0" font-size="17" fill="#17324D" text-anchor="start" font-weight="700">Little endian reverses byte significance in memory; it does not reverse all bits.</text>
+</svg>

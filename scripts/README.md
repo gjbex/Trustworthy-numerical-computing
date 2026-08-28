@@ -28,3 +28,16 @@ python scripts/generate_binary64_spacing_figure.py
 It writes the reviewed course asset to `figures/binary64-spacing.svg`. The
 generator validates the highlighted gaps against the Module 2 values before
 writing the SVG.
+
+
+## Regenerate the floating-point-layout figure
+
+Run the deterministic, standard-library generator from the repository root:
+
+```bash
+python scripts/generate_floating_point_layout_figure.py
+```
+
+It writes `figures/floating-point-layouts-little-endian.svg`. The generator
+validates the field allocations for binary16, bfloat16, binary32, and binary64
+before writing the logical-layout and little-endian byte-layout panels.

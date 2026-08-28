@@ -10,6 +10,7 @@ project:
     - hands-on/10-sensor-inversion/solution/README.md
   resources:
     - figures/binary64-spacing.svg
+    - figures/floating-point-layouts-little-endian.svg
     - hands-on/10-sensor-inversion/starter/
     - hands-on/10-sensor-inversion/solution/
 

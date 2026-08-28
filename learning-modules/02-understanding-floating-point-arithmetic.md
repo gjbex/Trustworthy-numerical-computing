@@ -56,7 +56,8 @@ where:
 
 * $s$ determines the sign;
 * $m$ is the **significand**, which carries the significant digits;
-* $b$ is the base, usually 2 for scientific-computing hardware;
+* $b$ is the **base**, also called the **radix**, usually 2 for
+  scientific-computing hardware;
 * $e$ is the exponent, which scales the value by a power of the base.
 
 The significand determines the available **precision**: how much detail can be

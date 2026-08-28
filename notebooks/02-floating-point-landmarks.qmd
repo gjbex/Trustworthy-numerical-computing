@@ -75,7 +75,8 @@ IEEE 754 encoding.
 The published course environment uses IEEE 754 binary64 for Python's `float`.
 The assertions make that assumption explicit: if this notebook runs in a
 different environment, it should stop instead of silently attaching binary64
-claims to another format.
+claims to another format. **Radix** is another name for the base of the number
+system, so a radix of 2 means that this activity is using binary floating point.
 ::::
 
 ```{python}

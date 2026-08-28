@@ -11,6 +11,7 @@ project:
   resources:
     - figures/binary64-spacing.svg
     - figures/floating-point-layouts-little-endian.svg
+    - figures/two-equation-sensitivity.svg
     - hands-on/10-sensor-inversion/starter/
     - hands-on/10-sensor-inversion/solution/
 

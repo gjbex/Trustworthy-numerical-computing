@@ -96,6 +96,18 @@ perturbed. The result persists in high precision and samples one direction,
 not the worst-case condition number.
 :::
 
+## See The Geometry
+
+<img src="../figures/two-equation-sensitivity.svg" class="r-stretch" alt="Two coordinate-plane plots show the Module 4 equations crossing visibly for delta equal to one and appearing coincident for delta equal to ten to the minus twelve. Independently magnified arrows compare the resulting solution displacement under the same input perturbation.">
+
+::: notes
+The coordinate panels share a common linear scale. The overlap on the right is
+real at this resolution, not a plotting failure. The lower arrows do not share
+a scale: use the labels to compare solution changes of 1e-16 and 1e-4. This
+connects the geometry of nearly dependent equations to the observed
+amplification without visually exaggerating the tiny line separation.
+:::
+
 ## From Sensitivity To Propagation
 
 For $y=f(x_1,\ldots,x_n)$ and small input changes:

@@ -30,3 +30,19 @@ panel is endian-independent. In the memory panel, bytes are in increasing
 address order and bits within each byte are shown in the conventional bit 7 to
 bit 0 direction. The figure therefore does not imply that little endian reverses
 all bits.
+
+`two-equation-sensitivity.svg` visualizes the exact dimensionless equations
+from Module 4 for $\delta=1$ and $\delta=10^{-12}$ on common linear coordinate
+scales. It also compares the solution changes caused by
+$\Delta b=(0,10^{-16})$.
+
+Regenerate it from the repository root with:
+
+```bash
+python scripts/generate_two_equation_sensitivity_figure.py
+```
+
+The generator validates the exact maximum-norm solution displacements and the
+line-crossing angles. The two lower displacement arrows use independent
+magnification and must be interpreted from their numerical labels, not their
+drawn lengths. The figure contains no measured or stochastic data.

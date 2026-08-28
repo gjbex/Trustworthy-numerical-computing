@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="850" viewBox="0 0 1200 850" role="img" aria-labelledby="title description">
+<title id="title">Geometry of the two-equation sensitivity experiment</title>
+<desc id="description">Two coordinate-plane panels compare the lines defined by the Module 4 equations for delta equal to one and delta equal to ten to the minus twelve. The first pair crosses visibly; the second is visually coincident at the same scale. Independently magnified arrows show that the same right-hand-side perturbation moves the solution by ten to the minus sixteen and ten to the minus four, respectively.</desc>
+<metadata>Generated deterministically by scripts/generate_two_equation_sensitivity_figure.py from the exact dimensionless equations and eta=1e-16. The coordinate panels share linear axes from zero to two. Displacement arrows use independent magnification.</metadata>
+<rect width="1200" height="850" fill="#FFFFFF"/>
+<style>text { font-family: system-ui, "Segoe UI", Arial, sans-serif; } line, rect, circle { vector-effect: non-scaling-stroke; }</style>
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#8E5AA7"/></marker></defs>
+<text x="55.0" y="43.0" font-size="29" fill="#17324D" text-anchor="start" font-weight="700">Nearly parallel equations amplify the same input change</text>
+<text x="55.0" y="73.0" font-size="17" fill="#5F6B76" text-anchor="start" font-weight="400">Both coordinate panels use the same linear x1 and x2 scales</text>
+<line x1="370.0" y1="103.0" x2="440.0" y2="103.0" stroke="#0072B2" stroke-width="3.2"/>
+<text x="450.0" y="109.0" font-size="15" fill="#17324D" text-anchor="start" font-weight="400">Equation 1: x1 + x2 = 2</text>
+<line x1="690.0" y1="103.0" x2="760.0" y2="103.0" stroke="#D55E00" stroke-width="3.2" stroke-dasharray="10 7"/>
+<text x="770.0" y="109.0" font-size="15" fill="#17324D" text-anchor="start" font-weight="400">Equation 2: x1 + (1 + δ)x2 = 2 + δ</text>
+<text x="295.0" y="132.0" font-size="23" fill="#17324D" text-anchor="middle" font-weight="700">δ = 1</text>
+<rect x="105.0" y="150.0" width="380.0" height="380.0" fill="#F2F8FC" stroke="#17324D" stroke-width="1.5"/>
+<line x1="105.0" y1="150.0" x2="105.0" y2="530.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<line x1="105.0" y1="530.0" x2="485.0" y2="530.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<text x="105.0" y="555.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="400">0</text>
+<text x="92.0" y="535.0" font-size="14" fill="#17324D" text-anchor="end" font-weight="400">0</text>
+<line x1="295.0" y1="150.0" x2="295.0" y2="530.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<line x1="105.0" y1="340.0" x2="485.0" y2="340.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<text x="295.0" y="555.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="400">1</text>
+<text x="92.0" y="345.0" font-size="14" fill="#17324D" text-anchor="end" font-weight="400">1</text>
+<line x1="485.0" y1="150.0" x2="485.0" y2="530.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<line x1="105.0" y1="150.0" x2="485.0" y2="150.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<text x="485.0" y="555.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="400">2</text>
+<text x="92.0" y="155.0" font-size="14" fill="#17324D" text-anchor="end" font-weight="400">2</text>
+<line x1="105.0" y1="150.0" x2="485.0" y2="530.0" stroke="#0072B2" stroke-width="3.2"/>
+<line x1="105.0" y1="245.0" x2="485.0" y2="435.0" stroke="#D55E00" stroke-width="3.2" stroke-dasharray="10 7"/>
+<circle cx="295.0" cy="340.0" r="6.0" fill="#8E5AA7" stroke="#FFFFFF" stroke-width="2"/>
+<text x="307.0" y="328.0" font-size="15" fill="#17324D" text-anchor="start" font-weight="600">x = (1, 1)</text>
+<text x="295.0" y="178.0" font-size="15" fill="#5F6B76" text-anchor="middle" font-weight="600">crossing angle ≈ 18.4°</text>
+<text x="295.0" y="584.0" font-size="17" fill="#17324D" text-anchor="middle" font-weight="600">x1</text>
+<text x="61.0" y="340.0" font-size="17" fill="#17324D" text-anchor="middle" font-weight="600">x2</text>
+<text x="890.0" y="132.0" font-size="23" fill="#17324D" text-anchor="middle" font-weight="700">δ = 1e-12</text>
+<rect x="700.0" y="150.0" width="380.0" height="380.0" fill="#F2F8FC" stroke="#17324D" stroke-width="1.5"/>
+<line x1="700.0" y1="150.0" x2="700.0" y2="530.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<line x1="700.0" y1="530.0" x2="1080.0" y2="530.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<text x="700.0" y="555.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="400">0</text>
+<text x="687.0" y="535.0" font-size="14" fill="#17324D" text-anchor="end" font-weight="400">0</text>
+<line x1="890.0" y1="150.0" x2="890.0" y2="530.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<line x1="700.0" y1="340.0" x2="1080.0" y2="340.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<text x="890.0" y="555.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="400">1</text>
+<text x="687.0" y="345.0" font-size="14" fill="#17324D" text-anchor="end" font-weight="400">1</text>
+<line x1="1080.0" y1="150.0" x2="1080.0" y2="530.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<line x1="700.0" y1="150.0" x2="1080.0" y2="150.0" stroke="#D9E1E8" stroke-width="1.0"/>
+<text x="1080.0" y="555.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="400">2</text>
+<text x="687.0" y="155.0" font-size="14" fill="#17324D" text-anchor="end" font-weight="400">2</text>
+<line x1="700.0" y1="150.0" x2="1080.0" y2="530.0" stroke="#0072B2" stroke-width="3.2"/>
+<line x1="700.0" y1="150.0" x2="1080.0" y2="530.0" stroke="#D55E00" stroke-width="3.2" stroke-dasharray="10 7"/>
+<circle cx="890.0" cy="340.0" r="6.0" fill="#8E5AA7" stroke="#FFFFFF" stroke-width="2"/>
+<text x="902.0" y="328.0" font-size="15" fill="#17324D" text-anchor="start" font-weight="600">x = (1, 1)</text>
+<text x="890.0" y="178.0" font-size="15" fill="#5F6B76" text-anchor="middle" font-weight="600">angle ≈ 2.86e-11°: visually coincident</text>
+<text x="890.0" y="584.0" font-size="17" fill="#17324D" text-anchor="middle" font-weight="600">x1</text>
+<text x="656.0" y="340.0" font-size="17" fill="#17324D" text-anchor="middle" font-weight="600">x2</text>
+<text x="600.0" y="602.0" font-size="20" fill="#17324D" text-anchor="middle" font-weight="700">Same RHS-input perturbation Δb = (0, 1e-16)</text>
+<text x="600.0" y="626.0" font-size="15" fill="#5F6B76" text-anchor="middle" font-weight="400">Solution-displacement arrows below are independently magnified</text>
+<rect x="80.0" y="645.0" width="485.0" height="145" rx="10" fill="#F2F8FC" stroke="#D9E1E8" stroke-width="1.5"/>
+<text x="100.0" y="675.0" font-size="19" fill="#17324D" text-anchor="start" font-weight="700">δ = 1</text>
+<line x1="145.0" y1="708.0" x2="445.0" y2="708.0" stroke="#8E5AA7" stroke-width="3.0" marker-end="url(#arrow)"/>
+<circle cx="145.0" cy="708.0" r="6" fill="#17324D"/>
+<circle cx="445.0" cy="708.0" r="6" fill="#8E5AA7"/>
+<text x="145.0" y="693.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="400">baseline x = (1, 1)</text>
+<text x="445.0" y="670.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="600"><tspan x="445.0" dy="0.00em">perturbed x</tspan><tspan x="445.0" dy="1.25em">(1 - 1e-16, 1 + 1e-16)</tspan></text>
+<text x="322.5" y="773.0" font-size="16" fill="#8E5AA7" text-anchor="middle" font-weight="700">max |Δx_i| = 1e-16</text>
+<rect x="635.0" y="645.0" width="485.0" height="145" rx="10" fill="#FFF7F0" stroke="#D9E1E8" stroke-width="1.5"/>
+<text x="655.0" y="675.0" font-size="19" fill="#17324D" text-anchor="start" font-weight="700">δ = 1e-12</text>
+<line x1="700.0" y1="708.0" x2="1000.0" y2="708.0" stroke="#8E5AA7" stroke-width="3.0" marker-end="url(#arrow)"/>
+<circle cx="700.0" cy="708.0" r="6" fill="#17324D"/>
+<circle cx="1000.0" cy="708.0" r="6" fill="#8E5AA7"/>
+<text x="700.0" y="693.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="400">baseline x = (1, 1)</text>
+<text x="1000.0" y="670.0" font-size="14" fill="#17324D" text-anchor="middle" font-weight="600"><tspan x="1000.0" dy="0.00em">perturbed x</tspan><tspan x="1000.0" dy="1.25em">(0.9999, 1.0001)</tspan></text>
+<text x="877.5" y="773.0" font-size="16" fill="#8E5AA7" text-anchor="middle" font-weight="700">max |Δx_i| = 1e-4</text>
+<text x="600.0" y="828.0" font-size="18" fill="#17324D" text-anchor="middle" font-weight="700">The solution change is 1e12 times larger when the equations are nearly dependent.</text>
+</svg>

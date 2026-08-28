@@ -174,6 +174,16 @@ mathematical map, not binary64 rounding: the experiment uses high-precision
 decimal arithmetic and the amplification follows directly from the equations.
 It measures one perturbation direction, not the worst-case condition number.
 
+![Geometry and solution displacement for the two-equation sensitivity experiment.](../figures/two-equation-sensitivity.svg){fig-alt="Two coordinate-plane panels share linear axes from zero to two. For delta equal to one, the two equation lines cross at a visible angle. For delta equal to ten to the minus twelve, the lines are visually coincident. Independently magnified arrows below show that the same right-hand-side perturbation produces maximum-norm solution changes of ten to the minus sixteen and ten to the minus four, respectively."}
+
+The upper panels use identical coordinate scales. The near overlap for
+$\delta=10^{-12}$ is therefore the geometric evidence: the two equations
+constrain almost the same direction. Their small angular difference cannot be
+resolved at this scale. The lower displacement arrows are deliberately and
+independently magnified; their labels, rather than their drawn lengths, give the
+quantitative comparison. The same input perturbation produces a solution change
+$10^{12}$ times larger in the nearly dependent system.
+
 
 ## Propagation combines sensitivity with input information
 

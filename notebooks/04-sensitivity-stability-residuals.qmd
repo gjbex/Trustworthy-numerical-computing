@@ -50,8 +50,9 @@ Read
 or complete the
 [comparison criteria across scales](03-comparison-criteria.qmd)
 activity first. This tutorial assumes that you can interpret relative error and
-a stated norm. It introduces conditioning and stability rather than assuming
-them.
+a stated aggregation rule. If norm notation is unfamiliar, use the
+[vectors, norms, and scaling reference](../learning-modules/reference-vectors-norms-and-scaling.md);
+the tutorial introduces conditioning and stability rather than assuming them.
 ::::
 
 

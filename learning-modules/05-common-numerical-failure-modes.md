@@ -201,7 +201,8 @@ operations rescale the result.
 
 ### Example: a Euclidean norm
 
-For $x=y=10^{308}$, the norm
+The [vectors, norms, and scaling reference](reference-vectors-norms-and-scaling.md)
+defines the Euclidean or 2-norm. For $x=y=10^{308}$,
 
 $$
 \sqrt{x^2+y^2}

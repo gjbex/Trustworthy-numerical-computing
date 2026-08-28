@@ -41,7 +41,9 @@ $$
 
 ::: notes
 The activity uses the maximum norm on dimensionless quantities and 80-digit
-decimal arithmetic to isolate problem sensitivity from binary64 effects.
+decimal arithmetic to isolate problem sensitivity from binary64 effects. Define
+the maximum norm as the largest absolute component; the persistent reference is
+`learning-modules/reference-vectors-norms-and-scaling.md`.
 :::
 
 ## Name The Map Before Measuring It

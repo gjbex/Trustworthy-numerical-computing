@@ -96,6 +96,14 @@ validated `indeterminate` component decision, a tightly bounded total, and a
 qualified reliability statement.
 
 
+## Reference material
+
+[Vectors, Norms, And Scaling](reference-vectors-norms-and-scaling.md) is a
+just-in-time reference for the vector summaries introduced in Module 3 and the
+norm notation used from Module 4 onward. It is not an additional prerequisite
+module and does not change the core sequence.
+
+
 ## Suggested delivery
 
 For a one-day core course:

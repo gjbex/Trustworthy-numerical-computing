@@ -143,7 +143,9 @@ or covariance will make some later examples more familiar. The course
 introduces the meaning and use of these ideas where they are needed; it does not
 assume a prior course in calculus, linear algebra, statistics, IEEE 754,
 numerical analysis, or parallel programming. No specific implementation
-language is required.
+language is required. A concise
+[vectors, norms, and scaling reference](learning-modules/reference-vectors-norms-and-scaling.md)
+supports the notation used from Module 3 onward.
 
 
 ### Quick self-assessment

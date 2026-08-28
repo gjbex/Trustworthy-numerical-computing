@@ -74,8 +74,15 @@ $$
      {\|\Delta b\|/\|b\|}.
 $$
 
-The norm and scaling are part of the definition. This module uses the maximum
-norm, $\|v\|_\infty=\max_i|v_i|$, on dimensionless, nondimensionalized
+A **norm** is a rule that turns a vector into one nonnegative measure of its
+size. The norm and scaling are part of the definition. This module uses the
+**maximum norm**, $\|v\|_\infty=\max_i|v_i|$: take the absolute value of every
+component and select the largest. For example,
+$\|(-3,4,1)\|_\infty=4$. The
+[vectors, norms, and scaling reference](reference-vectors-norms-and-scaling.md)
+compares this choice with other common norms.
+
+Here the maximum norm is applied to dimensionless, nondimensionalized
 quantities. If components have different units or meaningful scales, they must
 be scaled before one relative measure can be interpreted.
 

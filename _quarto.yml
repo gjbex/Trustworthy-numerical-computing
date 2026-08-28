@@ -83,6 +83,10 @@ website:
             href: hands-on/README.md
           - text: "10. Sensor-Inversion Capstone"
             href: hands-on/10-sensor-inversion/README.md
+      - section: "Reference"
+        contents:
+          - text: "Vectors, Norms, And Scaling"
+            href: learning-modules/reference-vectors-norms-and-scaling.md
       - text: "Optional advanced topics"
         href: learning-modules/optional-advanced-topics.md
 

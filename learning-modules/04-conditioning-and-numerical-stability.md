@@ -28,7 +28,8 @@ After this module, you should be able to:
   implementation correctness;
 * use controlled perturbations to estimate directional sensitivity;
 * propagate small deterministic input bounds or standard uncertainties through
-  a smooth model, while stating the assumptions behind the result;
+  a smooth model, while accounting for covariance and stating the assumptions
+  behind the result;
 * interpret forward error, backward error, and residuals as different
   questions;
 * explain why a small residual need not imply a small forward error;
@@ -287,13 +288,65 @@ useful scale estimate here, but its slight miss at the upper endpoint shows why
 it must not be presented as an exact bound.
 
 
-## Standard uncertainties require covariance
+## Covariance describes coupled input variation
 
 Now make a different statement: suppose $0.2\ \mathrm{g}$ and
 $0.3\ \mathrm{cm^3}$ are **standard uncertainties**, rather than interval
-half-widths. Let $\Sigma_x$ be the input covariance matrix and let the row
-vector $J=[c_1,\ldots,c_n]$ contain the sensitivity coefficients. First-order
-propagation gives
+half-widths. Under a declared probabilistic input model, the standard
+uncertainty $u(x_i)$ is the standard deviation assigned to the uncertain input
+$X_i$ represented by the estimate $x_i$.
+
+Covariance describes whether two uncertain inputs tend to deviate from their
+means together. If $\mu_i=\operatorname{E}[X_i]$ and
+$\mu_j=\operatorname{E}[X_j]$, then
+
+$$
+\operatorname{Cov}(X_i,X_j)
+=
+\operatorname{E}\left[(X_i-\mu_i)(X_j-\mu_j)\right],
+$$
+
+where $\operatorname{E}$ denotes an average under the declared probability
+model. Positive covariance means that above-average values of the two inputs
+tend to occur together; negative covariance means that an above-average value
+of one tends to accompany a below-average value of the other. Zero covariance
+means that they are **uncorrelated**, but does not in general prove that they
+are independent.
+
+Covariance has the product of the two inputs' units, so its magnitude is not a
+unit-free measure of association. The corresponding **correlation** is
+
+$$
+\operatorname{Corr}(X_i,X_j)
+=
+\frac{\operatorname{Cov}(X_i,X_j)}{u(x_i)u(x_j)},
+$$
+
+which is dimensionless and lies between $-1$ and $1$. Covariance is the
+quantity needed in uncertainty propagation; correlation is often easier to
+interpret and can be converted to covariance when the two standard
+uncertainties are known.
+
+The input covariance matrix collects every pairwise covariance:
+
+$$
+(\Sigma_x)_{ij}=\operatorname{Cov}(X_i,X_j).
+$$
+
+Its diagonal entries are the input variances,
+$\operatorname{Cov}(X_i,X_i)=u^2(x_i)$, while its off-diagonal entries describe
+coupled variation. For two inputs,
+
+$$
+\Sigma_x=
+\begin{bmatrix}
+u^2(x_1) & \operatorname{Cov}(X_1,X_2)\\
+\operatorname{Cov}(X_1,X_2) & u^2(x_2)
+\end{bmatrix}.
+$$
+
+Let the row vector $J=[c_1,\ldots,c_n]$ contain the sensitivity coefficients.
+First-order propagation gives
 
 $$
 u_c^2(y)\approx J\Sigma_xJ^\mathsf{T}
@@ -302,7 +355,8 @@ u_c^2(y)\approx J\Sigma_xJ^\mathsf{T}
 c_i c_j\operatorname{Cov}(X_i,X_j).
 $$
 
-If the inputs are independent, the covariance terms vanish and this reduces to
+If the inputs are independent, the off-diagonal covariance terms vanish and
+this reduces to
 
 $$
 u_c(y)\approx
@@ -323,11 +377,22 @@ $$
 
 This is not the deterministic interval calculated above, nor is it
 automatically a confidence interval. It is an estimated standard uncertainty
-under a different input model. Correlation also matters: because increasing
-mass raises the density while increasing volume lowers it, positive covariance
-between $m$ and $V$ reduces this first-order variance, while negative covariance
-increases it. Omitting a shared calibration effect can therefore make the
-result wrong in either direction.
+under a different input model. Without assuming independence, the density
+variance contains the cross-term
+
+$$
+u_c^2(\rho)
+\approx
+c_m^2u^2(m)+c_V^2u^2(V)
++2c_mc_V\operatorname{Cov}(M,V).
+$$
+
+Here $c_m=1/V$ is positive and $c_V=-m/V^2$ is negative. Positive covariance
+between mass and volume therefore makes the cross-term negative and reduces
+this first-order variance; negative covariance increases it. A shared
+calibration or environmental effect can make inputs vary together, so assuming
+independence without evidence can make the propagated uncertainty wrong in
+either direction.
 
 
 ## Relate propagation to conditioning
